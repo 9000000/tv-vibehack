@@ -1,11 +1,11 @@
 {
  "app": {
-  "versionCode": 24,
-  "versionName": "2.0.1",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.1.apk",
+  "versionCode": 25,
+  "versionName": "2.0.2",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.2.apk",
   "co": 11367907,
-  "ghiChu": "Chạy CleanTV ngay trên tivi mà báo lỗi kết nối: giờ app nói rõ cách bật ADB qua mạng, có nút mở Tuỳ chọn nhà phát triển.",
-  "ghiChuEn": "Running CleanTV on the TV and it can't connect: the app now explains how to turn on ADB over the network, with a button to Developer options.",
+  "ghiChu": "Rớt kết nối giữa lúc dọn (Wi-Fi chập chờn, tivi tự khởi động lại): app tự chờ và nối lại; tivi vừa khởi động lại thì dừng hẳn và chỉ ra gói nghi phạm. Không còn lỗi tiếng Anh khó hiểu.",
+  "ghiChuEn": "Connection lost while cleaning (flaky Wi-Fi, the TV restarting): the app waits and reconnects; if the TV restarted it stops and names the suspect package. No more cryptic English errors.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
@@ -13,13 +13,13 @@
    "phienBan": "c752f0ec8c447e7c",
    "url": "/ota/du-lieu.json",
    "co": 1259284,
-   "tuBan": 24
+   "tuBan": 25
   },
   "tvhome.apk": {
    "phienBan": "348650d509be7734",
    "url": "/ota/tvhome.apk",
    "co": 583151,
-   "tuBan": 24
+   "tuBan": 25
   }
  }
 }

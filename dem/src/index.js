@@ -1,6 +1,6 @@
 // Bộ đếm ẩn danh của CleanTV (21/10/2026). Không lưu IP, email hay tên: app gửi một mã máy ngẫu nhiên tự sinh,
 // lượt tải chỉ lưu băm IP+ngày để đếm số người tải khác nhau trong ngày.
-const LOAI = new Set(["mo", "cap-nhat", "don", "home", "home-phim", "khoi-phuc", "may-chieu"]);
+const LOAI = new Set(["mo", "cap-nhat", "don", "home", "home-phim", "khoi-phuc", "may-chieu", "don-loi"]);
 const cat = (s, n) => String(s ?? "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, n);
 
 async function bam(chu) {

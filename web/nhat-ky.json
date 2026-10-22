@@ -1,5 +1,19 @@
 [
  {
+  "ban": "2.0.2",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Rớt kết nối giữa lúc dọn: app chờ tivi trả lời lại (tối đa khoảng 1,5 phút) rồi làm tiếp từ gói đang dở, gói đã tắt dù mất kết nối vẫn được ghi vào sao lưu.",
+   "Tivi tự khởi động lại ngay sau khi tắt một gói: app dừng hẳn, báo tên gói nghi phạm để lần sau bỏ tích, và gửi tên gói về để VGS đưa vào danh sách giữ.",
+   "Thay lỗi tiếng Anh \"connect() must be called first\" bằng hướng dẫn tiếng Việt: kết nối lại để dọn tiếp hoặc Khôi phục."
+  ],
+  "en": [
+   "Connection lost while cleaning: the app waits for the TV (up to about 1.5 minutes) and carries on from the package it was on; a package disabled while the link dropped is still recorded in the backup.",
+   "The TV restarted right after a package was disabled: the app stops, names the suspect package so it can be left out next time, and reports it so VGS can keep it.",
+   "The raw \"connect() must be called first\" error is replaced by clear steps: reconnect to continue, or Restore."
+  ]
+ },
+ {
   "ban": "2.0.1",
   "ngay": "2026-10-22",
   "vi": [
