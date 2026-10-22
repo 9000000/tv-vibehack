@@ -163,7 +163,7 @@ private fun quayLai(vm: PhienLamViec) {
         Man.THONG_TIN, Man.KHOI_PHUC -> Man.KET_NOI
         Man.CHON_GOI -> Man.THONG_TIN
         Man.DANG_TAT -> Man.CHON_GOI
-        Man.HOME_SACH -> Man.DANG_TAT
+        Man.HOME_SACH -> vm.manTruocHome
         Man.XONG -> Man.HOME_SACH
         Man.HUONG_DAN, Man.GIAY_PHEP -> vm.manTruoc
         Man.CHINH -> Man.CHINH
@@ -685,7 +685,7 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
     }
     The(t("Giao diện", "Theme"), Icons.Rounded.Palette) {
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            THEMES.forEach { th -> TheTheme(th, th == vm.themeChon) { vm.themeChon = th } }
+            THEMES.forEach { th -> TheTheme(th, th == vm.themeChon) { vm.chonTheme(th) } }
         }
         Phu(t(vm.themeChon.moTaVi, vm.themeChon.moTaEn))
     }
@@ -818,10 +818,30 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
 
         // 2. Hiệu ứng chuyển động & Đồ hoạ (Motion & Graphics)
         Gap(t("2. Hiệu ứng & Đồ hoạ (Motion & Visual)", "2. Motion & Visual Effects"), Icons.Rounded.AutoAwesome) {
-            Text(t("Độ trong suốt thanh Dock (dock_opacity: 30-100%)", "Dock opacity"), fontSize = 14.sp)
+            Hang(t("Dải nền đen thanh Dock (dock_band)", "Dock background band"),
+                t("Dải nền tối phía sau hàng Dock (tắt để trong suốt hoàn toàn, thấy trọn ảnh nền như theme VGS)",
+                  "Dark band behind dock row (turn off for full transparency like VGS theme)"),
+                vm.daiNenDock) { vm.daiNenDock = it }
+
+            Text(t("Độ trong suốt thanh Dock (dock_opacity: 0-100%)", "Dock opacity"), fontSize = 14.sp)
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(100 to t("Đặc (100%)", "Solid"), 80 to "80%", 60 to "60%", 40 to "40%").forEach { (op, nhan) ->
-                    ChonChip(nhan, vm.doMoDock == op) { vm.doMoDock = op }
+                listOf(
+                    100 to t("Đặc (100%)", "Solid"),
+                    80 to "80%",
+                    60 to "60%",
+                    40 to "40%",
+                    0 to t("Trong suốt (0%)", "Transparent (0%)")
+                ).forEach { (op, nhan) ->
+                    val chon = if (op == 0) !vm.daiNenDock || vm.doMoDock == 0 else vm.daiNenDock && vm.doMoDock == op
+                    ChonChip(nhan, chon) {
+                        if (op == 0) {
+                            vm.daiNenDock = false
+                            vm.doMoDock = 0
+                        } else {
+                            vm.daiNenDock = true
+                            vm.doMoDock = op
+                        }
+                    }
                 }
             }
 
@@ -975,6 +995,7 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             )
         }
     }
+    MucNangCao(vm)
     if (vm.daCoHomeSach) NutChinh(if (vm.dangBan) t("Đang áp dụng…", "Applying…") else t("Áp dụng giao diện", "Apply theme"),
         enabled = !vm.dangBan, icon = Icons.Rounded.Palette) { vm.apDungTheme() }
     else NutChinh(if (vm.dangBan) t("Đang cài…", "Installing…") else t("Cài Home sạch", "Install clean Home"), enabled = !vm.dangBan, icon = Icons.Rounded.Home) { vm.caiHomeSach() }
@@ -982,6 +1003,57 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
         hienXemJson = true
     }
     vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+}
+
+/** Mục Nâng cao: mọi tuỳ chọn của launcher (mô tả tiếng Anh lấy từ tài liệu CleanYourTV). */
+@Composable
+private fun MucNangCao(vm: PhienLamViec) {
+    if (vm.dsNangCao.isEmpty()) return
+    var tim by remember { mutableStateOf("") }
+    val daDat = vm.nangCao.count { it.value.isNotBlank() }
+    The(t("Nâng cao · ${vm.dsNangCao.size} tuỳ chọn của Home sạch", "Advanced · ${vm.dsNangCao.size} clean Home options") +
+        if (daDat > 0) t(" · đã đặt $daDat", " · $daDat set") else "", Icons.Rounded.Tune) {
+        Phu(t("Cho người dùng nâng cao. Để trống = launcher tự quyết. Mô tả lấy nguyên văn từ tài liệu CleanYourTV (tiếng Anh). Nhóm \"Cẩn thận\" đụng tới remote, cổng HDMI, app của hãng: đặt sai có thể làm remote hoặc nguồn vào không chạy — bấm Khôi phục là về như cũ.",
+            "For advanced users. Empty = the launcher decides. Descriptions come from the CleanYourTV docs. The \"Careful\" group touches the remote, HDMI inputs and the maker's apps: a wrong value can break them — Restore puts everything back."))
+        OutlinedTextField(tim, { tim = it }, label = { Text(t("Tìm tuỳ chọn", "Search options")) }, singleLine = true,
+            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+        if (daDat > 0) TextButton(onClick = { vm.nangCao.clear() }) { Text(t("Đặt lại tất cả về mặc định", "Reset all to default")) }
+        val q = tim.trim().lowercase()
+        listOf(false, true).forEach { canThan ->
+            val ds = vm.dsNangCao.filter { it.canThan == canThan && (q.isEmpty() || it.khoa.contains(q) || it.moTa.lowercase().contains(q)) }
+            if (ds.isEmpty()) return@forEach
+            Text(if (canThan) t("⚠ Cẩn thận", "⚠ Careful") else t("Giao diện & hiệu ứng", "Look & effects"),
+                fontWeight = FontWeight.Bold, fontSize = 15.sp, color = if (canThan) Cam else Color.White, modifier = Modifier.padding(top = 8.dp))
+            ds.forEach { tc -> DongNangCao(tc, vm.nangCao[tc.khoa] ?: "") { v -> if (v.isBlank()) vm.nangCao.remove(tc.khoa) else vm.nangCao[tc.khoa] = v } }
+        }
+    }
+}
+
+@Composable
+private fun DongNangCao(tc: zone.vgs.tvsach.dulieu.TuyChon, gt: String, doi: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(The2).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(tc.khoa, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, color = if (gt.isNotBlank()) Hong else Color.White)
+        Phu(tc.moTa)
+        when (tc.kieu) {
+            "bool" -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChonChip(t("Mặc định", "Default"), gt.isBlank()) { doi("") }
+                ChonChip(t("Bật", "On"), gt == "true") { doi("true") }
+                ChonChip(t("Tắt", "Off"), gt == "false") { doi("false") }
+            }
+            "chon" -> Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChonChip(t("Mặc định", "Default"), gt.isBlank()) { doi("") }
+                tc.chon.forEach { c -> ChonChip(c, gt == c) { doi(c) } }
+            }
+            else -> OutlinedTextField(gt, { doi(it) }, singleLine = tc.kieu == "so" || tc.kieu == "chu",
+                placeholder = { Text(when (tc.kieu) {
+                    "so" -> t("Số từ ${tc.min} đến ${tc.max}", "${tc.min} to ${tc.max}")
+                    "ds", "ds-so" -> t("Cách nhau bằng dấu phẩy", "Comma-separated")
+                    else -> t("Để trống = mặc định", "Empty = default")
+                }, fontSize = 13.sp) },
+                keyboardOptions = KeyboardOptions(keyboardType = if (tc.kieu == "so") KeyboardType.Number else KeyboardType.Text),
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+        }
+    }
 }
 
 @Composable
@@ -1005,8 +1077,12 @@ private fun TheTheme(th: Theme, chon: Boolean, onClick: () -> Unit) {
             .background(Brush.linearGradient(th.mau.map { Color(it) }))
             .border(if (chon) 2.dp else 1.dp, if (chon) Hong else Vien, RoundedCornerShape(12.dp))) {
             if (anh != null) Image(anh, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
-            Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                repeat(4) { i -> Box(Modifier.size(width = 20.dp, height = 12.dp).clip(RoundedCornerShape(3.dp)).background(if (i == 0) Color.White else Color.White.copy(alpha = 0.55f))) }
+            val coNenDock = (th.cauHinh["dock_band"] as? Boolean) ?: true
+            Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)
+                .then(if (coNenDock) Modifier.background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(4.dp)).padding(horizontal = 4.dp, vertical = 2.dp) else Modifier)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    repeat(4) { i -> Box(Modifier.size(width = 18.dp, height = 11.dp).clip(RoundedCornerShape(3.dp)).background(if (i == 0) Color.White else Color.White.copy(alpha = 0.55f))) }
+                }
             }
             Text("5:05", Modifier.align(Alignment.TopStart).padding(8.dp), fontSize = 13.sp, fontWeight = FontWeight.Light)
             if (chon) Icon(Icons.Rounded.CheckCircle, null, Modifier.align(Alignment.TopEnd).padding(6.dp).size(18.dp), tint = Hong)

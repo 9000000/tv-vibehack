@@ -118,6 +118,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var hienNutInputs by mutableStateOf(true) // show_inputs_pill
     var tieuDeDock by mutableStateOf(true) // dock_title
     var hangDockRieng by mutableStateOf(true) // dock_row
+    var daiNenDock by mutableStateOf(false) // dock_band (tắt nền đen mặc định như theme VGS)
     var dienDayDock by mutableStateOf(true) // fill_dock
     var hieuUngLoXo by mutableStateOf(true) // focus_overshoot
     var chuyenDongCoBan by mutableStateOf(true) // animations
@@ -134,6 +135,182 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
     var phimHomeOk by mutableStateOf(true)
     var themeChon by mutableStateOf(zone.vgs.tvsach.dulieu.THEMES.first())
+    /** Mục Nâng cao: danh sách tuỳ chọn + giá trị người dùng đặt (khoá → chữ; thiếu = mặc định). */
+    val dsNangCao: List<zone.vgs.tvsach.dulieu.TuyChon> by lazy { zone.vgs.tvsach.dulieu.NangCao.nap(ctx) }
+    val nangCao = androidx.compose.runtime.mutableStateMapOf<String, String>()
+    /** Màn mà nút Back ở Home sạch quay về: vừa dọn → màn dọn; Đổi giao diện → thông tin tivi; Bỏ qua → chọn gói. */
+    var manTruocHome by mutableStateOf(Man.DANG_TAT)
+
+    val hoSoTheoTheme = mutableMapOf<String, MutableMap<String, Any>>()
+
+    fun taoHoSoMacDinh(th: zone.vgs.tvsach.dulieu.Theme): MutableMap<String, Any> {
+        val band = (th.cauHinh["dock_band"] as? Boolean) ?: true
+        val op = (th.cauHinh["dock_opacity"] as? Int) ?: if (!band) 0 else 100
+        return mutableMapOf(
+            "columns" to ((th.cauHinh["columns"] as? Int) ?: 4),
+            "rows_below_dock" to ((th.cauHinh["rows_below_dock"] as? Int) ?: 0),
+            "dock_band" to band,
+            "dock_opacity" to op,
+            "cinematic_home" to ((th.cauHinh["cinematic_home"] as? Boolean) ?: false),
+            "glow_style" to ((th.cauHinh["glow_style"] as? String) ?: ""),
+            "ambient_glow" to ((th.cauHinh["ambient_glow"] as? Boolean) ?: true),
+            "app_glow" to ((th.cauHinh["app_glow"] as? Boolean) ?: false),
+            "dock_glass" to ((th.cauHinh["dock_glass"] as? Boolean) ?: false),
+            "dock_title" to ((th.cauHinh["dock_title"] as? Boolean) ?: true),
+            "dock_row" to ((th.cauHinh["dock_row"] as? Boolean) ?: true),
+            "fill_dock" to ((th.cauHinh["fill_dock"] as? Boolean) ?: true),
+            "focus_overshoot" to ((th.cauHinh["focus_overshoot"] as? Boolean) ?: true),
+            "animations" to ((th.cauHinh["animations"] as? Boolean) ?: true),
+            "advanced_effects" to ((th.cauHinh["advanced_effects"] as? Boolean) ?: false),
+            "show_network_pill" to ((th.cauHinh["show_network_pill"] as? Boolean) ?: true),
+            "show_inputs_pill" to ((th.cauHinh["show_inputs_pill"] as? Boolean) ?: true),
+            "module_cards" to ((th.cauHinh["module_cards"] as? Boolean) ?: true),
+            "show_home_settings_shortcut" to ((th.cauHinh["show_home_settings_shortcut"] as? Boolean) ?: false),
+            "key_filter" to ((th.cauHinh["key_filter"] as? Boolean) ?: true),
+            "lunar_date" to ((th.cauHinh["lunar_date"] as? Boolean) ?: true),
+            "always_show_names" to ((th.cauHinh["always_show_names"] as? Boolean) ?: false),
+            "app_library" to ((th.cauHinh["app_library"] as? Boolean) ?: false),
+            "home_idle_clock_minutes" to ((th.cauHinh["home_idle_clock_minutes"] as? Int) ?: 0),
+            "reduced_motion" to ((th.cauHinh["reduced_motion"] as? Boolean) ?: false),
+            "wallpaper_dim" to ((th.cauHinh["wallpaper_dim"] as? Int) ?: 0),
+            "show_stats" to ((th.cauHinh["show_stats"] as? Boolean) ?: false),
+            "dream_button" to ((th.cauHinh["dream_button"] as? Boolean) ?: true),
+            "top_compact" to ((th.cauHinh["top_compact"] as? Boolean) ?: true),
+            "handle_view_inputs" to ((th.cauHinh["handle_view_inputs"] as? Boolean) ?: false),
+            "boot_to_live_tv" to ((th.cauHinh["boot_to_live_tv"] as? Boolean) ?: false),
+            "wallpaper_true_color" to ((th.cauHinh["wallpaper_true_color"] as? Boolean) ?: false),
+            "wallpaper_captions" to ((th.cauHinh["wallpaper_captions"] as? Boolean) ?: false),
+            "wallpaper_order" to ((th.cauHinh["wallpaper_order"] as? String) ?: "shuffle"),
+            "settings_key_panel" to ((th.cauHinh["settings_key_panel"] as? Boolean) ?: false),
+            "reorder_button" to ((th.cauHinh["reorder_button"] as? Boolean) ?: false),
+            "live_tv_package" to ((th.cauHinh["live_tv_package"] as? String) ?: ""),
+            "vpn_app" to ((th.cauHinh["vpn_app"] as? String) ?: ""),
+            "cau_hinh_tuy_y" to "",
+            "nang_cao" to ""
+        )
+    }
+
+    fun luuHoSoTheme(id: String) {
+        val m = mutableMapOf<String, Any>(
+            "columns" to soCot,
+            "rows_below_dock" to hangDuoiDock,
+            "dock_band" to daiNenDock,
+            "dock_opacity" to doMoDock,
+            "cinematic_home" to cheDoDienAnh,
+            "glow_style" to kieuQuangSang,
+            "ambient_glow" to toaSangNenDock,
+            "app_glow" to toaSangIconApp,
+            "dock_glass" to hieuUngKinh,
+            "dock_title" to tieuDeDock,
+            "dock_row" to hangDockRieng,
+            "fill_dock" to dienDayDock,
+            "focus_overshoot" to hieuUngLoXo,
+            "animations" to chuyenDongCoBan,
+            "advanced_effects" to hieuUngNangCao,
+            "show_network_pill" to hienNutWifi,
+            "show_inputs_pill" to hienNutInputs,
+            "module_cards" to theModuleCards,
+            "show_home_settings_shortcut" to nutHomeCaiDat,
+            "key_filter" to boLocPhim,
+            "lunar_date" to amLich,
+            "always_show_names" to tenDuoiApp,
+            "app_library" to thuVienApp,
+            "home_idle_clock_minutes" to dongHoKhiYen,
+            "reduced_motion" to tiviYeu,
+            "wallpaper_dim" to lamToiNen,
+            "show_stats" to hienThongSo,
+            "dream_button" to nutManCho,
+            "top_compact" to gonNut,
+            "handle_view_inputs" to nutInput,
+            "boot_to_live_tv" to tuVaoTruyenHinh,
+            "wallpaper_true_color" to hinhNenTrueColor,
+            "wallpaper_captions" to chuThichHinhNen,
+            "wallpaper_order" to thuTuHinhNen,
+            "settings_key_panel" to bangCaiDatNhanh,
+            "reorder_button" to nutSapXep,
+            "live_tv_package" to appTruyenHinh,
+            "vpn_app" to appVpn,
+            "cau_hinh_tuy_y" to cauHinhTuyY,
+            "nang_cao" to JSONObject(nangCao as Map<*, *>).toString()
+        )
+        hoSoTheoTheme[id] = m
+        runCatching {
+            prefs.edit().putString("hoso_theme_$id", JSONObject(m as Map<*, *>).toString()).apply()
+        }
+    }
+
+    fun napHoSoTheme(th: zone.vgs.tvsach.dulieu.Theme) {
+        val m = hoSoTheoTheme[th.id] ?: run {
+            val luu = runCatching { prefs.getString("hoso_theme_${th.id}", null) }.getOrNull()
+            if (!luu.isNullOrBlank()) {
+                runCatching {
+                    val j = JSONObject(luu)
+                    val map = mutableMapOf<String, Any>()
+                    j.keys().forEach { k -> map[k] = j.get(k) }
+                    map
+                }.getOrNull()
+            } else null
+        } ?: taoHoSoMacDinh(th).also { hoSoTheoTheme[th.id] = it }
+
+        soCot = (m["columns"] as? Number)?.toInt() ?: (m["columns"] as? String)?.toIntOrNull() ?: 4
+        hangDuoiDock = (m["rows_below_dock"] as? Number)?.toInt() ?: (m["rows_below_dock"] as? String)?.toIntOrNull() ?: 0
+        daiNenDock = (m["dock_band"] as? Boolean) ?: (m["dock_band"] as? String)?.toBooleanStrictOrNull() ?: true
+        doMoDock = (m["dock_opacity"] as? Number)?.toInt() ?: (m["dock_opacity"] as? String)?.toIntOrNull() ?: if (!daiNenDock) 0 else 100
+        cheDoDienAnh = (m["cinematic_home"] as? Boolean) ?: (m["cinematic_home"] as? String)?.toBooleanStrictOrNull() ?: false
+        kieuQuangSang = (m["glow_style"] as? String) ?: ""
+        toaSangNenDock = (m["ambient_glow"] as? Boolean) ?: (m["ambient_glow"] as? String)?.toBooleanStrictOrNull() ?: true
+        toaSangIconApp = (m["app_glow"] as? Boolean) ?: (m["app_glow"] as? String)?.toBooleanStrictOrNull() ?: false
+        hieuUngKinh = (m["dock_glass"] as? Boolean) ?: (m["dock_glass"] as? String)?.toBooleanStrictOrNull() ?: false
+        tieuDeDock = (m["dock_title"] as? Boolean) ?: (m["dock_title"] as? String)?.toBooleanStrictOrNull() ?: true
+        hangDockRieng = (m["dock_row"] as? Boolean) ?: (m["dock_row"] as? String)?.toBooleanStrictOrNull() ?: true
+        dienDayDock = (m["fill_dock"] as? Boolean) ?: (m["fill_dock"] as? String)?.toBooleanStrictOrNull() ?: true
+        hieuUngLoXo = (m["focus_overshoot"] as? Boolean) ?: (m["focus_overshoot"] as? String)?.toBooleanStrictOrNull() ?: true
+        chuyenDongCoBan = (m["animations"] as? Boolean) ?: (m["animations"] as? String)?.toBooleanStrictOrNull() ?: true
+        hieuUngNangCao = (m["advanced_effects"] as? Boolean) ?: (m["advanced_effects"] as? String)?.toBooleanStrictOrNull() ?: false
+        hienNutWifi = (m["show_network_pill"] as? Boolean) ?: (m["show_network_pill"] as? String)?.toBooleanStrictOrNull() ?: true
+        hienNutInputs = (m["show_inputs_pill"] as? Boolean) ?: (m["show_inputs_pill"] as? String)?.toBooleanStrictOrNull() ?: true
+        theModuleCards = (m["module_cards"] as? Boolean) ?: (m["module_cards"] as? String)?.toBooleanStrictOrNull() ?: true
+        nutHomeCaiDat = (m["show_home_settings_shortcut"] as? Boolean) ?: (m["show_home_settings_shortcut"] as? String)?.toBooleanStrictOrNull() ?: false
+        boLocPhim = (m["key_filter"] as? Boolean) ?: (m["key_filter"] as? String)?.toBooleanStrictOrNull() ?: true
+        amLich = (m["lunar_date"] as? Boolean) ?: (m["lunar_date"] as? String)?.toBooleanStrictOrNull() ?: true
+        tenDuoiApp = (m["always_show_names"] as? Boolean) ?: (m["always_show_names"] as? String)?.toBooleanStrictOrNull() ?: false
+        thuVienApp = (m["app_library"] as? Boolean) ?: (m["app_library"] as? String)?.toBooleanStrictOrNull() ?: false
+        dongHoKhiYen = (m["home_idle_clock_minutes"] as? Number)?.toInt() ?: (m["home_idle_clock_minutes"] as? String)?.toIntOrNull() ?: 0
+        tiviYeu = (m["reduced_motion"] as? Boolean) ?: (m["reduced_motion"] as? String)?.toBooleanStrictOrNull() ?: false
+        lamToiNen = (m["wallpaper_dim"] as? Number)?.toInt() ?: (m["wallpaper_dim"] as? String)?.toIntOrNull() ?: 0
+        hienThongSo = (m["show_stats"] as? Boolean) ?: (m["show_stats"] as? String)?.toBooleanStrictOrNull() ?: false
+        nutManCho = (m["dream_button"] as? Boolean) ?: (m["dream_button"] as? String)?.toBooleanStrictOrNull() ?: true
+        gonNut = (m["top_compact"] as? Boolean) ?: (m["top_compact"] as? String)?.toBooleanStrictOrNull() ?: true
+        nutInput = (m["handle_view_inputs"] as? Boolean) ?: (m["handle_view_inputs"] as? String)?.toBooleanStrictOrNull() ?: false
+        tuVaoTruyenHinh = (m["boot_to_live_tv"] as? Boolean) ?: (m["boot_to_live_tv"] as? String)?.toBooleanStrictOrNull() ?: false
+        hinhNenTrueColor = (m["wallpaper_true_color"] as? Boolean) ?: (m["wallpaper_true_color"] as? String)?.toBooleanStrictOrNull() ?: false
+        chuThichHinhNen = (m["wallpaper_captions"] as? Boolean) ?: (m["wallpaper_captions"] as? String)?.toBooleanStrictOrNull() ?: false
+        thuTuHinhNen = (m["wallpaper_order"] as? String) ?: "shuffle"
+        bangCaiDatNhanh = (m["settings_key_panel"] as? Boolean) ?: (m["settings_key_panel"] as? String)?.toBooleanStrictOrNull() ?: false
+        nutSapXep = (m["reorder_button"] as? Boolean) ?: (m["reorder_button"] as? String)?.toBooleanStrictOrNull() ?: false
+        appTruyenHinh = (m["live_tv_package"] as? String) ?: ""
+        appVpn = (m["vpn_app"] as? String) ?: ""
+        cauHinhTuyY = (m["cau_hinh_tuy_y"] as? String) ?: ""
+        val ncStr = (m["nang_cao"] as? String) ?: ""
+        nangCao.clear()
+        if (ncStr.isNotBlank()) {
+            runCatching {
+                val j = JSONObject(ncStr)
+                j.keys().forEach { k ->
+                    val v = j.optString(k, "")
+                    if (v.isNotBlank()) nangCao[k] = v
+                }
+            }
+        }
+    }
+
+    /** Chọn theme: tự động lưu cài đặt của theme trước và nạp hồ sơ của theme mới (mỗi theme lưu cài đặt độc lập). */
+    fun chonTheme(th: zone.vgs.tvsach.dulieu.Theme) {
+        if (th.id == themeChon.id) return
+        luuHoSoTheme(themeChon.id)
+        themeChon = th
+        napHoSoTheme(th)
+    }
 
     // Máy chiếu: màn của hãng dò được + những màn đã ghim vào nút "Máy chiếu" trên Home sạch (comp → nhãn).
     var laMayChieu by mutableStateOf(false)
@@ -210,6 +387,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         ip = prefs.getString("ip", "") ?: ""
         cong = prefs.getString("cong", "5555") ?: "5555"
         taiLaiSaoLuu()
+        napHoSoTheme(themeChon)
     }
 
     private fun xuLyBanMoi(b: zone.vgs.tvsach.CapNhat.BanMoi) {
@@ -343,6 +521,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun sauKhiKetNoi(host: String) {
+        daNapCu = false
         thongBao = t("Đang đọc thông tin tivi…", "Reading the TV…")
         val (info, gp) = io { tv.docThongTin() }
         thongTin = info; getprop = gp
@@ -378,6 +557,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     fun batDauTat() = chay(t("Đang sao lưu…", "Backing up…")) {
         val info = thongTin ?: return@chay
         nhatKy.clear(); ketQua = null; tienDo = 0f
+        manTruocHome = Man.DANG_TAT
         man = Man.DANG_TAT
         val sl = io { tv.damBaoSaoLuu(info, getprop, ip) }
         saoLuu = sl
@@ -428,14 +608,33 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     /** Từ màn thông tin: đổi theme cho tivi đã có Home sạch. */
-    fun moDoiTheme() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
+    fun moDoiTheme() { chuanBiDock(); manTruocHome = Man.THONG_TIN; man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
 
     /** Bỏ qua bước sao lưu & dọn gói để sang thẳng cài đặt / tuỳ biến Home sạch. */
-    fun boQuaDonGoi() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
+    fun boQuaDon() = chay(t("Đang sao lưu…", "Backing up…")) {
+        val info = thongTin ?: return@chay
+        saoLuu = io { tv.damBaoSaoLuu(info, getprop, ip) }
+        taiLaiSaoLuu()
+        chuanBiDock()
+        manTruocHome = Man.CHON_GOI
+        man = Man.HOME_SACH
+        if (daCoHomeSach) napCauHinhCu()
+    }
+    fun boQuaDonGoi() = boQuaDon()
+
+    /** Đã nạp config.json của tivi vào các lựa chọn chưa (mỗi lần kết nối một lần — quay lại màn không xoá chỉnh sửa). */
+    private var daNapCu = false
 
     /** "Đổi giao diện": mở ra đúng các lựa chọn đang có trên tivi thay vì mặc định. */
     private suspend fun napCauHinhCu() {
+        if (daNapCu) return
+        daNapCu = true
         val j = runCatching { io { tv.docCauHinhTv() } }.getOrNull() ?: return
+        // Chỉ nạp lại khoá NGƯỜI DÙNG đặt ở Nâng cao (ghi trong vgs_nang_cao), không lấy khoá do theme ghi
+        nangCao.clear()
+        val daDat = j.optJSONArray("vgs_nang_cao")?.let { a -> (0 until a.length()).map { a.optString(it) }.toSet() } ?: emptySet()
+        dsNangCao.filter { it.khoa in daDat }.forEach { tc -> zone.vgs.tvsach.dulieu.NangCao.docChu(tc, j)?.let { nangCao[tc.khoa] = it } }
+
         amLich = j.optBoolean("lunar_date", amLich)
         tenDuoiApp = j.optBoolean("always_show_names", false)
         thuVienApp = j.optBoolean("app_library", false)
@@ -448,6 +647,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (j.has("columns")) soCot = j.optInt("columns", soCot)
         if (j.has("rows_below_dock")) hangDuoiDock = j.optInt("rows_below_dock", hangDuoiDock)
         if (j.has("dock_opacity")) doMoDock = j.optInt("dock_opacity", doMoDock)
+        if (j.has("dock_band")) daiNenDock = j.optBoolean("dock_band", daiNenDock)
+        if (j.optInt("dock_opacity", 100) == 0) daiNenDock = false
         cheDoDienAnh = j.optBoolean("cinematic_home", cheDoDienAnh)
         if (j.has("glow_style")) kieuQuangSang = j.optString("glow_style", kieuQuangSang)
         tuVaoTruyenHinh = j.optBoolean("boot_to_live_tv", tuVaoTruyenHinh)
@@ -476,6 +677,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
         j.optString("greeting_name").takeIf { it.isNotBlank() }?.let { tenChao = it }
         j.optString("weather_place").takeIf { it.isNotBlank() }?.let { ten -> THANH_PHO.firstOrNull { it.ten == ten }?.let { thanhPho = it } }
+        luuHoSoTheme(themeChon.id)
     }
 
     private fun chuanBiDock() {
@@ -537,61 +739,81 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun cauHinhHome(): String = JSONObject().apply {
-        put("dock_apps", JSONArray(dock.toList()))
-        if (tenChao.isNotBlank()) put("greeting_name", tenChao.trim())
-        themeChon.ghiVao(this)
-        put("dream_button", nutManCho)
-        put("top_compact", gonNut)
-        thanhPho?.let { put("weather_lat", it.lat); put("weather_lon", it.lon); put("weather_place", it.ten) }
-        if (ghimMayChieu.isNotEmpty()) put("projector_actions", JSONArray(ghimMayChieu.map { (comp, nhan) -> "$nhan=$comp" }))
-        put("lunar_date", amLich)
-        // Launcher 2.6: nút Input trên remote (VIEW_INPUTS) mở bảng chọn nguồn của Home sạch — đi cùng công tắc nút Input.
-        if (nutInput) put("handle_view_inputs", true)
-        if (tenDuoiApp) put("always_show_names", true)
-        if (thuVienApp) { put("app_library", true); put("library_button", true) }
-        if (dongHoKhiYen > 0) put("home_idle_clock_minutes", dongHoKhiYen)
-        if (tiviYeu) put("reduced_motion", true)
-        if (hieuUngKinh) { put("dock_glass", true); put("app_glow", true) }
-        if (lamToiNen > 0) put("wallpaper_dim", lamToiNen)
-        if (hienThongSo) put("show_stats", true)
+    private fun cauHinhHome(): String {
+        luuHoSoTheme(themeChon.id)
+        return JSONObject().apply {
+            put("dock_apps", JSONArray(dock.toList()))
+            if (tenChao.isNotBlank()) put("greeting_name", tenChao.trim())
+            themeChon.ghiVao(this)
+            put("dream_button", nutManCho)
+            put("top_compact", gonNut)
+            thanhPho?.let { put("weather_lat", it.lat); put("weather_lon", it.lon); put("weather_place", it.ten) }
+            if (ghimMayChieu.isNotEmpty()) put("projector_actions", JSONArray(ghimMayChieu.map { (comp, nhan) -> "$nhan=$comp" }))
+            put("lunar_date", amLich)
+            // Launcher 2.6: nút Input trên remote (VIEW_INPUTS) mở bảng chọn nguồn của Home sạch — đi cùng công tắc nút Input.
+            if (nutInput) put("handle_view_inputs", true)
+            if (tenDuoiApp) put("always_show_names", true)
+            if (thuVienApp) { put("app_library", true); put("library_button", true) }
+            if (dongHoKhiYen > 0) put("home_idle_clock_minutes", dongHoKhiYen)
+            if (tiviYeu) put("reduced_motion", true)
+            if (hieuUngKinh) { put("dock_glass", true); put("app_glow", true) }
+            if (lamToiNen > 0) put("wallpaper_dim", lamToiNen)
+            if (hienThongSo) put("show_stats", true)
 
-        // Các Addons & Switches từ https://cleanyour.tv/addons
-        if (soCot in 1..8) put("columns", soCot)
-        if (hangDuoiDock in 0..3) put("rows_below_dock", hangDuoiDock)
-        if (doMoDock in 30..99) put("dock_opacity", doMoDock)
-        if (cheDoDienAnh) put("cinematic_home", true)
-        if (kieuQuangSang.isNotBlank()) put("glow_style", kieuQuangSang)
-        if (tuVaoTruyenHinh) put("boot_to_live_tv", true)
-        if (hinhNenTrueColor) put("wallpaper_true_color", true)
-        if (chuThichHinhNen) put("wallpaper_captions", true)
-        if (thuTuHinhNen == "sequential") put("wallpaper_order", "sequential")
-        if (bangCaiDatNhanh) put("settings_key_panel", true)
-        if (nutSapXep) put("reorder_button", true)
-        if (!hienNutWifi) put("show_network_pill", false)
-        if (!hienNutInputs) put("show_inputs_pill", false)
-        if (!tieuDeDock) put("dock_title", false)
-        if (!hangDockRieng) put("dock_row", false)
-        if (!dienDayDock) put("fill_dock", false)
-        if (!hieuUngLoXo) put("focus_overshoot", false)
-        if (!chuyenDongCoBan) put("animations", false)
-        if (hieuUngNangCao) put("advanced_effects", true)
-        if (!toaSangNenDock) put("ambient_glow", false)
-        if (toaSangIconApp) put("app_glow", true)
-        if (!theModuleCards) put("module_cards", false)
-        if (nutHomeCaiDat) put("show_home_settings_shortcut", true)
-        if (!boLocPhim) put("key_filter", false)
-        if (appTruyenHinh.isNotBlank()) put("live_tv_package", appTruyenHinh.trim())
-        if (appVpn.isNotBlank()) put("vpn_app", appVpn.trim())
-
-        // Nhập JSON tuỳ ý (cho phép bất kỳ khoá nào trong 64 switches)
-        if (cauHinhTuyY.isNotBlank()) {
-            runCatching {
-                val them = JSONObject(cauHinhTuyY.trim())
-                them.keys().forEach { k -> put(k, them.get(k)) }
+            // Các Addons & Switches từ https://cleanyour.tv/addons
+            if (soCot in 1..8) put("columns", soCot)
+            if (hangDuoiDock in 0..3) put("rows_below_dock", hangDuoiDock)
+            if (!daiNenDock) {
+                put("dock_band", false)
+                put("dock_opacity", 0)
+            } else {
+                put("dock_band", true)
+                if (doMoDock in 30..99) put("dock_opacity", doMoDock)
             }
-        }
-    }.toString()
+            put("cinematic_home", cheDoDienAnh)
+            if (kieuQuangSang.isNotBlank()) put("glow_style", kieuQuangSang)
+            put("boot_to_live_tv", tuVaoTruyenHinh)
+            put("wallpaper_true_color", hinhNenTrueColor)
+            put("wallpaper_captions", chuThichHinhNen)
+            if (thuTuHinhNen == "sequential") put("wallpaper_order", "sequential")
+            put("settings_key_panel", bangCaiDatNhanh)
+            put("reorder_button", nutSapXep)
+            put("show_network_pill", hienNutWifi)
+            put("show_inputs_pill", hienNutInputs)
+            put("dock_title", tieuDeDock)
+            put("dock_row", hangDockRieng)
+            put("fill_dock", dienDayDock)
+            put("focus_overshoot", hieuUngLoXo)
+            put("animations", chuyenDongCoBan)
+            put("advanced_effects", hieuUngNangCao)
+            put("ambient_glow", toaSangNenDock)
+            put("app_glow", toaSangIconApp)
+            put("module_cards", theModuleCards)
+            put("show_home_settings_shortcut", nutHomeCaiDat)
+            put("key_filter", boLocPhim)
+            if (appTruyenHinh.isNotBlank()) put("live_tv_package", appTruyenHinh.trim())
+            if (appVpn.isNotBlank()) put("vpn_app", appVpn.trim())
+
+            // Nâng cao ghi sau cùng: người dùng đã chủ động đặt thì đè lên giá trị theme và switch.
+            val daDat = dsNangCao.mapNotNull { tc ->
+                nangCao[tc.khoa]?.let { chu ->
+                    zone.vgs.tvsach.dulieu.NangCao.giaTri(tc, chu)?.let {
+                        put(tc.khoa, it)
+                        tc.khoa
+                    }
+                }
+            }
+            if (daDat.isNotEmpty()) put("vgs_nang_cao", JSONArray(daDat))
+
+            // Nhập JSON tuỳ ý (cho phép bất kỳ khoá nào trong 64 switches)
+            if (cauHinhTuyY.isNotBlank()) {
+                runCatching {
+                    val them = JSONObject(cauHinhTuyY.trim())
+                    them.keys().forEach { k -> put(k, them.get(k)) }
+                }
+            }
+        }.toString()
+    }
 
     fun xemTruocCauHinh(): String = runCatching {
         JSONObject(cauHinhHome()).toString(2)

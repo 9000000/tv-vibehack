@@ -181,6 +181,10 @@
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->
     <bool name="dock_glass">false</bool>
+    <!-- Whether to draw the background band and edge border behind the dock row. false keeps the dock layout
+         and spacing, but hides the dark rounded band and outline, leaving the dock apps floating over the background.
+         Can also be set with "dock_band": false in a theme's config.json. -->
+    <bool name="dock_band">true</bool>
     <!-- A reorder button (two arrows) in the top bar. Off by default: reordering is also in the Settings
          button's long-press menu, so it needs no extra button on screen. -->
     <bool name="reorder_button">false</bool>
