@@ -1,0 +1,25 @@
+{
+ "app": {
+  "versionCode": 26,
+  "versionName": "2.1",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.1.apk",
+  "co": 11387011,
+  "ghiChu": "CleanTV 2.1: giữ OK trên một app ở Home sạch để Di chuyển, Thêm vào dock / Thay bằng app khác, Bỏ khỏi Home, Thông tin app — đổi dock ngay trên tivi. 227 mẫu tivi.",
+  "ghiChuEn": "CleanTV 2.1: hold OK on an app on the clean Home to Move it, add it to the dock / replace it, remove it or open App info, right on the TV. 227 TV models.",
+  "ngay": "2026-10-22"
+ },
+ "duLieu": {
+  "du-lieu.json": {
+   "phienBan": "61353b367dfc39ef",
+   "url": "/ota/du-lieu.json",
+   "co": 1267388,
+   "tuBan": 26
+  },
+  "tvhome.apk": {
+   "phienBan": "70f0f2ca9475aa76",
+   "url": "/ota/tvhome.apk",
+   "co": 591967,
+   "tuBan": 26
+  }
+ }
+}

@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CleanTV — Dọn sạch quảng cáo trên tivi Android</title>
+<meta name="description" content="App Android dọn quảng cáo, theo dõi và app rác trên Android TV / Google TV qua Wi-Fi, thay màn Home bằng Home sạch kiểu Apple TV. Không root, không gỡ, khôi phục được.">
+<meta name="theme-color" content="#0b0b10">
+<link rel="icon" href="/anh/logo-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/anh/logo-192.png">
+<link rel="canonical" href="https://cleantv.alexvgs.tech/en">
+<link rel="alternate" hreflang="vi" href="https://vgs.zone/cleantv">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cleantv.alexvgs.tech/">
+<meta property="og:title" content="CleanTV — Tivi sạch quảng cáo trong 10 phút">
+<meta property="og:description" content="Dọn quảng cáo và app rác trên Android TV / Google TV bằng điện thoại. Không root, khôi phục được.">
+<meta property="og:image" content="https://cleantv.alexvgs.tech/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--nen:#0b0b10;--the:#15151c;--the2:#1e1e28;--vien:#2a2a36;--chu:#f4f4f8;--phu:#a1a1b5;--tim:#7c3aed;--hong:#ec4899;--xanh:#22c55e;--cam:#f59e0b;
+  --grad:linear-gradient(135deg,var(--tim),var(--hong))}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--nen);color:var(--chu);font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{max-width:100%;height:auto;display:block}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(11,11,16,.8);backdrop-filter:blur(14px);border-bottom:1px solid rgba(42,42,54,.6)}
+nav .wrap{display:flex;align-items:center;gap:12px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;text-decoration:none}
+.brand img{width:34px;height:34px;border-radius:10px}
+.brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+nav .links{margin-left:auto;display:flex;gap:6px;align-items:center}
+nav .links a{color:var(--phu);text-decoration:none;font-size:14px;padding:8px 10px;border-radius:10px}
+nav .links a:hover{color:var(--chu);background:var(--the)}
+.lang{border:1px solid var(--vien);background:var(--the);color:var(--chu);border-radius:999px;padding:6px 12px;font:600 13px inherit;cursor:pointer}
+@media (max-width:720px){nav .links a.an{display:none}}
+/* hero */
+.hero{position:relative;overflow:hidden;padding:72px 0 40px}
+.hero:before{content:"";position:absolute;inset:-30% -10% auto;height:620px;background:radial-gradient(closest-side,rgba(124,58,237,.35),transparent),radial-gradient(closest-side at 70% 40%,rgba(236,72,153,.25),transparent);filter:blur(10px);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--vien);background:var(--the);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--phu)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--xanh);box-shadow:0 0 12px var(--xanh)}
+h1{font-size:clamp(38px,6vw,64px);line-height:1.05;margin:18px 0 16px;font-weight:900;letter-spacing:-.02em}
+h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--phu);max-width:540px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 22px;border-radius:16px;font-weight:700;text-decoration:none;font-size:16px;border:1px solid transparent}
+.btn.chinh{background:var(--grad);color:#fff;box-shadow:0 10px 30px -10px rgba(236,72,153,.6)}
+.btn.chinh:hover{filter:brightness(1.08)}
+.btn.phu{border-color:var(--vien);background:var(--the)}
+#gop-y .btn{display:inline-flex}
+.btn svg{width:20px;height:20px}
+.nho{font-size:13px;color:var(--phu);margin-top:12px}
+.dienthoai{justify-self:center;width:min(320px,80vw);border-radius:44px;padding:10px;background:#000;border:1px solid var(--vien);box-shadow:0 40px 80px -30px rgba(124,58,237,.55)}
+.dienthoai img{border-radius:34px}
+/* so sánh */
+section{padding:72px 0}
+h2{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--phu);max-width:640px;margin:0 0 36px}
+.giua{text-align:center}.giua .sub{margin-left:auto;margin-right:auto}
+.sosanh{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--vien);aspect-ratio:16/9;user-select:none;background:#000}
+.sosanh img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sosanh .sau{clip-path:inset(0 0 0 var(--x,50%))}
+.sosanh .vach{position:absolute;top:0;bottom:0;left:var(--x,50%);width:3px;background:#fff;transform:translateX(-50%);box-shadow:0 0 20px rgba(0,0,0,.6)}
+.sosanh .vach:after{content:"⇆";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-weight:800}
+.sosanh .nhan{position:absolute;top:14px;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+.sosanh .nhan.t{left:14px}.sosanh .nhan.s{right:14px;color:#fff;background:linear-gradient(135deg,rgba(124,58,237,.9),rgba(236,72,153,.9))}
+.sosanh input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+/* tính năng */
+.luoi{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.the{background:var(--the);border:1px solid var(--vien);border-radius:22px;padding:24px}
+.the .ic{width:46px;height:46px;border-radius:14px;background:var(--grad);display:grid;place-items:center;margin-bottom:16px}
+.the .ic svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.the h3{margin:0 0 6px;font-size:18px}
+.the p{margin:0;color:var(--phu);font-size:15px}
+/* các bước */
+.buoc{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:b}
+.buoc .the{position:relative;padding-top:56px}
+.buoc .the:before{counter-increment:b;content:counter(b);position:absolute;top:20px;left:24px;font-weight:900;font-size:22px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* hướng dẫn */
+.luoi-hd{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.the.hd{padding:0;overflow:hidden}.the.hd img{width:100%;height:180px;object-fit:cover;object-position:top}
+.the.hd h3{display:flex;gap:8px;align-items:center;margin:14px 16px 0;font-size:16px}
+.the.hd h3 span{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--grad)}
+.the.hd p{margin:6px 16px 18px;font-size:14px}
+/* ảnh app */
+.anhapp{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.anhapp figure{margin:0}
+.anhapp img{border-radius:28px;border:1px solid var(--vien)}
+.anhapp figcaption{color:var(--phu);font-size:14px;text-align:center;margin-top:10px}
+/* hãng */
+.hang{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.hang span{border:1px solid var(--vien);background:var(--the);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px}
+.hang span.khong{color:var(--phu);text-decoration:line-through}
+/* faq */
+details{background:var(--the);border:1px solid var(--vien);border-radius:18px;padding:18px 22px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";color:var(--hong);font-size:22px;line-height:1}
+details[open] summary:after{content:"–"}
+details p{color:var(--phu);margin:12px 0 0}
+/* góp ý */
+.form{display:grid;gap:14px}
+.loai{display:flex;flex-wrap:wrap;gap:8px}
+.loai label{border:1px solid var(--vien);background:var(--the2);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:14px}
+.loai input{display:none}
+.loai label:has(input:checked){border-color:var(--hong);background:rgba(236,72,153,.15)}
+.form textarea,.form input[type=text]{width:100%;background:var(--the2);border:1px solid var(--vien);border-radius:14px;color:var(--chu);font:inherit;padding:14px}
+.form textarea{min-height:130px;resize:vertical}
+.form textarea:focus,.form input:focus{outline:none;border-color:var(--tim)}
+.hai{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.hai{grid-template-columns:1fr}}
+.form .btn{justify-self:start;cursor:pointer;font:700 16px inherit}
+#kq{font-size:14px;min-height:20px}
+.an-bot{position:absolute;left:-9999px}
+/* tải */
+.tai{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(236,72,153,.18));border:1px solid var(--vien);border-radius:28px;padding:48px 32px;text-align:center}
+.tai img{width:84px;height:84px;margin:0 auto 18px;border-radius:24px}
+footer{border-top:1px solid var(--vien);padding:32px 0 48px;color:var(--phu);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+@media (max-width:900px){
+  .hero .wrap{grid-template-columns:1fr;gap:40px}.hero{padding-top:40px}
+  .luoi{grid-template-columns:1fr 1fr}.buoc{grid-template-columns:1fr 1fr}
+  .anhapp{grid-template-columns:1fr 1fr 1fr;gap:10px}.anhapp img{border-radius:16px}
+}
+@media (max-width:560px){.luoi,.buoc{grid-template-columns:1fr}section{padding:52px 0}.anhapp{grid-template-columns:1fr 1fr}.anhapp figure:last-child{display:none}}
+.nk{background:var(--the,rgba(127,127,140,.08));border:1px solid var(--vien);border-radius:18px;padding:16px 20px;margin-bottom:12px}
+.nkMoi{background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(236,72,153,.1));border-color:rgba(139,92,246,.4)}
+.nkDau{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}.nkNgay{margin-left:auto;font-size:13px;opacity:.6}
+.nkNhan{font-size:11.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:999px;padding:2px 9px}
+.nk ul{margin:0;padding-left:20px;line-height:1.55}.nkCu summary{cursor:pointer;text-align:center;font-weight:600;opacity:.75;padding:8px;margin-bottom:10px}
+.tvTim{width:100%;font:inherit;font-size:16px;padding:12px 16px;border-radius:14px;border:1px solid var(--vien);background:rgba(127,127,140,.08);color:inherit;box-sizing:border-box}
+.tvLoai{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tvLoai button{font:inherit;font-size:13.5px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--vien);background:none;color:inherit;cursor:pointer;opacity:.75}
+.tvLoai button.chon{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border-color:transparent;opacity:1}.tvDem{font-size:13px;opacity:.6;margin:14px 2px 8px}
+.tvDs{max-height:560px;overflow-y:auto;border:1px solid var(--vien);border-radius:18px;padding:4px 18px 12px}.tvHang h3{margin:0;padding:12px 0 6px;font-size:15px}.tvHang h3 span{font-size:12px;opacity:.55}
+.tvMau{padding:8px 0;border-top:1px solid var(--vien);font-size:14.5px}.tvMau em{font-style:normal;font-size:11px;font-weight:700;padding:1px 8px;margin-left:8px;border-radius:999px;background:rgba(139,92,246,.18);color:#a78bfa}
+.tvMau i{font-style:normal;float:right;font-size:12.5px;opacity:.6}.tvMau small{display:block;font-size:12px;opacity:.55;margin-top:2px}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="#"><img src="/anh/logo-192.png" alt=""><span>Clean<b>TV</b></span></a>
+  <div class="links">
+    <a class="an" href="#tinh-nang" data-en="Features">Tính năng</a>
+    <a class="an" href="#cach-dung" data-en="How it works">Cách dùng</a>
+    <a class="an" href="#hoi-dap" data-en="FAQ">Hỏi đáp</a>
+    <a class="an" href="#gop-y" data-en="Feedback">Góp ý</a>
+    <button class="lang" id="doiNgon" aria-label="Language">EN</button>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <span class="pill"><i></i><span data-en="For Android TV &amp; Google TV">Cho Android TV &amp; Google TV</span></span>
+    <h1><span data-en="No more TV ads">Tivi hết quảng cáo</span><br><span class="g" data-en="with CleanTV">với CleanTV</span></h1>
+    <p class="lead" data-en="Does your TV open straight into ads and the maker's junk apps? Install CleanTV on your phone, connect to the TV over Wi-Fi and clean it up in a few minutes. Want it back the way it was? Press Restore.">CleanTV chạy trên điện thoại: kết nối tivi qua Wi-Fi, tắt quảng cáo, theo dõi và app rác của hãng, rồi thay màn Home đầy quảng cáo bằng Home sạch kiểu Apple TV. Không gỡ gì, không root, khôi phục được bất cứ lúc nào.</p>
+    <div class="cta">
+      <a class="btn chinh" href="/CleanTV.apk" download id="nutTai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-en="Download APK">Tải APK</span></a>
+      <a class="btn phu" href="#chuan-bi" data-en="Prepare the TV">Chuẩn bị tivi</a>
+    </div>
+    <p class="nho" id="banTai" data-en="Android 8+ · free · 9 MB">Android 8 trở lên · miễn phí · 9 MB</p>
+  </div>
+  <div class="dienthoai"><img src="/anh/app-tim.webp" alt="CleanTV" width="1080" height="2400"></div>
+</div></header>
+
+<section id="so-sanh"><div class="wrap giua">
+  <h2 data-en="Before and after">Trước và sau</h2>
+  <p class="sub" data-en="Drag the bar. Left: the stock Home with sponsored rows. Right: the clean Home with only the apps the family uses.">Kéo thanh ở giữa. Bên trái: Home gốc đầy hàng quảng cáo. Bên phải: Home sạch chỉ còn app cả nhà hay xem.</p>
+  <div class="sosanh" id="sosanh">
+    <img src="/anh/tv-truoc.webp" alt="" width="1920" height="1080">
+    <img class="sau" src="/anh/tv-sau.webp" alt="" width="1920" height="1080">
+    <div class="vach"></div>
+    <span class="nhan t" data-en="Before">Trước</span><span class="nhan s" data-en="After">Sau</span>
+    <input type="range" min="0" max="100" value="50" aria-label="So sánh">
+  </div>
+</div></section>
+
+<section id="tinh-nang"><div class="wrap">
+  <h2 data-en="What it does">CleanTV làm gì</h2>
+  <p class="sub" data-en="Everything happens from the phone in your hand. No computer, no cable, no technical knowledge.">Mọi thứ làm từ chiếc điện thoại trên tay. Không cần máy tính, không cáp, không cần biết kỹ thuật.</p>
+  <div class="luoi">
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></div><h3 data-en="Ads and tracking off">Tắt quảng cáo, theo dõi</h3><p data-en="Sponsored rows, recommendation feeds, the maker's analytics and junk apps are disabled one by one.">Hàng gợi ý trả tiền, dịch vụ quảng cáo, thu thập dữ liệu và app rác của hãng được tắt từng cái.</p></div>
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3 data-en="Clean Home with themes &amp; weather">Home sạch, theme, thời tiết</h3><p data-en="Clock, weather for your city (data by Open-Meteo.com), a dock of favourite apps, a tidy icon cluster and themes: VGS, aurora, time-of-day sky. Change the theme any time without cleaning again.">Đồng hồ, thời tiết theo thành phố (dữ liệu Open-Meteo.com), dock app hay xem, cụm icon gọn, theme VGS, cực quang, bầu trời theo giờ. Đổi theme lúc nào cũng được.</p></div>
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h3 data-en="213 tested TV models">213 mẫu tivi đã thử</h3><p data-en="Lists checked by real owners: TCL, Sony, Xiaomi, Philips, Hisense… Unknown TVs get safe general rules.">Danh sách người dùng thật đã kiểm: TCL, Sony, Xiaomi, Philips, Hisense… Tivi lạ dùng luật chung an toàn.</p></div>
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div><h3 data-en="One-tap restore">Khôi phục một chạm</h3><p data-en="The TV's state is backed up on the phone before any change. Restore puts every package and the stock Home back.">Trạng thái tivi được lưu vào điện thoại trước mọi thay đổi. Khôi phục bật lại tất cả và trả Home gốc.</p></div>
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 data-en="Built-in safeguards">Lớp bảo vệ sẵn</h3><p data-en="Never touches HDMI inputs, the remote, the keyboard or Play Store. Keeps the package that owns your Wi-Fi.">Không đụng cổng HDMI, remote, bàn phím, CH Play. Giữ lại gói đang giữ mạng Wi-Fi để tivi không rớt mạng.</p></div>
+    <div class="the"><div class="ic"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div><h3 data-en="Bring it to any home">Mang đi nhà nào cũng được</h3><p data-en="Help parents, friends and neighbours: join their Wi-Fi, clean the TV, switch debugging off and go.">Dọn tivi cho bố mẹ, bạn bè, hàng xóm: vào Wi-Fi nhà họ, dọn xong tắt gỡ lỗi là về.</p></div>
+  </div>
+</div></section>
+
+<section id="may-chieu"><div class="wrap">
+  <h2 data-en="Projector &amp; screensaver">Máy chiếu &amp; màn hình chờ</h2>
+  <p class="sub" data-en="The top of the clean Home is one icon cluster: Projector, Network, Screensaver, Settings.">Góc trên Home sạch là một cụm icon: Máy chiếu, Mạng, Màn hình chờ, Cài đặt.</p>
+  <img src="/anh/tv-cum.webp" alt="" loading="lazy" width="1920" height="1080" style="border-radius:18px;border:1px solid var(--vien);margin:0 auto 18px">
+  <div class="luoi">
+    <div class="the"><h3 data-en="Projector focus &amp; keystone">Lấy nét, chỉnh hình máy chiếu</h3><p data-en="On Formovie, XGIMI, JMGO and other Android projectors the app finds the maker's focus and keystone screens. Try one, pin it, and the Projector icon opens it straight away. Focus and keystone packages are never disabled.">Trên Formovie, XGIMI, JMGO… app dò màn lấy nét, chỉnh hình của hãng. Mở thử, ghim lại, icon Máy chiếu mở thẳng. Gói lấy nét, chỉnh hình không bao giờ bị tắt.</p></div>
+    <div class="the"><h3 data-en="Screensaver in one press">Màn hình chờ một chạm</h3><p data-en="The Screensaver icon starts Backdrop / Ambient mode right away — nice with music playing and a photo album on screen.">Icon Màn hình chờ bật ngay Backdrop / Ambient mode, tiện lúc nghe nhạc, xem album ảnh.</p></div>
+    <div class="the"><h3 data-en="Works with makers' own Home">Thay được Home riêng của hãng</h3><p data-en="TVs and projectors with their own launcher (e.g. Formovie Nemo) are handled too, so the Home button on the remote lands on the clean Home.">Tivi, máy chiếu có Home riêng của hãng cũng thay được, bấm Home trên remote về đúng Home sạch.</p></div>
+  </div>
+</div></section>
+
+<section id="cach-dung"><div class="wrap">
+  <h2 data-en="Four steps">Bốn bước</h2>
+  <p class="sub" data-en="About ten minutes per TV, with the remote in one hand and the phone in the other.">Khoảng mười phút một tivi, một tay cầm remote, một tay cầm điện thoại.</p>
+  <div class="buoc">
+    <div class="the"><h3 data-en="Turn on debugging">Bật gỡ lỗi trên tivi</h3><p data-en="Settings → About → press Build 7 times → Developer options → USB debugging.">Cài đặt → Giới thiệu → bấm Bản dựng 7 lần → Tuỳ chọn nhà phát triển → Gỡ lỗi USB.</p></div>
+    <div class="the"><h3 data-en="Connect">Kết nối</h3><p data-en="Same Wi-Fi as the TV, tap Scan, press Allow on the TV.">Cùng Wi-Fi với tivi, bấm Quét, bấm Cho phép trên tivi.</p></div>
+    <div class="the"><h3 data-en="Choose and clean">Chọn và dọn</h3><p data-en="Safe packages are pre-ticked. Ask the owner which apps they never use.">Gói an toàn đã tích sẵn. Hỏi chủ nhà app nào không bao giờ dùng.</p></div>
+    <div class="the"><h3 data-en="Clean Home, then lock">Home sạch rồi khoá lại</h3><p data-en="Pick the dock apps, install the clean Home, then switch ADB off.">Chọn app cho dock, cài Home sạch, cuối cùng tắt ADB.</p></div>
+  </div>
+</div></section>
+
+<section id="tren-tivi"><div class="wrap">
+  <h2 data-en="No Android phone? Install it on the TV">Không có điện thoại Android? Cài thẳng lên tivi</h2>
+  <p class="sub" data-en="Experimental. iPhone owners, or anyone who'd rather use the remote: install CleanTV on the TV itself. Same app, same steps.">Thử nghiệm. Dùng iPhone, hoặc muốn đi bằng remote: cài CleanTV lên chính chiếc tivi. Cùng một app, các bước y như trên điện thoại.</p>
+  <div class="luoi">
+    <div class="the hd"><img src="/anh/tv-tren-tivi-1.webp" alt="" loading="lazy"><h3><span>1</span><b data-en="Get the app onto the TV">Tải app về tivi</b></h3><p data-en="Turn on USB debugging. On the TV install Downloader from the Play Store, enter cleantv.alexvgs.tech/tv and install.">Bật Gỡ lỗi USB. Trên tivi cài app Downloader, gõ cleantv.alexvgs.tech/tv rồi cài.</p></div>
+    <div class="the hd"><img src="/anh/tv-tren-tivi-2.webp" alt="" loading="lazy"><h3><span>2</span><b data-en="Connect this TV">Kết nối chính tivi này</b></h3><p data-en="Open CleanTV → Clean a TV → Connect this TV. Tick Always allow and press Allow, then clean as usual.">Mở CleanTV → Dọn một tivi → Kết nối tivi này. Tích Luôn cho phép, bấm Cho phép, rồi dọn như bình thường.</p></div>
+    <div class="the hd"><img src="/anh/tv-tren-tivi-3.webp" alt="" loading="lazy"><h3><span>3</span><b data-en="Reopen it from the clean Home">Mở lại từ Home sạch</b></h3><p data-en="CleanTV sits on the clean Home: open it again to change the theme or restore. Turn ADB off when done.">CleanTV nằm trên Home sạch: mở lại để đổi giao diện hay khôi phục. Xong nhớ Tắt ADB.</p></div>
+  </div>
+  <p class="sub" style="margin-top:14px;font-size:14px" data-en="Newer Google TVs that only offer Wireless debugging (pairing code) may not connect yet; use an Android phone there.">Google TV đời mới chỉ có Gỡ lỗi qua Wi-Fi (ghép mã) có thể chưa kết nối được; khi đó dùng điện thoại Android.</p>
+</div></section>
+
+<section id="chuan-bi"><div class="wrap">
+  <h2 data-en="Step 0: turn on developer mode">Bước 0: bật chế độ nhà phát triển</h2>
+  <p class="sub" data-en="Required — without it the app can't reach the TV. One time, about a minute, with the remote. Names may differ slightly by brand.">Bắt buộc — không có bước này app không kết nối được tivi. Làm một lần, khoảng một phút.</p>
+  <div class="luoi-hd">
+    <div class="the hd"><img src="/anh/hd/1-caidat.webp" alt="" loading="lazy"><h3><span>1</span><b data-en="Open the TV's Settings">Mở Cài đặt của tivi</b></h3><p data-en="Gear button on the remote or the Settings icon. Choose “Device Preferences” (Google TV: “System”).">Nút bánh răng trên remote hoặc biểu tượng Cài đặt. Chọn “Lựa chọn ưu tiên về thiết bị” (Google TV: “Hệ thống”).</p></div>
+    <div class="the hd"><img src="/anh/hd/2-tuychon.webp" alt="" loading="lazy"><h3><span>2</span><b data-en="Open About">Vào Giới thiệu</b></h3><p data-en="Choose “About” (some brands: “Information”).">Chọn “Giới thiệu”.</p></div>
+    <div class="the hd"><img src="/anh/hd/3-bandung.webp" alt="" loading="lazy"><h3><span>3</span><b data-en="Press OK on Build 7 times">Bấm OK vào Bản dựng 7 lần</b></h3><p data-en="Stay on “Android TV OS build” and press OK 7 times until “You are now a developer!”. Enter the PIN if asked.">Đứng ở “Bản dựng”, bấm OK 7 lần tới khi hiện “Bạn đã là nhà phát triển!”.</p></div>
+    <div class="the hd"><img src="/anh/hd/4-tuychonnpt.webp" alt="" loading="lazy"><h3><span>4</span><b data-en="Open Developer options">Mở Tùy chọn nhà phát triển</b></h3><p data-en="Press Back. “Developer options” now sits at the end of the list.">Bấm Back, cuối danh sách có “Tùy chọn nhà phát triển”.</p></div>
+    <div class="the hd"><img src="/anh/hd/5-goloi.webp" alt="" loading="lazy"><h3><span>5</span><b data-en="Turn on USB debugging">Bật Gỡ lỗi qua USB</b></h3><p data-en="Turn on “USB debugging” (and “Network debugging” if shown). No cable needed — the app uses Wi-Fi.">Bật “Gỡ lỗi qua USB”. Không cần cắm dây.</p></div>
+    <div class="the hd"><img src="/anh/hd/6-goloiwifi.webp" alt="" loading="lazy"><h3><span>6</span><b data-en="Newer Google TV: Wireless debugging">Google TV đời mới: Gỡ lỗi qua Wi-Fi</b></h3><p data-en="If the app can't find the TV: turn on “Wireless debugging” → “Pair device with pairing code”, type the IP:port and code into the app.">App không thấy tivi thì bật “Gỡ lỗi qua Wi-Fi” → ghép bằng mã.</p></div>
+    <div class="the hd"><img src="/anh/hd/7-chophep.webp" alt="" loading="lazy"><h3><span>7</span><b data-en="Press Allow on the TV">Bấm Cho phép trên tivi</b></h3><p data-en="The first time, tick “Always allow from this computer” and press “Allow”.">Tích “Luôn cho phép” rồi bấm “Cho phép”.</p></div>
+  </div>
+  <p class="nho" data-en="When you're done the app turns ADB off. To be sure: Developer options → turn off USB debugging and revoke USB debugging authorizations.">Dọn xong app tắt ADB. Cho chắc: Tùy chọn nhà phát triển → tắt Gỡ lỗi qua USB và thu hồi uỷ quyền.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="anhapp">
+    <figure><img src="/anh/app-tim.webp" alt="" loading="lazy" width="1080" height="2400"><figcaption data-en="Find the TV">Tìm tivi</figcaption></figure>
+    <figure><img src="/anh/app-chon.webp" alt="" loading="lazy" width="1080" height="2400"><figcaption data-en="Choose packages">Chọn gói</figcaption></figure>
+    <figure><img src="/anh/app-en.webp" alt="" loading="lazy" width="1080" height="2400"><figcaption data-en="Pick a theme">Chọn giao diện</figcaption></figure>
+  </div>
+</div></section>
+
+<section><div class="wrap giua">
+  <h2 data-en="Which TVs?">Tivi nào dùng được?</h2>
+  <p class="sub" data-en="Anything running Android TV or Google TV, including boxes and projectors.">Mọi tivi chạy Android TV hoặc Google TV, kể cả box và máy chiếu.</p>
+  <div class="hang">
+    <span>TCL</span><span>Sony</span><span>Xiaomi</span><span>Philips</span><span>Hisense</span><span>Panasonic</span><span>Sharp</span><span>Toshiba</span><span>Skyworth / Coocaa</span><span>Casper</span><span>Chromecast</span><span>Mi Box</span><span>NVIDIA Shield</span><span>Formovie</span><span>XGIMI</span><span>JMGO</span>
+    <span class="khong">Samsung (Tizen)</span><span class="khong">LG (webOS)</span>
+  </div>
+</div></section>
+
+<section id="hoi-dap"><div class="wrap" style="max-width:820px">
+  <h2 class="giua" data-en="Questions">Hỏi đáp</h2>
+  <details><summary data-en="Can it break the TV?">Có làm hỏng tivi không?</summary><p data-en="Nothing is uninstalled: packages are only disabled, and the phone keeps a backup taken before the first change. Packages that run the HDMI inputs, the remote, the keyboard or Play Store are never touched. Restore turns everything back on.">Không gỡ gì cả, chỉ tắt, và điện thoại giữ bản sao lưu chụp trước lệnh đầu tiên. Gói chạy cổng HDMI, remote, bàn phím, CH Play không bao giờ bị đụng. Bấm Khôi phục là tivi về như cũ.</p></details>
+  <details><summary data-en="Already cleaned — how do I change the look?">Đã dọn rồi, muốn đổi giao diện thì sao?</summary><p data-en="No need to clean again. Turn USB debugging back on (Developer options stays). Open the app → Clean a TV → connect to that TV → tap “Change the clean Home theme”, pick a theme, dock and weather, then Apply. Disabled packages stay as they are. Turn ADB off when done. For quick tweaks like columns or app order, hold OK on the clean Home's Settings button on the TV.">Không phải dọn lại. Bật lại Gỡ lỗi qua USB, mở app → kết nối lại tivi → “Đổi giao diện Home sạch” → Áp dụng. Xong nhớ Tắt ADB.</p></details>
+  <details><summary data-en="Where are the projector focus / keystone settings after cleaning?">Máy chiếu chỉnh nét, chỉnh hình ở đâu sau khi thay Home?</summary><p data-en="While installing the clean Home, open the “Projector” card and tap Find focus / keystone screens. Try each one, then Pin the right ones — the Projector icon on the clean Home opens them. Nothing found? Tap Send the list to VGS so support can be added.">Lúc cài Home sạch, ở mục “Máy chiếu” bấm Dò màn lấy nét / chỉnh hình, mở thử rồi Ghim. Icon Máy chiếu trên Home sạch mở thẳng các màn đó. Không thấy màn nào thì bấm Gửi danh sách cho VGS.</p></details>
+  <details><summary data-en="How do I show my photo album on the screensaver?">Làm sao để màn hình chờ hiện album ảnh?</summary><p data-en="Press the Screensaver icon on the clean Home to start it. To show your own photos: open the Google Home app on your phone → pick the TV → Ambient mode / Backdrop → choose a Google Photos album. Music keeps playing while the screensaver runs.">Bấm icon Màn hình chờ trên Home sạch. Muốn hiện ảnh của bạn: app Google Home trên điện thoại → chọn tivi → Màn hình chờ (Ambient mode / Backdrop) → chọn album Google Photos. Nhạc vẫn phát tiếp.</p></details>
+  <details><summary data-en="The Home button on the remote goes back to the old screen?">Bấm Home trên remote lại về màn cũ?</summary><p data-en="Update the app, reconnect to the TV, tap “Change the clean Home theme” → Apply. Newer versions handle makers' own launchers and catch the remote's Home button. Still stuck? Send feedback with the brand and model.">Cập nhật app, kết nối lại tivi, bấm “Đổi giao diện Home sạch” → Áp dụng. Vẫn không được thì gửi góp ý kèm hãng, model.</p></details>
+  <details><summary data-en="The TV is stuck on the boot animation after cleaning?">Tivi kẹt ở màn khởi động sau khi dọn?</summary><p data-en="Nothing was uninstalled, so it can be brought back. Try in this order: wait 10 minutes once. Boot to safe mode (on many TVs hold Power on the remote during the boot animation), then turn the maker's Home back on under Settings → Apps → show system apps. Keep running the CleanTV app's Restore (or adb connect) for a couple of minutes right after power-on: ADB sometimes answers briefly. Wipe the cache partition from the recovery menu. A factory reset also works but erases everything, so do it last. Since 1.9.1 the app never disables the stock Home on CVTE-board TVs (JVC, Vision…), where this was seen.">Không có gì bị gỡ nên cứu được. Thử theo thứ tự: chờ 10 phút một lần. Vào chế độ an toàn (nhiều tivi: giữ nút Nguồn trên remote lúc đang hiện logo khởi động) rồi bật lại Home của hãng trong Cài đặt → Ứng dụng → hiện ứng dụng hệ thống. Ngay sau khi bật nguồn, bấm Khôi phục trong app CleanTV liên tục vài phút: ADB đôi khi lên được một lúc. Xoá phân vùng cache trong menu recovery. Khôi phục cài đặt gốc cũng được nhưng mất hết dữ liệu nên để cuối cùng. Từ bản 1.9.1 app không bao giờ tắt Home gốc trên tivi bo mạch CVTE (JVC, Vision…), loại đã gặp lỗi này.</p></details>
+  <details><summary data-en="The Home button still opens Google's Home?">Bấm Home vẫn về Home Google?</summary><p data-en="On Google TV the setup app (setupwraith) also claims Home, and the Wi-Fi saved when the TV was first set up belongs to it, so the app won't disable it (the TV would drop off Wi-Fi). On the TV: Settings → Network → forget the Wi-Fi and join it again (or plug in Ethernet). Then reconnect CleanTV, tick setupwraith in the Google Home group and clean again.">Trên Google TV, trình cài đặt (setupwraith) cũng nhận Home, mà Wi-Fi lưu lúc cài tivi lần đầu thuộc về nó nên app không tắt (tắt là rớt Wi-Fi). Trên tivi: Cài đặt → Mạng → quên mạng Wi-Fi rồi kết nối lại (hoặc cắm dây LAN). Sau đó kết nối lại CleanTV, tích setupwraith ở nhóm Google Home và dọn lại.</p></details>
+  <details><summary data-en="Does it remove YouTube ads?">Có chặn quảng cáo trong YouTube không?</summary><p data-en="No. CleanTV removes the TV's own ads (Home rows, promos, tracking). Ads inside apps like YouTube are not affected.">Không. CleanTV bỏ quảng cáo của chính tivi (hàng gợi ý trên Home, khuyến mãi, theo dõi). Quảng cáo bên trong app như YouTube thì không đụng tới.</p></details>
+  <details><summary data-en="Does it need root or a computer?">Có cần root hay máy tính không?</summary><p data-en="No. It uses Android's standard debugging over Wi-Fi, straight from the phone.">Không. App dùng gỡ lỗi chuẩn của Android qua Wi-Fi, làm thẳng từ điện thoại.</p></details>
+  <details><summary data-en="Is leaving debugging on safe?">Để gỡ lỗi bật có an toàn không?</summary><p data-en="Not really: anyone on the same network could control the TV. CleanTV's last step switches ADB off — also turn USB debugging off in Developer options.">Không nên: ai cùng mạng cũng điều khiển được tivi. Bước cuối của CleanTV là tắt ADB — bạn cũng nên tắt Gỡ lỗi USB trong Tuỳ chọn nhà phát triển.</p></details>
+  <details><summary data-en="Why isn't it on Google Play?">Sao không có trên Google Play?</summary><p data-en="It is installed straight from this page for now. The app updates itself: when a new version is out it shows an Update button.">Hiện tải thẳng từ trang này. App tự cập nhật: có bản mới là hiện nút Cập nhật ngay trong app.</p></details>
+  <details><summary data-en="Warranty and responsibility">Bảo hành và trách nhiệm</summary><p data-en="CleanTV is free software provided &quot;as is&quot;, with no warranty. It only changes a TV with the owner's permission (they must switch on debugging and press Allow on the TV). Every change is reversible with Restore, but you use it at your own risk. CleanTV is not affiliated with Google, Apple, Sony, TCL or any TV maker; brand names are only used to say which TVs work.">CleanTV là phần mềm miễn phí, cung cấp &quot;nguyên trạng&quot;, không kèm bảo hành. App chỉ thay đổi tivi khi chủ tivi cho phép (phải tự bật gỡ lỗi và bấm Cho phép trên tivi). Mọi thay đổi đều khôi phục được, nhưng người dùng tự chịu trách nhiệm khi sử dụng. CleanTV không liên quan tới Google, Apple, Sony, TCL hay hãng tivi nào; tên hãng chỉ dùng để nói tivi nào chạy được.</p></details>
+  <details><summary data-en="Who made it?">Ai làm?</summary><p data-en="CleanTV is made by AlexVGS on top of the open-source CleanYourTV project (MIT) by Gathin and its contributors, who built the 213 TV lists and the clean Home.">CleanTV do AlexVGS làm, dựa trên dự án mã nguồn mở CleanYourTV (MIT) của Gathin và cộng đồng — họ làm 213 danh sách tivi và màn Home sạch.</p></details>
+</div></section>
+
+<section id="tivi"><div class="wrap" style="max-width:860px">
+  <h2 class="giua" data-en="Tested TVs" id="tvTieuDe">Tivi đã thử</h2>
+  <p class="sub giua" style="margin:0 auto 18px" data-en="Each model is a package list real owners disabled and kept working, from the CleanYourTV community. A TV that isn't here still works: the app uses safe general rules.">Mỗi mẫu là danh sách gói người dùng thật đã tắt và chạy ổn, từ cộng đồng CleanYourTV. Tivi không có tên ở đây vẫn dùng được: app áp luật chung an toàn.</p>
+  <input id="tvTim" type="search" class="tvTim" placeholder="Search brand or model (TCL C725, Mi Box, Sony X80J)">
+  <div id="tvLoai" class="tvLoai"></div>
+  <p id="tvDem" class="tvDem"></p>
+  <div id="tvDs" class="tvDs"></div>
+</div></section>
+
+<section id="cap-nhat"><div class="wrap" style="max-width:820px">
+  <h2 class="giua" data-en="What's new">Bản mới có gì</h2>
+  <p class="sub giua" style="margin:0 auto 22px" data-en="The app tells you when an update is out. On an older version? Open the app and tap Update.">App tự báo khi có bản mới. Đang dùng bản cũ thì mở app bấm Cập nhật.</p>
+  <div id="nhatKy"></div>
+</div></section>
+
+<section id="gop-y"><div class="wrap giua">
+  <h2 data-en="Feedback &amp; bug reports">Góp ý &amp; báo lỗi</h2>
+  <p class="sub" data-en="Something broke or your TV isn't supported? Use the VGS feedback box and pick &quot;App CleanTV&quot;.">Có gì trục trặc hay tivi chưa hỗ trợ? Gửi ở hộp góp ý VGS, chọn mục &quot;App CleanTV&quot;.</p>
+  <a class="btn phu" href="https://vgs.zone/gop-y?tu=CleanTV" data-en="Open the feedback box">Mở hộp góp ý</a>
+</div></section>
+
+<section><div class="wrap">
+  <div class="tai">
+    <img src="/anh/logo-192.png" alt="">
+    <h2 data-en="Clean your TV today">Dọn tivi của bạn ngay hôm nay</h2>
+    <p class="sub" style="margin:0 auto 24px" data-en="Free. Install the APK on your Android phone (allow installing from your browser when asked).">Miễn phí. Cài APK lên điện thoại Android (cho phép cài từ trình duyệt khi máy hỏi).</p>
+    <a class="btn chinh" href="/CleanTV.apk" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-en="Download CleanTV">Tải CleanTV</span></a>
+    <p class="nho" id="banTai2" data-en="Android 8+ · free">Android 8 trở lên · miễn phí</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>© 2026 AlexVGS · CleanTV</span>
+  <span><span data-en="Based on">Dựa trên</span> <a href="https://github.com/Gathin23/cleanyourtv" rel="noopener">CleanYourTV</a> · <a href="/giay-phep.txt" data-en="License">Giấy phép</a></span>
+</div></footer>
+
+<script>
+// Song ngữ: chữ tiếng Việt trong HTML, tiếng Anh ở data-en. Chọn theo ?lang=, lần chọn trước, rồi ngôn ngữ máy.
+(function () {
+  var nodes = document.querySelectorAll('[data-en]');
+  nodes.forEach(function (n) { n.dataset.vi = n.innerHTML; });
+  var meta = { vi: [document.title, document.querySelector('meta[name=description]').content],
+    en: ['CleanTV — Strip the ads from your Android TV', 'An Android app that removes ads, tracking and junk from Android TV / Google TV over Wi-Fi and swaps the Home for a clean Apple TV-style one. No root, nothing uninstalled, fully reversible.'] };
+  function dat(l) {
+    nodes.forEach(function (n) { n.innerHTML = l === 'en' ? n.dataset.en : n.dataset.vi; });
+    document.documentElement.lang = l;
+    document.title = meta[l][0];
+    document.getElementById('doiNgon').textContent = l === 'en' ? 'VI' : 'EN';
+    try { localStorage.setItem('lang', l); } catch (e) {}
+    cur = l;
+  }
+  var q = new URLSearchParams(location.search).get('lang'), luu = null;
+  try { luu = localStorage.getItem('lang'); } catch (e) {}
+  var cur = q || 'en';
+  if (cur !== 'vi') dat(cur);
+  document.getElementById('doiNgon').onclick = function () { dat(cur === 'en' ? 'vi' : 'en'); };
+
+  // Phiên bản hiện có: đọc cap-nhat.json (phat-hanh.sh ghi) để khỏi sửa trang mỗi lần ra bản.
+  fetch('/cap-nhat.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) {
+    var a = j.app, mb = (a.co / 1048576).toFixed(1), d = (a.ngay || '').split('-');
+    var ngayVi = d.length === 3 ? ' · ' + (+d[2]) + '/' + (+d[1]) + '/' + d[0] : '';
+    var ngayEn = d.length === 3 ? ' · ' + new Date(a.ngay + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    ['banTai', 'banTai2'].forEach(function (id) {
+      var n = document.getElementById(id); if (!n) return;
+      n.dataset.vi = 'Bản ' + a.versionName + ngayVi + ' · ' + mb.replace('.', ',') + ' MB · Android 8 trở lên · miễn phí';
+      n.dataset.en = 'Version ' + a.versionName + ngayEn + ' · ' + mb + ' MB · Android 8+ · free';
+      n.innerHTML = cur === 'en' ? n.dataset.en : n.dataset.vi;
+    });
+  }).catch(function () {});
+
+  // Nhật ký cập nhật (nhat-ky.json, phat-hanh.sh tự thêm dòng): 3 bản mới nhất, còn lại gập lại.
+  var nkDs = [];
+  function veNhatKy() {
+    var hop = document.getElementById('nhatKy'); if (!hop || !nkDs.length) return;
+    var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var ngay = function (s) { var p = s.split('-'); return p.length === 3 ? (+p[2]) + '/' + (+p[1]) + '/' + p[0] : s; };
+    var mot = function (d, moi) {
+      var y = (cur === 'en' && d.en && d.en.length ? d.en : d.vi);
+      return '<div class="nk' + (moi ? ' nkMoi' : '') + '"><div class="nkDau"><b>' + (cur === 'en' ? 'Version ' : 'Bản ') + esc(d.ban) + '</b>' +
+        (moi ? '<span class="nkNhan">' + (cur === 'en' ? 'Latest' : 'Mới nhất') + '</span>' : '') + '<span class="nkNgay">' + ngay(d.ngay) + '</span></div><ul>' +
+        y.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    };
+    var h = nkDs.slice(0, 3).map(function (d, i) { return mot(d, i === 0); }).join('');
+    if (nkDs.length > 3) h += '<details class="nkCu"><summary>' + (cur === 'en' ? 'Earlier versions' : 'Các bản trước') + ' (' + (nkDs.length - 3) + ')</summary>' +
+      nkDs.slice(3).map(function (d) { return mot(d, false); }).join('') + '</details>';
+    hop.innerHTML = h;
+  }
+  fetch('/nhat-ky.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) { nkDs = j || []; veNhatKy(); }).catch(function () {});
+  document.getElementById('doiNgon').addEventListener('click', veNhatKy);
+
+  // Tivi đã thử (tivi.json, scripts/lam-ds-tivi.py).
+  var tvDs = [], tvLoai = '', LOAI_TV = [['', 'All', 'Tất cả'], ['tivi', 'TVs', 'Tivi'], ['box', 'Boxes & sticks', 'Box, que'], ['may-chieu', 'Projectors', 'Máy chiếu']];
+  function veTivi() {
+    var hop = document.getElementById('tvDs'); if (!hop || !tvDs.length) return;
+    var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var bo = function (t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); };
+    var q = bo(document.getElementById('tvTim').value.trim());
+    var loc = tvDs.filter(function (m) { return (!tvLoai || m.loai === tvLoai) && (!q || bo(m.hang + ' ' + m.ten + ' ' + m.chiTiet + ' ' + m.android).indexOf(q) >= 0); });
+    var nhom = {}; loc.forEach(function (m) { (nhom[m.hang] = nhom[m.hang] || []).push(m); });
+    var hang = Object.keys(nhom).sort(function (a, b) { return nhom[b].length - nhom[a].length || a.localeCompare(b); });
+    document.getElementById('tvDem').textContent = cur === 'en' ? loc.length + ' models · ' + hang.length + ' brands' : loc.length + ' mẫu · ' + hang.length + ' hãng';
+    document.getElementById('tvLoai').innerHTML = LOAI_TV.map(function (l) { return '<button type="button" data-l="' + l[0] + '"' + (l[0] === tvLoai ? ' class="chon"' : '') + '>' + (cur === 'en' ? l[1] : l[2]) + '</button>'; }).join('');
+    hop.innerHTML = hang.map(function (h) {
+      return '<div class="tvHang"><h3>' + esc(h) + ' <span>' + nhom[h].length + '</span></h3>' + nhom[h].map(function (m) {
+        return '<div class="tvMau"><b>' + esc(m.ten) + '</b>' + (m.loai !== 'tivi' ? '<em>' + (m.loai === 'box' ? 'Box' : (cur === 'en' ? 'Projector' : 'Máy chiếu')) + '</em>' : '') + (m.android ? '<i>' + esc(m.android) + '</i>' : '') + (m.chiTiet ? '<small>' + esc(m.chiTiet) + '</small>' : '') + '</div>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+  document.getElementById('tvTim').addEventListener('input', veTivi);
+  document.getElementById('tvLoai').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { tvLoai = b.dataset.l; veTivi(); } });
+  document.getElementById('doiNgon').addEventListener('click', veTivi);
+  fetch('/tivi.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) {
+    tvDs = j.ds || []; var t = document.getElementById('tvTieuDe');
+    if (t) { t.dataset.en = j.tong + ' tested TVs, ' + j.hang + ' brands'; t.dataset.vi = j.tong + ' mẫu, ' + j.hang + ' hãng'; t.innerHTML = cur === 'en' ? t.dataset.en : t.dataset.vi; }
+    veTivi();
+  }).catch(function () {});
+
+  // Placeholder hai thứ tiếng.
+  var ph = document.querySelectorAll('[data-ph-en]');
+  ph.forEach(function (n) { n.dataset.phVi = n.placeholder; });
+  function datPh() { ph.forEach(function (n) { n.placeholder = cur === 'en' ? n.dataset.phEn : n.dataset.phVi; }); }
+  datPh();
+  document.getElementById('doiNgon').addEventListener('click', datPh);
+
+  // Kéo so sánh trước/sau.
+  var ss = document.getElementById('sosanh'), r = ss.querySelector('input');
+  r.addEventListener('input', function () { ss.style.setProperty('--x', r.value + '%'); });
+
+  // Phiên bản + cỡ APK từ cap-nhat.json.
+  fetch('/cap-nhat.json', { cache: 'no-store' }).then(function (x) { return x.json(); }).then(function (j) {
+    var mb = Math.round((j.app.co || 0) / 1048576 * 10) / 10, b = document.getElementById('banTai');
+    b.dataset.vi = 'Bản ' + j.app.versionName + ' · Android 8 trở lên · miễn phí · ' + mb + ' MB';
+    b.dataset.en = 'Version ' + j.app.versionName + ' · Android 8+ · free · ' + mb + ' MB';
+    b.innerHTML = cur === 'en' ? b.dataset.en : b.dataset.vi;
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

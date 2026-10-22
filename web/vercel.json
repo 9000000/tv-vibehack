@@ -1,0 +1,62 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://vgs.zone/cleantv",
+      "permanent": false
+    },
+    {
+      "source": "/CleanTV.apk",
+      "destination": "https://cleantv-dem.vgszone.workers.dev/tai?tu=cleantv-en",
+      "permanent": false
+    },
+    {
+      "source": "/tv",
+      "destination": "https://cleantv-dem.vgszone.workers.dev/tai?tu=tv",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/cap-nhat.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/ota/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/anh/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
+        }
+      ]
+    }
+  ]
+}
