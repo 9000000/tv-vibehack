@@ -14,5 +14,6 @@ mkdir -p app/src/main/assets
 cp upstream/launcher/app/build/outputs/apk/release/app-release.apk app/src/main/assets/tvhome.apk
 python3 -I scripts/lam-du-lieu.py upstream app/src/main/assets/du-lieu.json
 python3 -I scripts/lam-ds-tivi.py app/src/main/assets/du-lieu.json web/tivi.json
+python3 -I scripts/lam-nang-cao.py upstream/themes/README.md app/src/main/assets/nang-cao.json
 git -C upstream rev-parse HEAD > app/src/main/assets/upstream-commit.txt
 echo "Xong: launcher $(du -h app/src/main/assets/tvhome.apk | cut -f1), upstream $(cat app/src/main/assets/upstream-commit.txt | cut -c1-7)"

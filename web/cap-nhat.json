@@ -1,11 +1,11 @@
 {
  "app": {
-  "versionCode": 18,
-  "versionName": "1.8",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.8.apk",
-  "co": 10733595,
-  "ghiChu": "Home sạch cập nhật theo CleanYourTV 2.6: bấm Home từ app về nhanh hơn trên tivi yếu, ô đầu và cuối dock không bị che. Nút Input trên remote mở bảng chọn nguồn. An toàn hơn trên tivi Xiaomi.",
-  "ghiChuEn": "Clean Home updated to CleanYourTV 2.6: faster back to Home on slow TVs, first and last dock tiles no longer clipped. The remote's Input button opens the source picker. Safer on Xiaomi TVs.",
+  "versionCode": 19,
+  "versionName": "1.9",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.apk",
+  "co": 10737185,
+  "ghiChu": "Nút Bỏ qua: chỉ cài / đổi Home sạch, không dọn gói. Mục Nâng cao với 50 tuỳ chọn của Home sạch. Thay được launcher cài thêm như Dangbei trên tivi nội địa Trung.",
+  "ghiChuEn": "A Skip button: just install / change the clean Home, no cleaning. An Advanced section with 50 clean Home options. Replaces add-on launchers such as Dangbei on Chinese-market TVs.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
@@ -13,13 +13,13 @@
    "phienBan": "4ade98d2fafd1587",
    "url": "/ota/du-lieu.json",
    "co": 1185263,
-   "tuBan": 18
+   "tuBan": 19
   },
   "tvhome.apk": {
    "phienBan": "70e863980c54e165",
    "url": "/ota/tvhome.apk",
    "co": 568379,
-   "tuBan": 18
+   "tuBan": 19
   }
  }
 }

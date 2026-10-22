@@ -163,7 +163,7 @@ private fun quayLai(vm: PhienLamViec) {
         Man.THONG_TIN, Man.KHOI_PHUC -> Man.KET_NOI
         Man.CHON_GOI -> Man.THONG_TIN
         Man.DANG_TAT -> Man.CHON_GOI
-        Man.HOME_SACH -> Man.DANG_TAT
+        Man.HOME_SACH -> vm.manTruocHome
         Man.XONG -> Man.HOME_SACH
         Man.HUONG_DAN, Man.GIAY_PHEP -> vm.manTruoc
         Man.CHINH -> Man.CHINH
@@ -584,8 +584,10 @@ private fun ManChonGoi(vm: PhienLamViec) {
             }
         }
         var hoi by remember { mutableStateOf(false) }
-        Box(Modifier.background(Nen).padding(16.dp)) {
+        Column(Modifier.background(Nen).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             NutChinh(t("Sao lưu & dọn $so gói", "Back up & clean $so packages"), enabled = !vm.dangBan && so > 0, icon = Icons.Rounded.CleaningServices) { hoi = true }
+            NutPhu(if (vm.daCoHomeSach) t("Bỏ qua, chỉ đổi giao diện", "Skip, just change the theme") else t("Bỏ qua, chỉ cài Home sạch", "Skip, just install the clean Home"),
+                Icons.Rounded.Home, enabled = !vm.dangBan) { vm.boQuaDon() }
         }
         if (hoi) AlertDialog(
             onDismissRequest = { hoi = false }, containerColor = The1,
@@ -732,10 +734,62 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             listOf(0, 20, 40).forEach { p -> ChonChip(if (p == 0) t("Không", "None") else "$p%", vm.lamToiNen == p) { vm.lamToiNen = p } }
         }
     }
+    MucNangCao(vm)
     if (vm.daCoHomeSach) NutChinh(if (vm.dangBan) t("Đang áp dụng…", "Applying…") else t("Áp dụng giao diện", "Apply theme"),
         enabled = !vm.dangBan, icon = Icons.Rounded.Palette) { vm.apDungTheme() }
     else NutChinh(if (vm.dangBan) t("Đang cài…", "Installing…") else t("Cài Home sạch", "Install clean Home"), enabled = !vm.dangBan, icon = Icons.Rounded.Home) { vm.caiHomeSach() }
     vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+}
+
+/** Mục Nâng cao: mọi tuỳ chọn còn lại của launcher (mô tả tiếng Anh lấy từ tài liệu CleanYourTV). */
+@Composable
+private fun MucNangCao(vm: PhienLamViec) {
+    if (vm.dsNangCao.isEmpty()) return
+    var tim by remember { mutableStateOf("") }
+    val daDat = vm.nangCao.count { it.value.isNotBlank() }
+    Gap(t("Nâng cao · ${vm.dsNangCao.size} tuỳ chọn của Home sạch", "Advanced · ${vm.dsNangCao.size} clean Home options") +
+        if (daDat > 0) t(" · đã đặt $daDat", " · $daDat set") else "", Icons.Rounded.Tune) {
+        Phu(t("Cho người dùng nâng cao. Để trống = launcher tự quyết. Mô tả lấy nguyên văn từ tài liệu CleanYourTV (tiếng Anh). Nhóm \"Cẩn thận\" đụng tới remote, cổng HDMI, app của hãng: đặt sai có thể làm remote hoặc nguồn vào không chạy — bấm Khôi phục là về như cũ.",
+            "For advanced users. Empty = the launcher decides. Descriptions come from the CleanYourTV docs. The \"Careful\" group touches the remote, HDMI inputs and the maker's apps: a wrong value can break them — Restore puts everything back."))
+        OutlinedTextField(tim, { tim = it }, label = { Text(t("Tìm tuỳ chọn", "Search options")) }, singleLine = true,
+            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+        if (daDat > 0) TextButton(onClick = { vm.nangCao.clear() }) { Text(t("Đặt lại tất cả về mặc định", "Reset all to default")) }
+        val q = tim.trim().lowercase()
+        listOf(false, true).forEach { canThan ->
+            val ds = vm.dsNangCao.filter { it.canThan == canThan && (q.isEmpty() || it.khoa.contains(q) || it.moTa.lowercase().contains(q)) }
+            if (ds.isEmpty()) return@forEach
+            Text(if (canThan) t("⚠ Cẩn thận", "⚠ Careful") else t("Giao diện & hiệu ứng", "Look & effects"),
+                fontWeight = FontWeight.Bold, fontSize = 15.sp, color = if (canThan) Cam else Color.White, modifier = Modifier.padding(top = 8.dp))
+            ds.forEach { tc -> DongNangCao(tc, vm.nangCao[tc.khoa] ?: "") { v -> if (v.isBlank()) vm.nangCao.remove(tc.khoa) else vm.nangCao[tc.khoa] = v } }
+        }
+    }
+}
+
+@Composable
+private fun DongNangCao(tc: zone.vgs.tvsach.dulieu.TuyChon, gt: String, doi: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(The2).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(tc.khoa, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, color = if (gt.isNotBlank()) Hong else Color.White)
+        Phu(tc.moTa)
+        when (tc.kieu) {
+            "bool" -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChonChip(t("Mặc định", "Default"), gt.isBlank()) { doi("") }
+                ChonChip(t("Bật", "On"), gt == "true") { doi("true") }
+                ChonChip(t("Tắt", "Off"), gt == "false") { doi("false") }
+            }
+            "chon" -> Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChonChip(t("Mặc định", "Default"), gt.isBlank()) { doi("") }
+                tc.chon.forEach { c -> ChonChip(c, gt == c) { doi(c) } }
+            }
+            else -> OutlinedTextField(gt, { doi(it) }, singleLine = tc.kieu == "so" || tc.kieu == "chu",
+                placeholder = { Text(when (tc.kieu) {
+                    "so" -> t("Số từ ${tc.min} đến ${tc.max}", "${tc.min} to ${tc.max}")
+                    "ds", "ds-so" -> t("Cách nhau bằng dấu phẩy", "Comma-separated")
+                    else -> t("Để trống = mặc định", "Empty = default")
+                }, fontSize = 13.sp) },
+                keyboardOptions = KeyboardOptions(keyboardType = if (tc.kieu == "so") KeyboardType.Number else KeyboardType.Text),
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+        }
+    }
 }
 
 @Composable

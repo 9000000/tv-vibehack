@@ -1,0 +1,316 @@
+[
+{
+"khoa": "fill_dock",
+"kieu": "bool",
+"moTa": "Fill the dock slots dock_apps leaves free with the first grid apps (true by default); false leaves them empty",
+"canThan": false
+},
+{
+"khoa": "hidden_apps",
+"kieu": "ds",
+"moTa": "Never shown as tiles",
+"canThan": true
+},
+{
+"khoa": "live_tv_package",
+"kieu": "chu",
+"moTa": "The Live TV app and, if it has no leanback entry, the action to start it with",
+"canThan": true
+},
+{
+"khoa": "live_tv_action",
+"kieu": "chu",
+"moTa": "The Live TV app and, if it has no leanback entry, the action to start it with",
+"canThan": true
+},
+{
+"khoa": "live_tv_input_id",
+"kieu": "chu",
+"moTa": "Exact system tuner for the Inputs menu's Live TV row; opens its channel collection. Empty keeps automatic selection. Missing input or unsupported collection falls back to the app's normal launch. [HAAM satellite example](../docs/devices/haam-r4.md)",
+"canThan": true
+},
+{
+"khoa": "source_panel_service",
+"kieu": "chu",
+"moTa": "The TV's own source panel, for sets with no TvInputManager: a service, or an activity (BYINTEK U4). Without a Live TV app, the Inputs pill opens it directly",
+"canThan": true
+},
+{
+"khoa": "source_panel_action",
+"kieu": "chu",
+"moTa": "The TV's own source panel, for sets with no TvInputManager: a service, or an activity (BYINTEK U4). Without a Live TV app, the Inputs pill opens it directly",
+"canThan": true
+},
+{
+"khoa": "source_panel_extra",
+"kieu": "chu",
+"moTa": "One int extra sent with the source panel (Coocaa OS: control_center_command=100)",
+"canThan": true
+},
+{
+"khoa": "coocaa_sources",
+"kieu": "bool",
+"moTa": "Coocaa OS (Skyworth, China): list the sources from com.skyworth.tv in the Inputs menu, ahead of the source panel",
+"canThan": true
+},
+{
+"khoa": "launch_actions",
+"kieu": "ds",
+"moTa": "Tiles that open a screen of the app instead of its start screen; an action that no longer resolves opens the app normally (MagentaTV's guide: com.telekom.onetv.tv.pl=com.telekom.onetv.tv.pl.action.PROGRAM_GUIDE)",
+"canThan": true
+},
+{
+"khoa": "app_labels",
+"kieu": "ds",
+"moTa": "A tile's name instead of the app's own (MagentaTV as com.telekom.onetv.tv.pl=TV)",
+"canThan": true
+},
+{
+"khoa": "app_banners",
+"kieu": "ds",
+"moTa": "A tile's artwork from a banner_* drawable bundled with the launcher (banner_tv: magenta with the Live TV glyph)",
+"canThan": true
+},
+{
+"khoa": "input_action",
+"kieu": "chu",
+"moTa": "Action sent with an HDMI/AV row's channel URI when nothing handles the standard VIEW (XGIMI: com.xgimi.action.hdmiPlayer). Only a handler-less set gets here; any app that claims the channel MIME type takes the row instead, so check with query-activities ([#805](https://github.com/Gathin23/cleanyourtv/issues/805))",
+"canThan": true
+},
+{
+"khoa": "input_uri_scheme",
+"kieu": "chu",
+"moTa": "Scheme an HDMI/AV row's passthrough URI is sent with instead of content://, with no MIME type (YaOS: live-tv, which its source player answers)",
+"canThan": true
+},
+{
+"khoa": "columns",
+"kieu": "so",
+"min": 1,
+"max": 8,
+"moTa": "Tiles per row; tiles shrink to fit from 5 up",
+"canThan": false
+},
+{
+"khoa": "rows_below_dock",
+"kieu": "so",
+"min": 0,
+"max": 3,
+"moTa": "Grid rows left visible under the dock; tiles shrink if the dock, its title and that many rows would not fit the screen height",
+"canThan": false
+},
+{
+"khoa": "dock_title",
+"kieu": "bool",
+"moTa": "The focused dock app's name in large type above the dock (true); false keeps only the glow",
+"canThan": false
+},
+{
+"khoa": "dock_row",
+"kieu": "bool",
+"moTa": "The dock as its own row with a band (true); false makes the dock apps the first tiles of one plain grid",
+"canThan": false
+},
+{
+"khoa": "reorder_button",
+"kieu": "bool",
+"moTa": "A reorder button in the top bar (false by default); reordering is always in the Settings button's long-press menu",
+"canThan": false
+},
+{
+"khoa": "show_network_pill",
+"kieu": "bool",
+"moTa": "The Wi-Fi/Ethernet pill in the top bar (true by default); false hides it",
+"canThan": false
+},
+{
+"khoa": "show_inputs_pill",
+"kieu": "bool",
+"moTa": "The Inputs pill in the top bar, shown when the TV has inputs (true by default); false hides it; what the remote's Input button does is unchanged",
+"canThan": false
+},
+{
+"khoa": "icon_only_buttons",
+"kieu": "bool",
+"moTa": "Wi-Fi and Settings as round icon buttons; Inputs keeps its label (false by default)",
+"canThan": false
+},
+{
+"khoa": "wifi_label_width",
+"kieu": "so",
+"min": 0,
+"max": 300,
+"moTa": "With icon_only_buttons, keep the network name on the Wi-Fi pill up to this width in dp, cut with an ellipsis; 0 leaves only the icon",
+"canThan": false
+},
+{
+"khoa": "wallpaper_true_color",
+"kieu": "bool",
+"moTa": "Decode wallpapers in 32-bit colour (8 MB at 1080p) instead of RGB_565 (4 MB), which bands dark gradients such as a night sky; for TVs with 2 GB or more (false by default)",
+"canThan": false
+},
+{
+"khoa": "shamsi_date",
+"kieu": "bool",
+"moTa": "Show the Solar Hijri date above the Gregorian one",
+"canThan": false
+},
+{
+"khoa": "module_cards",
+"kieu": "bool",
+"moTa": "Look for module cards and ask about them (true); false turns the feature off",
+"canThan": true
+},
+{
+"khoa": "boot_to_live_tv",
+"kieu": "bool",
+"moTa": "Open the Live TV app (live_tv_package) on the first Home after the TV starts, once per boot",
+"canThan": true
+},
+{
+"khoa": "focus_overshoot",
+"kieu": "bool",
+"moTa": "The highlight and the focused tile swing past their target before settling (true by default); false glides straight there with smooth scrolling",
+"canThan": false
+},
+{
+"khoa": "vpn_app",
+"kieu": "chu",
+"moTa": "App the network pill opens when a VPN is configured; also shows a red \"VPN off\" badge while no VPN is up",
+"canThan": true
+},
+{
+"khoa": "animations",
+"kieu": "bool",
+"moTa": "Basic focus, glass, title and tile entrance motion; true by default",
+"canThan": false
+},
+{
+"khoa": "advanced_effects",
+"kieu": "bool",
+"moTa": "Optional lifted tile, icon zoom, smooth ambient colour and app opening effects; false by default",
+"canThan": false
+},
+{
+"khoa": "show_home_settings_shortcut",
+"kieu": "bool",
+"moTa": "Keep the optional Default-home tile visible when the TV has a home picker; false by default",
+"canThan": true
+},
+{
+"khoa": "background_color",
+"kieu": "chu",
+"moTa": "Colour behind everything; black by default",
+"canThan": false
+},
+{
+"khoa": "sky_intensity",
+"kieu": "so",
+"min": 0,
+"max": 100,
+"moTa": "Time-of-day backdrop: a dark gradient that follows the clock, 0 hides it (default)",
+"canThan": false
+},
+{
+"khoa": "wallpaper_order",
+"kieu": "chon",
+"chon": [
+"shuffle",
+"sequential"
+],
+"moTa": "How a collection advances. shuffle (the default, and what launchers did before this key existed) avoids repeating the current picture; sequential walks the folder in filename order and wraps at the end. An unknown value falls back to shuffle",
+"canThan": false
+},
+{
+"khoa": "dock_opacity",
+"kieu": "so",
+"min": 30,
+"max": 100,
+"moTa": "Opacity of the dock's band, in percent, so a wallpaper shows through it; 100 by default (the cinematic shelf keeps its own translucent band)",
+"canThan": false
+},
+{
+"khoa": "wallpaper_captions",
+"kieu": "bool",
+"moTa": "With a rotating collection, the shown picture's name under the top-right buttons, from wallpapers/captions.txt (001.jpg<TAB>Dusk over the peaks, one per line); a picture without a line shows no name (false by default)",
+"canThan": false
+},
+{
+"khoa": "festival",
+"kieu": "chu",
+"moTa": "Turns on a festive skin: the network pill becomes a diya whose flame follows the connection, Inputs a temple bell, Settings a marigold, and the first Home of the day gets a petal shower. dussehra and diwali have built-in greetings",
+"canThan": true
+},
+{
+"khoa": "festival_until",
+"kieu": "chu",
+"moTa": "Last day the festive skin shows; it switches itself off after that. A malformed date turns it off",
+"canThan": true
+},
+{
+"khoa": "greeting",
+"kieu": "chu",
+"moTa": "Replaces the time-of-day greeting while the festive skin is on",
+"canThan": true
+},
+{
+"khoa": "accent_color",
+"kieu": "chu",
+"moTa": "Colour of the focus glow while the festive skin is on; diya gold if not set",
+"canThan": true
+},
+{
+"khoa": "settings_key_keycodes",
+"kieu": "ds-so",
+"moTa": "Remote buttons that open Settings, for HomeKeyService (TCL Google TV gear: [83])",
+"canThan": true
+},
+{
+"khoa": "settings_key_panel",
+"kieu": "bool",
+"moTa": "Those buttons open a small quick settings panel (TV settings, Display, Network, Apps, Launcher settings) instead of the TV's Settings",
+"canThan": true
+},
+{
+"khoa": "input_key_keycodes",
+"kieu": "ds-so",
+"moTa": "More remote buttons that open the input switcher, for InputKeyService (KEYCODE_TV and KEYCODE_TV_INPUT always do)",
+"canThan": true
+},
+{
+"khoa": "app_keys",
+"kieu": "ds",
+"moTa": "Remote buttons that open an app, as \"190:com.google.android.youtube.tv\" or \"KEYCODE_BUTTON_3:com.google.android.youtube.tv\", or by scancode as \"scan:490:com.wbd.hbomax\" for remotes that share one keycode between app buttons (Sony BRAVIA), for InputKeyService or HomeKeyService",
+"canThan": true
+},
+{
+"khoa": "key_filter",
+"kieu": "bool",
+"moTa": "false makes the key helpers stop filtering keys while staying enabled. Use it on firmware where any key-filtering accessibility service breaks long-press repeat (TCL Google TV on Android 12): the remote buttons above stop working, and volume repeat comes back",
+"canThan": true
+},
+{
+"khoa": "stock_home_redirect",
+"kieu": "chu",
+"moTa": "Stock launcher package; if the firmware turns it back on (XGIMI), its home screen is sent straight back here (HOME_KEY_SERVICE=1)",
+"canThan": true
+},
+{
+"khoa": "glow_style",
+"kieu": "chu",
+"moTa": "Shape of the glow behind the focused app, in its colour: radial (default) or horizon, the colour washing down from the top edge to black; the cinematic shelf keeps its own",
+"canThan": false
+},
+{
+"khoa": "cinematic_home",
+"kieu": "bool",
+"moTa": "Cinematic top shelf: the focused dock app's artwork, softened, fills the top of the screen in its colour, with a larger name, \"Last opened\" (apps opened from Home), dock position dots, a focus glow in the app's colour and a translucent dock band; off by default",
+"canThan": false
+},
+{
+"khoa": "ambient_glow",
+"kieu": "bool",
+"moTa": "The glow behind the dock in the focused app's colour (true by default); false keeps only background_color or the wallpaper, e.g. for a calm photo background",
+"canThan": false
+}
+]

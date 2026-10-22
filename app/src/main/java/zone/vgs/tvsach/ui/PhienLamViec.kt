@@ -101,6 +101,9 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var hieuUngKinh by mutableStateOf(false)
     var lamToiNen by mutableStateOf(0)
     var hienThongSo by mutableStateOf(false)
+    /** Mục Nâng cao: danh sách tuỳ chọn + giá trị người dùng đặt (khoá → chữ; thiếu = mặc định). */
+    val dsNangCao: List<zone.vgs.tvsach.dulieu.TuyChon> by lazy { zone.vgs.tvsach.dulieu.NangCao.nap(ctx) }
+    val nangCao = androidx.compose.runtime.mutableStateMapOf<String, String>()
     var homeXong by mutableStateOf(false)
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
     var phimHomeOk by mutableStateOf(true)
@@ -314,6 +317,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun sauKhiKetNoi(host: String) {
+        daNapCu = false
         thongBao = t("Đang đọc thông tin tivi…", "Reading the TV…")
         val (info, gp) = io { tv.docThongTin() }
         thongTin = info; getprop = gp
@@ -349,6 +353,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     fun batDauTat() = chay(t("Đang sao lưu…", "Backing up…")) {
         val info = thongTin ?: return@chay
         nhatKy.clear(); ketQua = null; tienDo = 0f
+        manTruocHome = Man.DANG_TAT
         man = Man.DANG_TAT
         val sl = io { tv.damBaoSaoLuu(info, getprop, ip) }
         saoLuu = sl
@@ -362,6 +367,20 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         saoLuu = kho.doc(info.khoaLuu)
         taiLaiSaoLuu()
         chuanBiDock()
+    }
+
+    /**
+     * Bỏ qua bước dọn, chỉ cài / đổi Home sạch (góp ý github.com/vgscity/vgs-cleantv/issues/1, 22/10/2026). Sao lưu VẪN
+     * chạy (vài giây): đó là đường lui duy nhất để Khôi phục.
+     */
+    fun boQuaDon() = chay(t("Đang sao lưu…", "Backing up…")) {
+        val info = thongTin ?: return@chay
+        saoLuu = io { tv.damBaoSaoLuu(info, getprop, ip) }
+        taiLaiSaoLuu()
+        chuanBiDock()
+        manTruocHome = Man.CHON_GOI
+        man = Man.HOME_SACH
+        if (daCoHomeSach) napCauHinhCu()
     }
 
     // Đi qua hàng đợi Main như ghiTuIo, để dòng tổng kết không chen lên trước dòng tiến độ.
@@ -399,10 +418,18 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     /** Từ màn thông tin: đổi theme cho tivi đã có Home sạch. */
-    fun moDoiTheme() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
+    /** Màn mà nút Back ở Home sạch quay về: vừa dọn → màn dọn; Đổi giao diện → thông tin tivi; Bỏ qua → chọn gói. */
+    var manTruocHome by mutableStateOf(Man.DANG_TAT)
+
+    fun moDoiTheme() { chuanBiDock(); manTruocHome = Man.THONG_TIN; man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
 
     /** "Đổi giao diện": mở ra đúng các lựa chọn đang có trên tivi thay vì mặc định. */
+    /** Đã nạp config.json của tivi vào các lựa chọn chưa (mỗi lần kết nối một lần — quay lại màn không xoá chỉnh sửa). */
+    private var daNapCu = false
+
     private suspend fun napCauHinhCu() {
+        if (daNapCu) return
+        daNapCu = true
         val j = runCatching { io { tv.docCauHinhTv() } }.getOrNull() ?: return
         amLich = j.optBoolean("lunar_date", amLich)
         tenDuoiApp = j.optBoolean("always_show_names", false)
@@ -413,6 +440,11 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         lamToiNen = j.optInt("wallpaper_dim", 0)
         hienThongSo = j.optBoolean("show_stats", false)
         if (j.has("handle_view_inputs")) nutInput = j.optBoolean("handle_view_inputs", nutInput)
+        // Chỉ nạp lại khoá NGƯỜI DÙNG đặt ở Nâng cao (ghi trong vgs_nang_cao), không lấy khoá do theme ghi
+        // (background_color, sky_intensity…) — nếu không, đổi theme sau đó sẽ bị kẹt giá trị của theme cũ.
+        nangCao.clear()
+        val daDat = j.optJSONArray("vgs_nang_cao")?.let { a -> (0 until a.length()).map { a.optString(it) }.toSet() } ?: emptySet()
+        dsNangCao.filter { it.khoa in daDat }.forEach { tc -> zone.vgs.tvsach.dulieu.NangCao.docChu(tc, j)?.let { nangCao[tc.khoa] = it } }
         nutManCho = j.optBoolean("dream_button", nutManCho)
         gonNut = j.optBoolean("top_compact", gonNut)
         j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
@@ -497,6 +529,9 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (hieuUngKinh) { put("dock_glass", true); put("app_glow", true) }
         if (lamToiNen > 0) put("wallpaper_dim", lamToiNen)
         if (hienThongSo) put("show_stats", true)
+        // Nâng cao ghi sau cùng: người dùng đã chủ động đặt thì đè lên giá trị theme.
+        val daDat = dsNangCao.mapNotNull { tc -> nangCao[tc.khoa]?.let { chu -> zone.vgs.tvsach.dulieu.NangCao.giaTri(tc, chu)?.let { put(tc.khoa, it); tc.khoa } } }
+        if (daDat.isNotEmpty()) put("vgs_nang_cao", JSONArray(daDat))
     }.toString()
 
     private suspend fun anhNenTheme(): ByteArray? = themeChon.anhNen?.let { a -> io { ctx.assets.open(a).readBytes() } }

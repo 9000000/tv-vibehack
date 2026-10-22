@@ -186,6 +186,9 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             }
             home == SETUP -> return t("Home đang là trình cài đặt của Google TV (setupwraith). Xem lại phần tắt gói: setupwraith phải tắt cùng Home gốc.", "Home is the Google TV setup wizard (setupwraith). Disable setupwraith together with the stock Home.")
             laHomeHangLa(home) -> home
+            // Launcher CÀI THÊM (Dangbei trên tivi nội địa Trung, Projectivy, ATV Launcher…): không thuộc phần mềm gốc,
+            // thay được — giữ nó bật, đặt Home sạch làm mặc định; nút Home vẫn về nó thì mới tắt (ghi sao lưu). 22/10/2026.
+            laLauncherCaiThem(home) -> home
             else -> return t("Home hiện là '$home', không phải Home gốc app biết. Để an toàn app không đổi.", "Home is '$home', not a stock launcher this app knows. Leaving it alone to be safe.")
         }
         // Home của hãng lạ (Fengmi, máy chiếu, tivi nội địa…): thử giữ nó bật, chỉ đặt Home mặc định + bắt nút Home trên
@@ -401,7 +404,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     private fun nenTatVuiGianhHome(pkg: String): Boolean {
         if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
             pkg.startsWith("com.android.systemui") || pkg.contains("packageinstaller") || pkg.contains("permissioncontroller")) return false
-        if (!sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return false
+        if (!sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return laLauncherCaiThem(pkg)
         if (sh("dumpsys package $pkg | grep -c TV_INPUT_HARDWARE").trim().toIntOrNull()?.let { it > 0 } == true) return false
         val coHome = sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
             .lines().any { it.trim().startsWith("$pkg/") }
@@ -421,6 +424,14 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      * Bật dịch vụ trợ năng của Home sạch. TCL (TclAppBoot) không cho bind dịch vụ của app chưa chạy nếu thiếu app-op
      * AUTO_START (upstream #526): cấp trước; dịch vụ đã có trong danh sách thì xoá đi ghi lại để Android bind lại.
      */
+    /** App NGƯỜI DÙNG (không phải hệ thống) có màn HOME thật: launcher cài thêm như Dangbei. */
+    private fun laLauncherCaiThem(pkg: String): Boolean {
+        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || APP_XUAT_XUONG.containsMatchIn(pkg)) return false
+        if (sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return false
+        return sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
+            .lines().any { it.trim().startsWith("$pkg/") }
+    }
+
     private fun batDichVu(ten: String) {
         val svc = "$PKG_HOME/.$ten"
         sh("cmd appops set $PKG_HOME AUTO_START allow 2>/dev/null; s=\$(settings get secure enabled_accessibility_services); case \"\$s\" in *$ten*) settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; sleep 1; settings put secure enabled_accessibility_services \"\$s\" ;; null|'') settings put secure enabled_accessibility_services $svc ;; *) settings put secure enabled_accessibility_services \"\$s:$svc\" ;; esac; settings put secure accessibility_enabled 1")

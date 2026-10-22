@@ -1,5 +1,21 @@
 [
  {
+  "ban": "1.9",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Nút \"Bỏ qua, chỉ cài Home sạch\" ở bước chọn gói: không tắt gói nào, sao lưu vẫn chạy ngầm để Khôi phục được (góp ý trên GitHub).",
+   "Mục Nâng cao: 50 tuỳ chọn của Home sạch cho người dùng nâng cao, có tìm kiếm, nhóm \"Cẩn thận\" riêng cho remote và cổng HDMI.",
+   "Thay được launcher cài thêm (Dangbei trên tivi nội địa Trung, Projectivy…): đặt Home sạch làm mặc định, giữ launcher kia nguyên.",
+   "Nút Back ở màn Home sạch về đúng màn trước; quay lại không mất chỉnh sửa."
+  ],
+  "en": [
+   "A \"Skip, just install the clean Home\" button: no packages disabled, the backup still runs so Restore works (GitHub suggestion).",
+   "Advanced: 50 clean Home options for power users, with search and a separate \"Careful\" group for remote and HDMI settings.",
+   "Add-on launchers (Dangbei on Chinese-market TVs, Projectivy…) can be replaced: the clean Home becomes the default, the other launcher stays.",
+   "Back from the clean Home screen returns to the right screen; going back no longer loses your edits."
+  ]
+ },
+ {
   "ban": "1.8",
   "ngay": "2026-10-22",
   "vi": [
