@@ -1,0 +1,8 @@
+{
+  // Bộ đếm CleanTV: lượt tải APK, máy đang dùng, cập nhật, tivi đã dọn. Deploy: xem README tv-sach.
+  "name": "cleantv-dem",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "d1_databases": [{ "binding": "DB", "database_name": "cleantv-dem", "database_id": "5295f78c-9fe2-44eb-99bb-89d9757106ac" }],
+  "vars": { "APK_MOI": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV.apk" }
+}

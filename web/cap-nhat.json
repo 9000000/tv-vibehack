@@ -1,0 +1,23 @@
+{
+ "app": {
+  "versionCode": 15,
+  "versionName": "1.5",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.5.apk",
+  "co": 9753476,
+  "ghiChu": "Không còn tích sẵn gói tìm kiếm giọng nói (nút mic) và các gói người làm danh sách tắt theo ý riêng; nhóm Giọng nói & Trợ lý Google tách riêng.",
+  "ghiChuEn": "Voice search (the mic button) and packages a list author disabled by personal choice are no longer pre-ticked; Voice & Google Assistant get their own group.",
+  "ngay": "2026-10-22"
+ },
+ "duLieu": {
+  "du-lieu.json": {
+   "phienBan": "425a3080c4afe5bd",
+   "url": "/ota/du-lieu.json",
+   "co": 1185263
+  },
+  "tvhome.apk": {
+   "phienBan": "b0a3d65de2c83d69",
+   "url": "/ota/tvhome.apk",
+   "co": 563331
+  }
+ }
+}

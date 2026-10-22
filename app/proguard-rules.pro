@@ -1,0 +1,9 @@
+-keep class io.github.muntashirakon.adb.** { *; }
+-keep class org.conscrypt.** { *; }
+-keep class org.bouncycastle.** { *; }
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn javax.naming.**
+-dontwarn com.android.org.conscrypt.**
+-dontwarn org.apache.harmony.xnet.provider.jsse.**
+-dontwarn sun.security.**
