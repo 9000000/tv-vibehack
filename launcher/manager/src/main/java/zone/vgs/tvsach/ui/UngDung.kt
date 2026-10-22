@@ -689,6 +689,16 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             THEMES.forEach { th -> TheTheme(th, th == vm.themeChon) { vm.chonTheme(th) } }
         }
         Phu(t(vm.themeChon.moTaVi, vm.themeChon.moTaEn))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(
+                onClick = { vm.khoiPhucMacDinhTheme() },
+                colors = ButtonDefaults.textButtonColors(contentColor = Cam)
+            ) {
+                Icon(Icons.Rounded.RestartAlt, null, Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(t("Khôi phục mặc định theme này", "Reset this theme to defaults"), fontSize = 12.sp)
+            }
+        }
     }
     The(t("Dock (tối đa $DOCK_TOI_DA, theo thứ tự chạm)", "Dock (up to $DOCK_TOI_DA, in tap order)"), Icons.Rounded.Apps) {
         vm.appChoDock().forEach { p ->
@@ -1002,6 +1012,9 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
     else NutChinh(if (vm.dangBan) t("Đang cài…", "Installing…") else t("Cài Home sạch", "Install clean Home"), enabled = !vm.dangBan, icon = Icons.Rounded.Home) { vm.caiHomeSach() }
     NutPhu(t("Xem cấu hình JSON (Preview config.json)", "Preview config.json"), icon = Icons.Rounded.Code) {
         hienXemJson = true
+    }
+    NutPhu(t("Khôi phục mặc định theme ${vm.themeChon.ten}", "Reset theme ${vm.themeChon.ten} to defaults"), icon = Icons.Rounded.RestartAlt) {
+        vm.khoiPhucMacDinhTheme()
     }
     vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
 }

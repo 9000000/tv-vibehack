@@ -315,6 +315,16 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         napHoSoTheme(th)
     }
 
+    /** Khôi phục cấu hình của theme đang chọn về nguyên bản mặc định ban đầu. */
+    fun khoiPhucMacDinhTheme(th: zone.vgs.tvsach.dulieu.Theme = themeChon) {
+        hoSoTheoTheme.remove(th.id)
+        runCatching { prefs.edit().remove("hoso_theme_${th.id}").apply() }
+        val macDinh = taoHoSoMacDinh(th)
+        hoSoTheoTheme[th.id] = macDinh
+        napHoSoTheme(th)
+        thongBao = t("Đã khôi phục cài đặt mặc định của theme ${th.ten}.", "Reset settings of theme ${th.ten} to defaults.")
+    }
+
     // Máy chiếu: màn của hãng dò được + những màn đã ghim vào nút "Máy chiếu" trên Home sạch (comp → nhãn).
     var laMayChieu by mutableStateOf(false)
     var mayChieu by mutableStateOf<List<String>?>(null)
