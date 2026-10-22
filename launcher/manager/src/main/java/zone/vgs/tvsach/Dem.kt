@@ -12,7 +12,8 @@ import java.util.UUID
  * Máy chủ: Cloudflare Worker cleantv-dem (tv-sach/dem). Gửi lỗi thì thôi, không ảnh hưởng gì.
  */
 object Dem {
-    private const val DIA_CHI = "https://cleantv-dem.vgszone.workers.dev/su-kien"
+    // Để trống: không gửi số liệu ẩn danh sang máy chủ bên thứ ba
+    private const val DIA_CHI = ""
 
     private fun maMay(ctx: Context): String {
         val p = ctx.getSharedPreferences("dem", Context.MODE_PRIVATE)
@@ -20,6 +21,7 @@ object Dem {
     }
 
     fun gui(ctx: Context, loai: String, tivi: String = "", so: Int = 0, them: String = "") {
+        if (DIA_CHI.isBlank()) return
         val app = ctx.applicationContext
         Thread {
             runCatching {

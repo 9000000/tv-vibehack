@@ -322,13 +322,13 @@ private fun DauTrang(icon: @Composable () -> Unit, tieuDe: String, phu: String?)
     }
 }
 
-/** Mở hộp góp ý chung của vgs.zone (mục App CleanTV tự chọn theo chữ "CleanTV"), kèm bản app + model tivi. */
+/** Mở trang báo lỗi / góp ý trên GitHub repository 9000000/tv-vibehack. */
 @Composable
 private fun NutGopY(vm: PhienLamViec) {
     val uri = androidx.compose.ui.platform.LocalUriHandler.current
     NutPhu(t("Góp ý / báo lỗi", "Feedback / report a bug"), Icons.Rounded.Feedback) {
-        val tu = "CleanTV ${BuildConfig.VERSION_NAME}" + (vm.thongTin?.let { " · ${it.tenHienThi} (${it.device}, Android ${it.android})" } ?: "")
-        uri.openUri("https://vgs.zone/gop-y?tu=" + java.net.URLEncoder.encode(tu, "UTF-8"))
+        val tu = "CleanYourTV ${BuildConfig.VERSION_NAME}" + (vm.thongTin?.let { " · ${it.tenHienThi} (${it.device}, Android ${it.android})" } ?: "")
+        uri.openUri("https://github.com/9000000/tv-vibehack/issues/new?title=" + java.net.URLEncoder.encode(tu, "UTF-8"))
     }
 }
 
@@ -383,7 +383,7 @@ private fun ManChinh(vm: PhienLamViec) = Cuon {
     TextButton(onClick = { vm.moGiayPhep() }) { Icon(Icons.Rounded.Gavel, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp)); Text(t("Giấy phép mã nguồn mở", "Open-source licenses")) }
     Phu(t("Dựa trên CleanYourTV (github.com/Gathin23/cleanyourtv, MIT) của Gathin và cộng đồng: 213 danh sách tivi và màn Home sạch là của dự án đó.",
         "Built on CleanYourTV (github.com/Gathin23/cleanyourtv, MIT) by Gathin and contributors: the 213 TV lists and the clean Home come from that project.") +
-        "\nCleanTV ${BuildConfig.VERSION_NAME} · AlexVGS")
+        "\nCleanYourTV ${BuildConfig.VERSION_NAME} · github.com/9000000/tv-vibehack")
 }
 
 // ---------------- Kết nối ----------------
@@ -689,7 +689,7 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
         }
         Phu(t(vm.themeChon.moTaVi, vm.themeChon.moTaEn))
     }
-    The(t("Dock (tối đa 6, theo thứ tự chạm)", "Dock (up to 6, in tap order)"), Icons.Rounded.Apps) {
+    The(t("Dock (tối đa $DOCK_TOI_DA, theo thứ tự chạm)", "Dock (up to $DOCK_TOI_DA, in tap order)"), Icons.Rounded.Apps) {
         vm.appChoDock().forEach { p ->
             val viTri = vm.dock.indexOf(p)
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (viTri >= 0) Tim.copy(alpha = 0.2f) else The2)
@@ -1286,11 +1286,11 @@ private fun TheMayChieu(vm: PhienLamViec) {
             if (vm.ghimMayChieu.isNotEmpty()) Phu(t("Đã ghim ${vm.ghimMayChieu.size}. Bấm Cài Home sạch / Áp dụng giao diện để đưa lên máy chiếu.",
                 "${vm.ghimMayChieu.size} pinned. Install the clean Home / Apply theme to send them to the projector."), Xanh)
         }
-        NutPhu(t("Gửi danh sách cho VGS", "Send the list to VGS"), Icons.Rounded.Feedback) {
+        NutPhu(t("Gửi danh sách máy chiếu", "Send projector list"), Icons.Rounded.Feedback) {
             clip.setText(androidx.compose.ui.text.AnnotatedString(vm.chuDanhSachMayChieu()))
-            val tu = "CleanTV máy chiếu · " + (vm.thongTin?.tenHienThi ?: "")
-            uri.openUri("https://vgs.zone/gop-y?tu=" + java.net.URLEncoder.encode(tu, "UTF-8"))
+            val tu = "CleanYourTV máy chiếu · " + (vm.thongTin?.tenHienThi ?: "")
+            uri.openUri("https://github.com/9000000/tv-vibehack/issues/new?title=" + java.net.URLEncoder.encode(tu, "UTF-8"))
         }
-        Phu(t("Danh sách đã chép sẵn — dán vào ô nội dung trong hộp góp ý.", "The list is copied — paste it into the feedback box."))
+        Phu(t("Danh sách đã chép sẵn — dán vào ô nội dung khi mở Issue.", "The list is copied — paste it into the issue description."))
     }
 }

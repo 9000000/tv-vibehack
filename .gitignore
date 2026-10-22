@@ -15,6 +15,7 @@ work/
 
 # Generated install bundles and JVM crash reports stay out of contributions.
 *.apk
+!launcher/manager/src/main/assets/*.apk
 *.aab
 launcher/hs_err_pid*.log
 launcher/replay_pid*.log

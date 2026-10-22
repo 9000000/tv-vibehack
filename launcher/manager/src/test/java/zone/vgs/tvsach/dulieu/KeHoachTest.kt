@@ -45,4 +45,17 @@ class KeHoachTest {
         println("dòng theo ý riêng: $tongTheoY, dòng quảng cáo/theo dõi vẫn tích sẵn: $tichQc")
         assertTrue(tongTheoY > 500); assertTrue(tichQc > 50)
     }
+
+    /** JVC LT-43N7115 treo màn khởi động sau khi tắt Home CVTE (upstream #741): không mẫu nào được đưa Home CVTE vào danh sách tắt. */
+    @Test fun homeCvte_khongBaoGioVaoDanhSachTat() {
+        var coTrongDuLieu = 0
+        for (m in du.mau) {
+            if (m.goi.any { KeHoach.laHomeCvte(it.pkg) }) coTrongDuLieu++
+            val (_, ds) = tivi(m.id, setOf("com.cvte.tv.launcher.space", "com.cvte.tv.launcher.highend"))
+            assertTrue("${m.id}: ${ds.filter { KeHoach.laHomeCvte(it.pkg) }.map { it.pkg }}", ds.none { KeHoach.laHomeCvte(it.pkg) })
+        }
+        assertTrue("dữ liệu phải có mẫu ghi tắt Home CVTE để bài thử có nghĩa", coTrongDuLieu >= 2)
+        assertTrue(KeHoach.laHomeCvte("com.cvte.tv.launcher.space.skin"))
+        assertFalse(KeHoach.laHomeCvte("com.cvte.tv.appstore"))
+    }
 }

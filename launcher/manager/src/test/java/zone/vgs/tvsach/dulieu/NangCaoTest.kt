@@ -19,10 +19,10 @@ class NangCaoTest {
             File("launcher/manager/src/main/assets/nang-cao.json")
         ).firstOrNull { it.exists() } ?: File("src/main/assets/nang-cao.json")
         val a = JSONArray(f.readText().removePrefix("\uFEFF"))
-        assertTrue("có ít nhất 40 tuỳ chọn", a.length() >= 40)
+        assertTrue("có ít nhất 20 tuỳ chọn nâng cao chuyên sâu", a.length() >= 20)
         val khoa = (0 until a.length()).map { a.getJSONObject(it).getString("khoa") }
         assertEquals("không trùng khoá", khoa.size, khoa.toSet().size)
-        for (k in listOf("dock_apps", "lunar_date", "always_show_names", "wallpaper")) assertTrue("$k do app tự lo", k !in khoa)
+        for (k in NangCao.KHOA_DA_CO_SAN) assertTrue("$k đã có trong cài đặt trước đó, không lặp lại ở nâng cao", k !in khoa)
         val appKeys = (0 until a.length()).map { a.getJSONObject(it) }.first { it.getString("khoa") == "app_keys" }
         assertTrue("app_keys thuộc nhóm cẩn thận", appKeys.getBoolean("canThan"))
     }

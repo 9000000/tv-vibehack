@@ -20,11 +20,25 @@ data class TuyChon(
 )
 
 object NangCao {
+    val KHOA_DA_CO_SAN = setOf(
+        "dock_apps", "greeting_name", "lunar_date", "always_show_names", "app_library", "library_button",
+        "home_idle_clock_minutes", "reduced_motion", "dock_glass", "app_glow", "wallpaper_dim", "show_stats",
+        "handle_view_inputs", "wallpaper", "race_calendar", "wallpaper_rotation_minutes",
+        "columns", "rows_below_dock", "dock_row", "dock_title", "fill_dock", "reorder_button",
+        "dock_band", "dock_opacity", "glow_style", "ambient_glow", "focus_overshoot", "animations",
+        "advanced_effects", "cinematic_home", "wallpaper_true_color", "wallpaper_captions", "wallpaper_order",
+        "show_network_pill", "show_inputs_pill", "module_cards", "show_home_settings_shortcut",
+        "settings_key_panel", "boot_to_live_tv", "live_tv_package", "key_filter", "vpn_app", "dream_button",
+        "top_compact", "weather_lat", "weather_lon", "weather_place", "projector_actions"
+    )
+
     fun nap(ctx: Context): List<TuyChon> = runCatching {
         val a = JSONArray(ctx.assets.open("nang-cao.json").bufferedReader().readText().removePrefix("\uFEFF"))
-        (0 until a.length()).map { i ->
+        (0 until a.length()).mapNotNull { i ->
             val o = a.getJSONObject(i)
-            TuyChon(o.getString("khoa"), o.getString("kieu"), o.optInt("min", Int.MIN_VALUE), o.optInt("max", Int.MAX_VALUE),
+            val khoa = o.getString("khoa")
+            if (khoa in KHOA_DA_CO_SAN) null
+            else TuyChon(khoa, o.getString("kieu"), o.optInt("min", Int.MIN_VALUE), o.optInt("max", Int.MAX_VALUE),
                 o.optJSONArray("chon")?.let { c -> (0 until c.length()).map { c.getString(it) } } ?: emptyList(),
                 o.optString("moTa"), o.optBoolean("canThan"))
         }

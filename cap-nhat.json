@@ -1,0 +1,10 @@
+{
+  "app": {
+    "versionCode": 21,
+    "versionName": "1.9.2",
+    "apk": "https://github.com/9000000/tv-vibehack/releases/download/v1.9.2/CleanYourTV-v1.9.2.apk",
+    "co": 12854203,
+    "ghiChu": "## CleanYourTV v1.9.2\n\n### What's New & Improvements:\n- Tích hợp toàn bộ tuỳ biến nâng cao chuẩn CleanYourTV (50+ tuỳ chọn, lọc sạch trùng lặp).\n- Lưu và áp dụng độc lập cài đặt theo từng Theme giao diện.\n- Bản vá an toàn chống treo máy cho tivi bo mạch CVTE (JVC, Vision, Super General...).\n- Khắc phục lỗi quầng sáng focus và chế độ điện ảnh cho app cuối cùng dưới dock.\n- Thay đổi package ID độc lập (`zone.vgs.cleanyourtv.manager`) không bị cài đè lên app gốc.\n- Sửa lỗi bật lên tắt luôn trên một số dòng Android TV.",
+    "ngay": "2026-10-22"
+  }
+}

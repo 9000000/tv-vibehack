@@ -2,6 +2,7 @@ package zone.vgs.tvsach.adb
 
 import zone.vgs.tvsach.t
 import zone.vgs.tvsach.dulieu.BanSaoLuu
+import zone.vgs.tvsach.dulieu.KeHoach
 import zone.vgs.tvsach.dulieu.KhoSaoLuu
 import zone.vgs.tvsach.dulieu.ThongTinTv
 import zone.vgs.tvsach.dulieu.TrangThaiGoi
@@ -11,6 +12,32 @@ import zone.vgs.tvsach.dulieu.TrangThaiGoi
  * launcher/build-and-install.sh của cleanyourtv; ghi chú "(#số)" là số issue bên đó.
  */
 class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
+
+    /**
+     * Tên gói Home sạch trên tivi này. Tivi Xiaomi bản Trung Quốc (Home gốc com.mitv.tvhome) chỉ nhận Home có tên trong
+     * danh sách của hãng: dùng bản dựng tên com.ts.launcher (upstream docs/devices/xiaomi-mitv-aetp0-dofus.md), trừ khi
+     * tivi đã có app khác mang tên đó. 22/10/2026, MiTV-ASTP0: bản com.gathin.tvhome cài được nhưng nút Home ra màn đen.
+     */
+    private var pkgHomeDaDo: String? = null
+    val pkgHome: String get() = pkgHomeDaDo ?: run {
+        val cuaMinh = sh("dumpsys package $PKG_HOME_XIAOMI | grep -c '$PKG_HOME_XIAOMI/$NS_HOME.MainActivity'").trim().toIntOrNull()?.let { it > 0 } == true
+        val coTen = sh("pm path $PKG_HOME_XIAOMI").isNotBlank()
+        val xiaomi = sh("pm list packages com.mitv.tvhome").lines().any { it.trim() == "package:com.mitv.tvhome" }
+        if (cuaMinh || (xiaomi && !coTen)) PKG_HOME_XIAOMI else PKG_HOME
+    }.also { pkgHomeDaDo = it }
+
+    /** Gọi khi kết nối tivi mới: quên những gì đã dò của tivi trước. */
+    fun quenTivi() { pkgHomeDaDo = null; cvteDaDo = null }
+    val cmpHome get() = "$pkgHome/$NS_HOME.MainActivity"
+    /** File APK trong assets cho pkgHome. */
+    val apkHome get() = if (pkgHome == PKG_HOME_XIAOMI) "tvhome-xiaomi.apk" else "tvhome.apk"
+
+    /** Khởi động lại Home để đọc cấu hình; bật lại dịch vụ trợ năng nếu force-stop làm rơi (theme.sh). */
+    private val KHOI_DONG_LAI_HOME get() =
+            "a=\$(settings get secure enabled_accessibility_services); am force-stop $pkgHome; am start -n $cmpHome >/dev/null; " +
+                "case \"\$a\" in *$pkgHome*) sleep 1; settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; " +
+                "sleep 1; settings put secure enabled_accessibility_services \"\$a\"; settings put secure accessibility_enabled 1 ;; esac"
+
 
     private fun sh(lenh: String): String = adb.shell(lenh).replace("\r", "")
 
@@ -177,7 +204,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     ): String? {
         val home = homeHienTai().substringBefore('/')
         val homeGoc = when {
-            home == PKG_HOME -> "none"
+            home == pkgHome || home in HOME_SACH -> "none"
             home in HOME_GOC_BIET -> home
             home == "android" -> {
                 val ung = sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
@@ -194,6 +221,9 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         // Home của hãng lạ (Fengmi, máy chiếu, tivi nội địa…): thử giữ nó bật, chỉ đặt Home mặc định + bắt nút Home trên
         // remote; không được mới tắt (21/10/2026, Formovie Nemo: com.tvfengmi.launcher).
         val hangLa = homeGoc != "none" && homeGoc !in HOME_GOC_BIET
+        // Bo mạch CVTE: chỉ đặt Home mặc định, không tắt Home gốc, không bật dịch vụ bắt phím cùng lượt (upstream #741).
+        val cvte = laBoMachCvte()
+        val giuHomeGoc = KeHoach.laHomeCvte(homeGoc)
 
         bao(t("Đẩy và cài Home sạch (${apk.size / 1024} KB)…", "Pushing and installing the clean Home (${apk.size / 1024} KB)…"))
         var out = caiApkHome(apk, bao)
@@ -205,19 +235,19 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         }
         if (!out.contains("Success")) {
             return if (out.contains("UPDATE_INCOMPATIBLE"))
-                t("Tivi đã có Home sạch ký bằng khoá khác (cài từ máy khác). Gỡ bản cũ trước: pm uninstall $PKG_HOME.", "The TV has a clean Home signed with another key (installed from another computer). Uninstall it first: pm uninstall $PKG_HOME.")
+                t("Tivi đã có Home sạch ký bằng khoá khác (cài từ máy khác). Gỡ bản cũ trước: pm uninstall $pkgHome.", "The TV has a clean Home signed with another key (installed from another computer). Uninstall it first: pm uninstall $pkgHome.")
             else t("Cài không được: ${out.trim().lines().lastOrNull()}. Home gốc vẫn nguyên.", "Install failed: ${out.trim().lines().lastOrNull()}. The stock Home is untouched.")
         }
         sl.launcherDaCai = true; kho.ghi(sl)
 
         bao(t("Mở thử Home sạch…", "Starting the clean Home…"))
-        val start = sh("am start -W -n $PKG_HOME/.MainActivity")
+        val start = sh("am start -W -n $cmpHome")
         if (!start.contains("Status: ok") || start.lines().any { it.startsWith("Error") }) {
             return t("Home sạch không mở được, Home gốc vẫn giữ nguyên.\n$start", "The clean Home did not start; the stock Home is untouched.\n$start")
         }
-        sh("pm grant $PKG_HOME android.permission.ACCESS_FINE_LOCATION 2>/dev/null; true")
+        sh("pm grant $pkgHome android.permission.ACCESS_FINE_LOCATION 2>/dev/null; true")
         bao(t("Tối ưu cho tivi yếu…", "Optimising for slow TVs…"))
-        runCatching { sh("cmd package compile -m speed -f $PKG_HOME") }
+        runCatching { sh("cmd package compile -m speed -f $pkgHome") }
 
         fun tatHomeGoc() {
             bao(t("Tắt Home gốc ($homeGoc)…", "Disabling the stock Home ($homeGoc)…"))
@@ -226,30 +256,45 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             if (homeGoc !in sl.daTatTruoc) sl.daTatBoiApp += homeGoc
             kho.ghi(sl)
         }
-        if (homeGoc != "none" && !hangLa) tatHomeGoc()
-        sh("cmd package set-home-activity --user 0 $PKG_HOME/.MainActivity")
-        if (hangLa) {
-            // Bắt nút Home trên remote về Home sạch dù hãng có dịch vụ bắt phím riêng.
-            batDichVu("HomeKeyService")
-            if (!homeHienTai().startsWith("$PKG_HOME/")) {
+        if (homeGoc != "none" && !hangLa && !giuHomeGoc) tatHomeGoc()
+        sh("cmd package set-home-activity --user 0 $cmpHome")
+        if (hangLa && !giuHomeGoc) {
+            // Bắt nút Home trên remote về Home sạch dù hãng có dịch vụ bắt phím riêng (bo CVTE: không, xem trên).
+            if (!cvte) batDichVu("HomeKeyService")
+            if (!homeHienTai().startsWith("$pkgHome/")) {
                 bao(t("Home của hãng vẫn giữ quyền, tắt nó…", "The maker's Home still wins, disabling it…"))
                 tatHomeGoc()
-                sh("cmd package set-home-activity --user 0 $PKG_HOME/.MainActivity")
+                sh("cmd package set-home-activity --user 0 $cmpHome")
             }
         }
 
         val bayGio = homeHienTai()
-        if (!bayGio.startsWith("$PKG_HOME/")) {
+        if (!bayGio.startsWith("$pkgHome/") && giuHomeGoc) {
+            traHomeGoc(sl)
+            return t("Tivi bo mạch CVTE ('${bayGio.ifBlank { "không rõ" }}' vẫn nhận Home). Với loại bo này app không tắt Home gốc vì đã có tivi treo ở màn khởi động sau khi tắt. Tivi vẫn như cũ; Home sạch vẫn mở được từ danh sách ứng dụng.",
+                "CVTE board ('${bayGio.ifBlank { "unknown" }}' still claims Home). On this board the app never disables the stock Home: one TV hung on its boot animation after that. The TV is as before; open the clean Home from the app list.")
+        }
+        if (!bayGio.startsWith("$pkgHome/")) {
             bao(t("Home không chuyển được, trả lại Home gốc…", "Home did not switch, restoring the stock Home…"))
             traHomeGoc(sl)
             return t("Home sau khi đổi là '${bayGio.ifBlank { "không rõ" }}'. Đã trả Home gốc. Trên Google TV thường do ", "Home resolved to '${bayGio.ifBlank { "unknown" }}'. The stock Home is back. On Google TV this usually means ") +
                 t("setupwraith cũng nhận Home: cần tắt nó trong danh sách (sau khi kết nối lại Wi-Fi) rồi làm lại.", "setupwraith also claims Home: disable it in the list (after re-joining Wi-Fi) and try again.")
         }
 
+        // Xiaomi: bản com.gathin.tvhome cài từ trước (bị hãng chặn) thì gỡ, để không còn hai Home sạch.
+        if (pkgHome != PKG_HOME && sh("pm path $PKG_HOME").isNotBlank()) {
+            bao(t("Gỡ Home sạch bản cũ ($PKG_HOME)…", "Removing the old clean Home ($PKG_HOME)…"))
+            sh("pm uninstall $PKG_HOME")
+        }
         bao(t("Ghi cấu hình dock…", "Writing the dock settings…"))
         dayCauHinh(cauHinh, anhNen, boAnh)
-        if (nutInput) batDichVu("InputKeyService")
-        if (nutHome) batDichVu("HomeKeyService")
+        if (cvte && (nutInput || nutHome)) {
+            bao(t("Tivi bo mạch CVTE: chưa bật bắt phím remote lượt này. Tắt mở tivi một lần, thấy Home sạch lên bình thường rồi vào Đổi giao diện bật lại.",
+                "CVTE board: remote-key helpers stay off this pass. Restart the TV once and, once the clean Home comes up, turn them on under Change look."))
+        } else {
+            if (nutInput) batDichVu("InputKeyService")
+            if (nutHome) batDichVu("HomeKeyService")
+        }
         return null
     }
 
@@ -263,12 +308,12 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         if (!out.contains("UPDATE_INCOMPATIBLE")) return out
         bao(t("Home sạch cũ ký khoá khác, gỡ rồi cài lại…", "The old clean Home has another signature, reinstalling…"))
         val troNang = sh("settings get secure enabled_accessibility_services").trim()
-        val laHome = homeHienTai().startsWith("$PKG_HOME/")
-        sh("pm uninstall $PKG_HOME")
+        val laHome = homeHienTai().startsWith("$pkgHome/")
+        sh("pm uninstall $pkgHome")
         val lai = runCatching { adb.caiApk(apk) }.getOrElse { "Failure ${it.message}" }
         if (lai.contains("Success")) {
-            if (laHome) sh("cmd package set-home-activity --user 0 $PKG_HOME/.MainActivity")
-            if (troNang.contains(PKG_HOME)) sh("settings put secure enabled_accessibility_services '$troNang'; settings put secure accessibility_enabled 1")
+            if (laHome) sh("cmd package set-home-activity --user 0 $cmpHome")
+            if (troNang.contains(pkgHome)) sh("settings put secure enabled_accessibility_services '$troNang'; settings put secure accessibility_enabled 1")
         }
         return lai
     }
@@ -277,7 +322,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     fun capNhatLauncher(apk: ByteArray): Boolean {
         val truoc = sh("settings get secure enabled_accessibility_services").trim()
         val out = caiApkHome(apk)
-        if (truoc.contains(PKG_HOME)) {
+        if (truoc.contains(pkgHome)) {
             sh("settings put secure enabled_accessibility_services '$truoc'; settings put secure accessibility_enabled 1")
         }
         return out.contains("Success")
@@ -309,16 +354,16 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      * sau khi gỡ-cài lại Home. File cũ của shell phải xoá trước, không thì provider cũng không ghi đè được.
      */
     private fun ghiFileTheme(ten: String, du: ByteArray) {
-        val dir = "/sdcard/Android/data/$PKG_HOME/files"
+        val dir = "/sdcard/Android/data/$pkgHome/files"
         val tam = "/data/local/tmp/cyt-${ten.replace('/', '-')}"
         adb.ghiFile(tam, du)
         if (ten.contains('/')) sh("mkdir -p $dir/${ten.substringBeforeLast('/')} 2>/dev/null; true")
-        sh("rm -f $dir/$ten 2>/dev/null; content write --uri content://$PKG_HOME.theme/$ten < $tam 2>/dev/null || cp $tam $dir/$ten 2>/dev/null; rm -f $tam")
+        sh("rm -f $dir/$ten 2>/dev/null; content write --uri content://$pkgHome.theme/$ten < $tam 2>/dev/null || cp $tam $dir/$ten 2>/dev/null; rm -f $tam")
     }
 
     fun dayCauHinh(json: String, anhNen: ByteArray? = null, boAnh: List<Pair<String, ByteArray>>? = null) {
-        val dir = "/sdcard/Android/data/$PKG_HOME/files"
-        val uri = "content://$PKG_HOME.theme"
+        val dir = "/sdcard/Android/data/$pkgHome/files"
+        val uri = "content://$pkgHome.theme"
         sh("mkdir -p $dir 2>/dev/null; true")
         ghiFileTheme("config.json", json.toByteArray())
         if (anhNen != null) ghiFileTheme("wallpaper.jpg", anhNen)
@@ -339,7 +384,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
 
     /** config.json đang có trên tivi (để "Đổi giao diện" mở ra đúng lựa chọn cũ); null nếu chưa có / đọc không được. */
     fun docCauHinhTv(): org.json.JSONObject? {
-        val s = sh("content read --uri content://$PKG_HOME.theme/config.json 2>/dev/null || cat /sdcard/Android/data/$PKG_HOME/files/config.json 2>/dev/null").trim()
+        val s = sh("content read --uri content://$pkgHome.theme/config.json 2>/dev/null || cat /sdcard/Android/data/$pkgHome/files/config.json 2>/dev/null").trim()
         return runCatching { org.json.JSONObject(s) }.getOrNull()
     }
 
@@ -373,18 +418,29 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
                 bao(t("Không chuyển được nút Home, bật lại ${gianh.joinToString()}…", "Couldn't take over the Home button, re-enabling ${gianh.joinToString()}…"))
                 gianh.forEach { p -> sh("pm enable --user 0 $p"); sl?.daTatBoiApp?.remove(p); if (sl?.homeGocDaTat == p) sl.homeGocDaTat = "" }
                 sl?.let { kho.ghi(it) }
-                sh("input keyevent KEYCODE_HOME")
             }
+            // Home gốc đã tắt từ bước cài (caiLauncher) mà nút Home vẫn không ra Home sạch: bật lại + đặt làm mặc định.
+            // 22/10/2026, Xiaomi MiTV-ASTP0 bản Trung Quốc: hãng chỉ nhận Home theo danh sách tên gói, nút Home ra
+            // FallbackHome (com.android.tv.settings) = màn đen, mà app báo "để tivi như cũ" khi Home Xiaomi vẫn tắt.
+            if (sl != null && sl.homeGocDaTat.isNotBlank()) {
+                bao(t("Bật lại Home gốc (${sl.homeGocDaTat})…", "Re-enabling the stock Home (${sl.homeGocDaTat})…"))
+                traHomeGoc(sl)
+            }
+            if (gianh.isNotEmpty() || sl != null) sh("input keyevent KEYCODE_HOME")
             return KetQuaPhimHome(false, gianh.toList(), pkg, lyDo)
         }
         repeat(4) { lan ->
-            sh("cmd package set-home-activity --user 0 $PKG_HOME/.MainActivity")
+            sh("cmd package set-home-activity --user 0 $cmpHome")
             sh("input keyevent KEYCODE_HOME")
             Thread.sleep(2500)
             val pkg = goiDangHien()
             // ganChuyenHomeCu (stock_home_redirect) CHƯA bật: thử trên máy ảo Android TV 14 ngày 22/10/2026 chưa thấy chuyển
             // về được — upstream mới thử trên XGIMI thật. Chưa thử chạy được thì không đưa ra cho người dùng.
-            if (pkg == PKG_HOME) return KetQuaPhimHome(true, gianh, "", "")
+            if (pkg == pkgHome) return KetQuaPhimHome(true, gianh, "", "")
+            if (KeHoach.laHomeCvte(pkg)) {
+                lyDo = "cvte"
+                return tra(pkg)
+            }
             if (lan == 3 || sl == null || pkg == SETUP || !nenTatVuiGianhHome(pkg)) return tra(pkg)
             if (pkg in HOME_GOC_BIET && dangBat(SETUP)) {
                 lyDo = "setupwraith"
@@ -402,7 +458,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     }
 
     private fun nenTatVuiGianhHome(pkg: String): Boolean {
-        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
+        if (!TEN_GOI.matches(pkg) || pkg in HOME_SACH || KeHoach.laHomeCvte(pkg) || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
             pkg.startsWith("com.android.systemui") || pkg.contains("packageinstaller") || pkg.contains("permissioncontroller")) return false
         if (!sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return laLauncherCaiThem(pkg)
         if (sh("dumpsys package $pkg | grep -c TV_INPUT_HARDWARE").trim().toIntOrNull()?.let { it > 0 } == true) return false
@@ -410,14 +466,6 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             .lines().any { it.trim().startsWith("$pkg/") }
         return coHome || Regex("launcher|tvhome|home", RegexOption.IGNORE_CASE).containsMatchIn(pkg.substringAfterLast('.').ifBlank { pkg }) ||
             Regex("launcher", RegexOption.IGNORE_CASE).containsMatchIn(pkg)
-    }
-
-    /** App NGƯỜI DÙNG (không phải hệ thống) có màn HOME thật: launcher cài thêm như Dangbei. */
-    private fun laLauncherCaiThem(pkg: String): Boolean {
-        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || APP_XUAT_XUONG.containsMatchIn(pkg)) return false
-        if (sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return false
-        return sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
-            .lines().any { it.trim().startsWith("$pkg/") }
     }
 
     private fun laHomeHangLa(pkg: String): Boolean {
@@ -432,9 +480,22 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      * Bật dịch vụ trợ năng của Home sạch. TCL (TclAppBoot) không cho bind dịch vụ của app chưa chạy nếu thiếu app-op
      * AUTO_START (upstream #526): cấp trước; dịch vụ đã có trong danh sách thì xoá đi ghi lại để Android bind lại.
      */
+    /** App NGƯỜI DÙNG (không phải hệ thống) có màn HOME thật: launcher cài thêm như Dangbei. */
+    private fun laLauncherCaiThem(pkg: String): Boolean {
+        if (!TEN_GOI.matches(pkg) || pkg in HOME_SACH || pkg in KHONG_PHAI_HOME || APP_XUAT_XUONG.containsMatchIn(pkg)) return false
+        if (sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return false
+        return sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
+            .lines().any { it.trim().startsWith("$pkg/") }
+    }
+
+    /** Tivi dùng bo mạch CVTE (có gói com.cvte.* / cn.cvte.*). Nhớ theo kết nối. */
+    private var cvteDaDo: Boolean? = null
+    fun laBoMachCvte(): Boolean = cvteDaDo ?: sh("pm list packages | grep -c -E 'package:(com|cn)\\.cvte\\.'").trim()
+        .toIntOrNull().let { (it ?: 0) > 0 }.also { cvteDaDo = it }
+
     private fun batDichVu(ten: String) {
-        val svc = "$PKG_HOME/.$ten"
-        sh("cmd appops set $PKG_HOME AUTO_START allow 2>/dev/null; s=\$(settings get secure enabled_accessibility_services); case \"\$s\" in *$ten*) settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; sleep 1; settings put secure enabled_accessibility_services \"\$s\" ;; null|'') settings put secure enabled_accessibility_services $svc ;; *) settings put secure enabled_accessibility_services \"\$s:$svc\" ;; esac; settings put secure accessibility_enabled 1")
+        val svc = "$pkgHome/$NS_HOME.$ten"
+        sh("cmd appops set $pkgHome AUTO_START allow 2>/dev/null; s=\$(settings get secure enabled_accessibility_services); case \"\$s\" in *$ten*) settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; sleep 1; settings put secure enabled_accessibility_services \"\$s\" ;; null|'') settings put secure enabled_accessibility_services $svc ;; *) settings put secure enabled_accessibility_services \"\$s:$svc\" ;; esac; settings put secure accessibility_enabled 1")
     }
 
     /**
@@ -444,8 +505,8 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      */
     fun ganChuyenHomeCu(pkg: String) {
         if (!TEN_GOI.matches(pkg)) return
-        val dir = "/sdcard/Android/data/$PKG_HOME/files"
-        val cu = sh("content read --uri content://$PKG_HOME.theme/config.json 2>/dev/null || cat $dir/config.json 2>/dev/null").trim()
+        val dir = "/sdcard/Android/data/$pkgHome/files"
+        val cu = sh("content read --uri content://$pkgHome.theme/config.json 2>/dev/null || cat $dir/config.json 2>/dev/null").trim()
         val j = runCatching { org.json.JSONObject(cu) }.getOrNull() ?: return
         if (j.optString("stock_home_redirect") == pkg) { batDichVu("HomeKeyService"); return }
         j.put("stock_home_redirect", pkg)
@@ -483,12 +544,12 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         if (sl.launcherDaCai) {
             bao(t("Trả Home gốc…", "Restoring the stock Home…"))
             val goc = sl.homeTruoc
-            if (goc.isNotBlank() && !goc.startsWith(PKG_HOME)) {
+            if (goc.isNotBlank() && HOME_SACH.none { goc.startsWith("$it/") }) {
                 sh("cmd package set-home-activity --user 0 $goc")
             }
             if (goLauncher) {
                 bao(t("Gỡ Home sạch…", "Removing the clean Home…"))
-                sh("pm uninstall $PKG_HOME")
+                HOME_SACH.filter { it == PKG_HOME || it == pkgHome }.forEach { sh("pm uninstall $it") }
                 // Trả danh sách dịch vụ trợ năng như trước khi làm (app có thể đã bật HomeKeyService / InputKeyService).
                 val tc = sl.truyCapTruoc
                 if (tc.isBlank() || tc == "null") sh("settings delete secure enabled_accessibility_services")
@@ -522,6 +583,10 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         /** Tên máy / tên gói gợi ý máy chiếu (21/10/2026, Formovie Nemo). */
         val TU_MAY_CHIEU = Regex("projector|formovie|fengmi|xgimi|jmgo|dangbei|nebula|wanbo|byintek|keystone|autofocus|tixing|duijiao", RegexOption.IGNORE_CASE)
         const val PKG_HOME = "com.gathin.tvhome"
+        const val PKG_HOME_XIAOMI = "com.ts.launcher"
+        /** Namespace Java của launcher: không đổi theo tên gói. */
+        const val NS_HOME = "com.gathin.tvhome"
+        val HOME_SACH = setOf(PKG_HOME, PKG_HOME_XIAOMI)
         const val SETUP = "com.google.android.tungsten.setupwraith"
         const val HOME_QUERY = "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
         val HOME_GOC_BIET = listOf(
@@ -535,11 +600,5 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
          * giờ là Home của hãng, không tắt (theo upstream 0357546, 22/10/2026).
          */
         private val APP_XUAT_XUONG = Regex("factorytest|factory_test|factorymode", RegexOption.IGNORE_CASE)
-
-        /** Khởi động lại Home để đọc cấu hình; bật lại dịch vụ trợ năng nếu force-stop làm rơi (theme.sh). */
-        private const val KHOI_DONG_LAI_HOME =
-            "a=\$(settings get secure enabled_accessibility_services); am force-stop $PKG_HOME; am start -n $PKG_HOME/.MainActivity >/dev/null; " +
-                "case \"\$a\" in *$PKG_HOME*) sleep 1; settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; " +
-                "sleep 1; settings put secure enabled_accessibility_services \"\$a\"; settings put secure accessibility_enabled 1 ;; esac"
     }
 }
