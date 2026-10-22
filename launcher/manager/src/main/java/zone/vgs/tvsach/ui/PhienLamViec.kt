@@ -340,7 +340,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         val macDinh = taoHoSoMacDinh(th)
         hoSoTheoTheme[th.id] = macDinh
         napHoSoTheme(th)
-        thongBao = t("Đã khôi phục cài đặt mặc định của theme ${th.ten}.", "Reset settings of theme ${th.ten} to defaults.")
+        thongBao = t("Đã khôi phục cài đặt mặc định của theme ${th.tenVi}.", "Reset settings of theme ${th.tenEn} to defaults.")
     }
 
     // Máy chiếu: màn của hãng dò được + những màn đã ghim vào nút "Máy chiếu" trên Home sạch (comp → nhãn).

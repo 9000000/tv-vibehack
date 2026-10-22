@@ -517,7 +517,7 @@ private fun ManThongTin(vm: PhienLamViec) = Cuon {
             (if (vm.saoLuuTuTv) t(" (lấy từ bản lưu trên tivi)", " (read from the copy on the TV)") else "") +
             t(". Làm tiếp vẫn giữ mốc khôi phục cũ.", ". Continuing keeps that restore point."))
     }
-    The(t("Danh sách mẫu", "Model list"), Icons.Rounded.FactCheck) {
+    The(t("Danh sách mẫu", "Model list"), Icons.AutoMirrored.Rounded.FactCheck) {
         if (vm.ungVien.isEmpty()) Phu(t("Chưa có mẫu nào khớp đúng tivi này. App dùng luật chung: chỉ tích sẵn gói đã tắt trên nhiều tivi khác và không ai ghi là phải giữ.",
             "No tested list matches this TV. The app uses general rules: it pre-ticks only packages disabled on many other TVs that nobody marked as needed."))
         vm.ungVien.forEach { (m, diem) ->
@@ -1046,7 +1046,7 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
     NutPhu(t("Xem cấu hình JSON (Preview config.json)", "Preview config.json"), icon = Icons.Rounded.Code) {
         hienXemJson = true
     }
-    NutPhu(t("Khôi phục mặc định theme ${vm.themeChon.ten}", "Reset theme ${vm.themeChon.ten} to defaults"), icon = Icons.Rounded.RestartAlt) {
+    NutPhu(t("Khôi phục mặc định theme ${vm.themeChon.tenVi}", "Reset theme ${vm.themeChon.tenEn} to defaults"), icon = Icons.Rounded.RestartAlt) {
         vm.khoiPhucMacDinhTheme()
     }
     vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
@@ -1373,7 +1373,7 @@ private fun TheNhacNpt(vm: PhienLamViec) {
             "The app can't reach the TV without this. One time, about a minute: Settings → About → press Build 7 times → turn on USB debugging."), Color.White.copy(alpha = 0.85f))
         Box(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(14.dp)).background(Cam).clickable { vm.moHuongDan() }, contentAlignment = Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.MenuBook, null, tint = Color.Black); Spacer(Modifier.width(8.dp))
+                Icon(Icons.AutoMirrored.Rounded.MenuBook, null, tint = Color.Black); Spacer(Modifier.width(8.dp))
                 Text(t("Xem hướng dẫn có hình (7 bước)", "Picture guide (7 steps)"), fontWeight = FontWeight.Bold, color = Color.Black)
             }
         }
