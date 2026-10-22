@@ -570,6 +570,17 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         return loi
     }
 
+    /** Bật lại các gói đang tắt trực tiếp trên tivi mà không cần bản sao lưu (cứu hộ khi mất dữ liệu app). */
+    fun batLaiGoiDaTat(goi: List<String>, bao: (String) -> Unit): List<String> {
+        val loi = mutableListOf<String>()
+        goi.forEachIndexed { i, p ->
+            bao(t("Bật lại ${i + 1}/${goi.size}: $p", "Re-enabling ${i + 1}/${goi.size}: $p"))
+            val out = runCatching { sh("pm enable --user 0 $p") }.getOrElse { t("lỗi ${it.message}", "error ${it.message}") }
+            if (!out.contains("enabled")) loi += "$p: ${out.trim()}"
+        }
+        return loi
+    }
+
     // ---------- Đóng ADB ----------
 
     /** Tắt ADB qua mạng trên tivi. Lệnh cuối làm rớt kết nối này, nên lỗi ở đây là bình thường. */

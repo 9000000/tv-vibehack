@@ -58,4 +58,30 @@ class KeHoachTest {
         assertTrue(KeHoach.laHomeCvte("com.cvte.tv.launcher.space.skin"))
         assertFalse(KeHoach.laHomeCvte("com.cvte.tv.appstore"))
     }
+
+    @Test fun chieuManHinh_luonNhomChieuManHinh_khongTichSan() {
+        val (_, ds) = tivi("xiaomi-mi-box-s", setOf("com.tcl.miracast", "com.xiaomi.wfdsinkhelperservice"))
+        val miracast = ds.filter { it.pkg == "com.tcl.miracast" || it.pkg == "com.xiaomi.wfdsinkhelperservice" }
+        assertTrue(miracast.isNotEmpty())
+        miracast.forEach {
+            assertEquals(LoaiMuc.CHIEU_MAN_HINH, it.loai)
+            assertFalse("${it.pkg} không được tích sẵn", it.chonSan)
+        }
+    }
+
+    @Test fun capNhatOta_luonNhomCapNhat_khongTichSan() {
+        val (_, ds) = tivi("xiaomi-mi-box-s", setOf("com.google.android.systemupdater", "com.tcl.ota", "com.xiaomi.mitv.upgrade"))
+        val ota = ds.filter { it.pkg in setOf("com.google.android.systemupdater", "com.tcl.ota", "com.xiaomi.mitv.upgrade") }
+        assertTrue(ota.isNotEmpty())
+        ota.forEach {
+            assertEquals(LoaiMuc.CAP_NHAT, it.loai)
+            assertFalse("${it.pkg} không được tích sẵn", it.chonSan)
+        }
+    }
+
+    @Test fun factoryTest_khongBaoGioVaoDanhSachTat() {
+        val (_, ds) = tivi("xiaomi-mi-box-s", setOf("com.duokan.factorytest", "com.cvte.tv.hkcfac", "mediatek.factorymenu.ui"))
+        assertTrue(ds.none { it.pkg.contains("factory") || it.pkg.contains("hkcfac") })
+    }
 }
+

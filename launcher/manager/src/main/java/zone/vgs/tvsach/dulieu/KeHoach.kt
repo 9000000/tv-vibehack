@@ -6,6 +6,10 @@ import zone.vgs.tvsach.t
 enum class LoaiMuc(private val vi: Pair<String, String>, private val en: Pair<String, String>) {
     MAU("Theo danh sách đã thử" to "Người dùng cùng dòng tivi đã tắt và chạy ổn.",
         "From a tested list" to "Owners of this TV model disabled these and it kept working."),
+    CHIEU_MAN_HINH("Chiếu màn hình & Miracast" to "Tắt là điện thoại không chiếu màn hình (Miracast / AirPlay) lên tivi được. Chỉ tích nếu nhà không dùng.",
+        "Screen mirroring & Miracast" to "Disable these and phones cannot mirror their screens (Miracast / AirPlay) to the TV. Tick only if nobody uses it."),
+    CAP_NHAT("Cập nhật hệ thống (OTA)" to "Tắt là tivi không nhận bản cập nhật mới từ hãng. Khuyên nên giữ lại để tivi nhận bản vá bảo mật.",
+        "System updates (OTA)" to "Disable these and the TV stops receiving new updates from the maker. Recommended to keep for security patches."),
     GOOGLE_HOME("Google Home & truyền từ điện thoại" to "Tắt là app Google Home trên điện thoại không thấy tivi, không điều khiển hay cast được. Chỉ tích nếu nhà không dùng.",
         "Google Home & casting from phones" to "Disable these and the Google Home phone app can't find, control or cast to the TV. Tick only if nobody uses that."),
     GIONG_NOI("Tìm kiếm giọng nói & Trợ lý Google" to "Tắt là nút mic trên remote hết dùng được (chỉ còn tìm bằng giọng trong YouTube). Chỉ tích nếu nhà không dùng.",
@@ -71,6 +75,17 @@ object KeHoach {
     /** Nút mic / tìm bằng giọng nói (22/10/2026: Mi Box S mất giọng nói vì danh sách tắt katniss "personal choice"). */
     private val GIONG_NOI = Regex("""^com\.google\.android\.katniss$|^com\.google\.android\.speech\.pumpkin$|^com\.google\.android\.(apps\.)?tv\.assistant$|^com\.google\.android\.googlequicksearchbox$""")
 
+    /** Chiếu màn hình / Miracast / AirPlay / Mi Cast / AirScreen. Không tự tích sẵn. */
+    private val CHIEU_MAN_HINH = Regex("""miracast|wfdsink|airplay|happycast|airkan|smartshare|fastcast|fastscreen|multiscreen|hisense\.hitv\.airplay|airplaydaemon|icast""", RegexOption.IGNORE_CASE)
+    fun laGoiChieuManHinh(pkg: String) = CHIEU_MAN_HINH.containsMatchIn(pkg)
+
+    /** Cập nhật hệ thống qua mạng (OTA / Firmware Updater). Khuyên nên giữ lại theo quy tắc AGENTS.md. Không tự tích sẵn. */
+    private val CAP_NHAT = Regex("""systemupdate|systemupdater|\bota\b|updateservice|versionupdate|fota|mitv\.upgrade""", RegexOption.IGNORE_CASE)
+    fun laGoiCapNhat(pkg: String) = CAP_NHAT.containsMatchIn(pkg)
+
+    /** Menu thử nghiệm xuất xưởng: không bao giờ tắt hay kích hoạt kẻo lật cờ Factory Mode. */
+    private val APP_XUAT_XUONG = Regex("""factorytest|factory_test|factorymode|hkcfac|fac\.menu""", RegexOption.IGNORE_CASE)
+
     /**
      * Nhóm trong danh sách đúng mẫu mà người làm danh sách ghi là tắt THEO Ý RIÊNG ("off by choice", "personal choice",
      * "optional"…): ~1.100 dòng trên 213 danh sách. Không tự tích — mỗi nhà một khác.
@@ -91,7 +106,7 @@ object KeHoach {
 
     fun laGoiCanGiu(pkg: String, tt: TrangThaiGoi): Boolean =
         pkg in GIU_CHINH_XAC || GIU_DAU.any { pkg.startsWith(it) } || pkg in tt.banPhim || pkg == tt.homeHienTai ||
-            GIU_MAY_CHIEU.containsMatchIn(pkg) || laHomeCvte(pkg)
+            GIU_MAY_CHIEU.containsMatchIn(pkg) || laHomeCvte(pkg) || APP_XUAT_XUONG.containsMatchIn(pkg)
 
     fun lap(du: DuLieu, mau: MauTv?, tt: TrangThaiGoi): List<MucGoi> {
         val ketQua = LinkedHashMap<String, MucGoi>()
@@ -152,6 +167,22 @@ object KeHoach {
             if (!laGoiGoogleHome(p)) continue
             val canh = t("Google Home / cast cần gói này.", "Google Home / casting needs this.")
             ketQua[p] = m.copy(loai = LoaiMuc.GOOGLE_HOME, chonSan = false,
+                ghiChu = listOf(canh, m.ghiChu.ifBlank { m.nhom }).filter { it.isNotBlank() }.joinToString(" "))
+        }
+
+        // 6) Chiếu màn hình / Miracast: nhóm riêng, không tự tích.
+        for ((p, m) in ketQua.entries.toList()) {
+            if (!laGoiChieuManHinh(p)) continue
+            val canh = t("Chiếu màn hình (Miracast / AirPlay) cần gói này.", "Screen mirroring (Miracast / AirPlay) needs this.")
+            ketQua[p] = m.copy(loai = LoaiMuc.CHIEU_MAN_HINH, chonSan = false,
+                ghiChu = listOf(canh, m.ghiChu.ifBlank { m.nhom }).filter { it.isNotBlank() }.joinToString(" "))
+        }
+
+        // 7) Cập nhật hệ thống (OTA): nhóm riêng, không tự tích.
+        for ((p, m) in ketQua.entries.toList()) {
+            if (!laGoiCapNhat(p)) continue
+            val canh = t("Cập nhật hệ thống (OTA). Khuyên nên giữ lại.", "System updates (OTA). Recommended to keep.")
+            ketQua[p] = m.copy(loai = LoaiMuc.CAP_NHAT, chonSan = false,
                 ghiChu = listOf(canh, m.ghiChu.ifBlank { m.nhom }).filter { it.isNotBlank() }.joinToString(" "))
         }
 

@@ -905,6 +905,22 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         taiLaiSaoLuu()
     }
 
+    /** Cứu hộ: Bật lại tất cả ứng dụng đang tắt trên tivi mà không cần file sao lưu trong điện thoại. */
+    fun chayBatLaiTatCaGoiTv() = chay(t("Đang bật lại các ứng dụng trên tivi…", "Re-enabling apps on TV…")) {
+        val tt = trangThai ?: io { tv.docTrangThai() }
+        val dsTat = tt.daTat.toList()
+        if (dsTat.isEmpty()) {
+            ghi(t("Không có ứng dụng nào đang bị tắt trên tivi.", "No disabled packages found on TV."))
+            return@chay
+        }
+        nhatKy.clear()
+        val loi = io { tv.batLaiGoiDaTat(dsTat) { s -> ghiTuIo(s) } }
+        loi.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
+        trangThai = io { tv.docTrangThai() }
+        ghi(t("Đã bật lại ${dsTat.size - loi.size}/${dsTat.size} ứng dụng.", "Re-enabled ${dsTat.size - loi.size}/${dsTat.size} apps."))
+        if (loi.isEmpty()) khoiPhucXong = true
+    }
+
     fun datLai() {
         thongTin = null; trangThai = null; muc = emptyList(); chon.clear(); ketQua = null
         dock.clear(); tenChao = ""; homeXong = false; dnsChanQc = false; dangKhoiPhuc = false; khoiPhucXong = false; anhTv = null

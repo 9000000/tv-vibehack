@@ -521,7 +521,8 @@ private fun ManThongTin(vm: PhienLamViec) = Cuon {
     NutPhu(t("Bỏ qua dọn gói → Cài / Tuỳ biến Home sạch", "Skip debloat → Install / Customize clean Home"), Icons.Rounded.SkipNext) { vm.boQuaDonGoi() }
     NutPhu(t("Xem màn hình tivi", "View TV screen"), Icons.Rounded.Screenshot) { vm.chupManHinh() }
     if (vm.daCoHomeSach) NutPhu(t("Đổi giao diện Home sạch", "Change the clean Home theme"), Icons.Rounded.Palette) { vm.moDoiTheme() }
-    if (vm.saoLuu != null) NutPhu(t("Khôi phục tivi này", "Restore this TV"), Icons.Rounded.Restore) { vm.man = Man.KHOI_PHUC }
+    val coTheKhoiPhuc = vm.saoLuu != null || (vm.trangThai?.daTat?.isNotEmpty() == true)
+    if (coTheKhoiPhuc) NutPhu(t("Khôi phục tivi này", "Restore this TV"), Icons.Rounded.Restore) { vm.man = Man.KHOI_PHUC }
 }
 
 @Composable
@@ -1137,9 +1138,27 @@ private fun ManKhoiPhuc(vm: PhienLamViec) = Cuon {
         return@Cuon
     }
     if (sl == null) {
-        The {
-            Text(t("Điện thoại này không có bản sao lưu của ${vm.thongTin?.tenHienThi}. Có thể đã dọn bằng máy khác.",
-                "This phone has no backup for ${vm.thongTin?.tenHienThi}. It may have been cleaned from another phone."))
+        val daTat = vm.trangThai?.daTat.orEmpty()
+        if (daTat.isNotEmpty()) {
+            DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ứng dụng đã tắt", "Restore disabled apps"),
+                t("Điện thoại không còn file sao lưu cũ, nhưng phát hiện tivi có ${daTat.size} ứng dụng đang bị tắt.",
+                  "This phone has no backup file, but detected ${daTat.size} disabled apps on the TV."))
+            The(t("Ứng dụng đang tắt trên tivi (${daTat.size})", "Disabled apps on TV (${daTat.size})"), Icons.Rounded.Apps) {
+                Phu(t("Bấm nút dưới để bật lại toàn bộ các ứng dụng này trực tiếp trên tivi.",
+                      "Tap below to re-enable all these apps directly on the TV."))
+                daTat.take(8).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+                if (daTat.size > 8) Phu("… " + t("và ${daTat.size - 8} ứng dụng khác", "and ${daTat.size - 8} more"))
+            }
+            NutChinh(if (vm.dangBan) t("Đang bật lại…", "Re-enabling…") else t("Bật lại tất cả ${daTat.size} ứng dụng", "Re-enable all ${daTat.size} apps"),
+                enabled = !vm.dangBan, icon = Icons.Rounded.Restore) {
+                vm.chayBatLaiTatCaGoiTv()
+            }
+            vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+        } else {
+            The {
+                Text(t("Điện thoại này không có bản sao lưu của ${vm.thongTin?.tenHienThi}. Trên tivi hiện cũng không có ứng dụng nào đang bị tắt.",
+                    "This phone has no backup for ${vm.thongTin?.tenHienThi}. There are also no disabled packages on the TV."))
+            }
         }
         return@Cuon
     }
