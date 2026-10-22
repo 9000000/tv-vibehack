@@ -118,4 +118,9 @@ Sử dụng các lệnh sau để kích hoạt quy trình tác chiến chuyên s
 Thêm các hướng dẫn cụ thể cho dự án của bạn tại đây.
 
 ---
+Gemini CLI reads this file. The guide for every coding agent in this repo is AGENTS.md, imported below.
+
+@AGENTS.md
+
+---
 *Được tạo bởi Antigravity IDE*
