@@ -1,25 +1,25 @@
 {
  "app": {
-  "versionCode": 22,
-  "versionName": "1.9.3",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.3.apk",
-  "co": 11322087,
-  "ghiChu": "Bản sao lưu được lưu thêm ngay trên tivi: gỡ app hay đổi điện thoại vẫn khôi phục được. Thêm khôi phục khi không có sao lưu. Nút tham gia cộng đồng VGS.",
-  "ghiChuEn": "The backup is now also stored on the TV itself, so restoring works after reinstalling the app or switching phones. Restore without a backup. A link to join the VGS community.",
+  "versionCode": 23,
+  "versionName": "2.0",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.apk",
+  "co": 11367899,
+  "ghiChu": "CleanTV 2.0: Home sạch mới (đủ tiếng Việt, sửa thư viện app, giữ phím remote sau khi bị dừng), 225 mẫu tivi, 52 tuỳ chọn Nâng cao. Cùng các bản 1.9.x: an toàn cho tivi CVTE, Home sạch riêng cho Xiaomi, sao lưu trên tivi, khôi phục không cần sao lưu.",
+  "ghiChuEn": "CleanTV 2.0: a new clean Home (full Vietnamese, app library fix, remote helpers kept after a force stop), 225 TV models, 52 Advanced options. Plus the 1.9.x work: CVTE safety, a Xiaomi clean Home build, backup on the TV, restore without a backup.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
   "du-lieu.json": {
-   "phienBan": "4ade98d2fafd1587",
+   "phienBan": "c752f0ec8c447e7c",
    "url": "/ota/du-lieu.json",
-   "co": 1185263,
-   "tuBan": 22
+   "co": 1259284,
+   "tuBan": 23
   },
   "tvhome.apk": {
-   "phienBan": "70e863980c54e165",
+   "phienBan": "348650d509be7734",
    "url": "/ota/tvhome.apk",
-   "co": 568379,
-   "tuBan": 22
+   "co": 583151,
+   "tuBan": 23
   }
  }
 }

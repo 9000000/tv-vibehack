@@ -136,6 +136,12 @@
 "canThan": false
 },
 {
+"khoa": "top_menu",
+"kieu": "bool",
+"moTa": "Inputs, Wi-Fi and Settings folded into one round gear, centred on the header: OK drops a menu with the three, hold OK keeps the launcher menu (false by default)",
+"canThan": false
+},
+{
 "khoa": "wifi_label_width",
 "kieu": "so",
 "min": 0,
@@ -226,7 +232,7 @@
 "kieu": "so",
 "min": 30,
 "max": 100,
-"moTa": "Opacity of the dock's band, in percent, so a wallpaper shows through it; 100 by default (the cinematic shelf keeps its own translucent band)",
+"moTa": "Opacity of the dock's band, in percent, so a wallpaper shows through it; 100 by default (the cinematic shelf keeps its own translucent band). Launcher settings on the TV offers 100, 70, 50 or 30, which wins until the next theme push or Follow theme",
 "canThan": false
 },
 {
@@ -270,6 +276,12 @@
 "kieu": "bool",
 "moTa": "Those buttons open a small quick settings panel (TV settings, Display, Network, Apps, Launcher settings) instead of the TV's Settings",
 "canThan": true
+},
+{
+"khoa": "restore_key_services",
+"kieu": "bool",
+"moTa": "After a force stop of the launcher, Home puts the remote's accessibility helpers (HomeKeyService, InputKeyService) back on the enabled list; needs RESTORE_KEY_SERVICES=1 at install. Off by default",
+"canThan": false
 },
 {
 "khoa": "input_key_keycodes",

@@ -1,5 +1,21 @@
 [
  {
+  "ban": "2.0",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Home sạch cập nhật theo CleanYourTV mới nhất: dịch đủ tiếng Việt (vẫn font Lexend), thư viện app luôn hiện kể cả khi vừa cài/gỡ app, bật lại phím remote sau khi hệ thống buộc dừng Home sạch (tuỳ chọn restore_key_services trong Nâng cao).",
+   "Danh sách đã thử lên 225 mẫu tivi / 65 hãng; mục Nâng cao có 52 tuỳ chọn.",
+   "Google TV bấm Home vẫn về Home Google: lời báo chỉ cách quên Wi-Fi rồi kết nối lại (không cần dây LAN), đã có người dùng Skyworth làm được.",
+   "Tổng hợp 1.9.1–1.9.3: an toàn cho tivi bo mạch CVTE, Home sạch riêng cho Xiaomi bản Trung Quốc và không bao giờ để màn đen, dock 8 app, sao lưu thêm trên tivi, khôi phục không cần sao lưu, nút cộng đồng VGS."
+  ],
+  "en": [
+   "The clean Home follows the latest CleanYourTV: complete Vietnamese (still Lexend), the app library always shows after an install/uninstall, remote helpers come back after the system force-stops the Home (restore_key_services under Advanced).",
+   "Tested lists: 225 TV models from 65 brands; Advanced has 52 options.",
+   "Google TV Home still opening Google's Home: the note now explains forgetting and re-joining the Wi-Fi (no Ethernet needed), confirmed on a Skyworth.",
+   "All of 1.9.1–1.9.3: CVTE safety, a Xiaomi China-market clean Home and never a black screen, dock of 8, backup on the TV, restore without a backup, VGS community link."
+  ]
+ },
+ {
   "ban": "1.9.3",
   "ngay": "2026-10-22",
   "vi": [

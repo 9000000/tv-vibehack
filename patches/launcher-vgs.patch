@@ -98,7 +98,7 @@ index 0000000..b1477aa
 +FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 +OTHER DEALINGS IN THE FONT SOFTWARE.
 diff --git a/launcher/app/src/main/AndroidManifest.xml b/launcher/app/src/main/AndroidManifest.xml
-index 04ad18a..69cddfd 100644
+index 4cee7a6..335d9e1 100644
 --- a/launcher/app/src/main/AndroidManifest.xml
 +++ b/launcher/app/src/main/AndroidManifest.xml
 @@ -8,6 +8,8 @@
@@ -110,7 +110,7 @@ index 04ad18a..69cddfd 100644
      <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
      <!-- Needed since Android 10 to read the Wi-Fi network name for the network pill. Never requested at
           runtime: build-and-install grants it with pm grant, so lint's Android 12 "ask for COARSE with
-@@ -21,6 +23,11 @@
+@@ -25,6 +27,11 @@
      <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
           apps that declare a module card (docs/specs/card.md). -->
      <queries>
@@ -123,10 +123,10 @@ index 04ad18a..69cddfd 100644
          <intent>
              <action android:name="android.settings.SETTINGS" />
 diff --git a/launcher/app/src/main/java/com/gathin/tvhome/Config.java b/launcher/app/src/main/java/com/gathin/tvhome/Config.java
-index 9fa0726..355c1f1 100644
+index f56a54d..a781f97 100644
 --- a/launcher/app/src/main/java/com/gathin/tvhome/Config.java
 +++ b/launcher/app/src/main/java/com/gathin/tvhome/Config.java
-@@ -69,6 +69,9 @@ final class Config {
+@@ -70,6 +70,9 @@ final class Config {
      final boolean advancedEffects;
      final int rowsBelowDock;
      final boolean shamsiDate;
@@ -136,7 +136,7 @@ index 9fa0726..355c1f1 100644
      /** Name after the greeting ("Good morning, Mr. Trịnh"); empty for the greeting alone. */
      final String greetingName;
      final boolean moduleCards;
-@@ -173,7 +176,7 @@ final class Config {
+@@ -178,7 +181,7 @@ final class Config {
                     Festival festival, int[] inputKeycodes, List<String> appKeys, String stockHomeRedirect,
                     List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, int homeIdleClockMinutes,
                     boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
@@ -145,7 +145,7 @@ index 9fa0726..355c1f1 100644
          this.handleViewInputs = handleViewInputs;
          this.inputKeycodes = inputKeycodes;
          this.appKeys = Collections.unmodifiableList(appKeys);
-@@ -199,6 +202,8 @@ final class Config {
+@@ -204,6 +207,8 @@ final class Config {
          this.animations = animations;
          this.advancedEffects = advancedEffects;
          this.shamsiDate = shamsiDate;
@@ -154,7 +154,7 @@ index 9fa0726..355c1f1 100644
          this.greetingName = greetingName;
          this.moduleCards = moduleCards;
          this.reducedMotion = reducedMotion;
-@@ -273,6 +278,8 @@ final class Config {
+@@ -280,6 +285,8 @@ final class Config {
          boolean animations = res.getBoolean(R.bool.animations);
          boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
          boolean shamsi = res.getBoolean(R.bool.shamsi_date);
@@ -163,7 +163,7 @@ index 9fa0726..355c1f1 100644
          String greetingName = res.getString(R.string.greeting_name).trim();
          boolean moduleCards = res.getBoolean(R.bool.module_cards);
          boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
-@@ -336,6 +343,8 @@ final class Config {
+@@ -345,6 +352,8 @@ final class Config {
              animations = bool(json, "animations", animations);
              advancedEffects = bool(json, "advanced_effects", advancedEffects);
              shamsi = bool(json, "shamsi_date", shamsi);
@@ -172,8 +172,8 @@ index 9fa0726..355c1f1 100644
              greetingName = string(json, "greeting_name", greetingName).trim();
              moduleCards = bool(json, "module_cards", moduleCards);
              reducedMotion = bool(json, "reduced_motion", reducedMotion);
-@@ -431,7 +440,7 @@ final class Config {
-                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, wallpaperEnabled, wallpaper,
+@@ -443,7 +452,7 @@ final class Config {
+                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                  wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                  festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow,
 -                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs);
@@ -320,10 +320,10 @@ index 0000000..4181780
 +    }
 +}
 diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
-index d5a729c..3ae906f 100644
+index 183e582..9803b1b 100644
 --- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
 +++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
-@@ -165,13 +165,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -166,13 +166,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      private int wifiIcon;
      /** The pills have been filled in once; later resumes refresh them after the first frame. */
      private boolean pillsShown;
@@ -349,7 +349,7 @@ index d5a729c..3ae906f 100644
      private boolean shamsi;
      /** greeting_name: said after the greeting, which is shown in capitals. */
      private String greetingName = "";
-@@ -325,6 +337,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -326,6 +338,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
              // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
              if (festive) updateWifiLabel();
@@ -357,7 +357,7 @@ index d5a729c..3ae906f 100644
              sky.update();
              wallpaperPlayer.update();
              handler.postDelayed(this, MINUTE_MS);
-@@ -406,12 +419,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -421,12 +434,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
          raceSessions = findViewById(R.id.raceSessions);
          showStats = cfg.showStats;
          shamsi = cfg.shamsiDate;
@@ -384,7 +384,7 @@ index d5a729c..3ae906f 100644
          }
          vpnApp = cfg.vpnApp;
          moduleCards = cfg.moduleCards;
-@@ -473,7 +500,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -488,7 +515,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              public void onChildViewDetachedFromWindow(@NonNull View v) {
              }
          });
@@ -394,7 +394,7 @@ index d5a729c..3ae906f 100644
          // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
          if (animations && !reducedMotion) {
              grid.setLayoutAnimation(new LayoutAnimationController(
-@@ -600,7 +628,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -632,7 +660,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
          };
          btnInputs.setOnKeyListener(pillKeys);
@@ -422,7 +422,7 @@ index d5a729c..3ae906f 100644
          btnSettings.setOnKeyListener(pillKeys);
          btnReorder.setOnKeyListener(pillKeys);
          btnLibraryTop.setOnKeyListener(pillKeys);
-@@ -772,6 +820,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -804,6 +852,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              pillsShown = true;
          }
          if (showStats) startStats();
@@ -430,7 +430,7 @@ index d5a729c..3ae906f 100644
          sky.update();
          wallpaperPlayer.start();
          handler.postDelayed(minuteTick, MINUTE_MS);
-@@ -1728,6 +1777,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -1760,6 +1809,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
          else glass.setAlpha(0f);
      }
  
@@ -461,7 +461,7 @@ index d5a729c..3ae906f 100644
      // ---- optional system stats (config.xml show_stats) --------------------------------------------
  
      /** Background reader. Started only while Home is resumed and show_stats is on. */
-@@ -2106,6 +2179,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -2138,6 +2211,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              greeting.setTextColor(greetingColor);
          }
          if (shamsi) shamsiDate.setText(Shamsi.today(getResources()));
@@ -469,7 +469,7 @@ index d5a729c..3ae906f 100644
      }
  
      // ---- race-weekend panel (a theme's race_calendar) -----------------------------------------------
-@@ -2244,7 +2318,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -2276,7 +2350,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              text = name.length() < text.length() && name.length() < 5 ? "" : name;
              SpannableString label = new SpannableString(text + " " + badge);
              label.setSpan(span, text.length() + 1, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -482,7 +482,7 @@ index d5a729c..3ae906f 100644
          } else if (!TextUtils.equals(btnWifi.getText(), text)) {
              btnWifi.setText(text);
          }
-@@ -2727,7 +2805,75 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -2788,7 +2866,75 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
          rows.getChildAt(0).requestFocus();
      }
  
@@ -5216,11 +5216,11 @@ index 1550b02..c7b78ea 100644
          tools:targetApi="28" />
  </font-family>
 diff --git a/launcher/app/src/main/res/layout-iw/activity_main.xml b/launcher/app/src/main/res/layout-iw/activity_main.xml
-index 765ad1c..dadabfc 100644
+index f11791c..8774982 100644
 --- a/launcher/app/src/main/res/layout-iw/activity_main.xml
 +++ b/launcher/app/src/main/res/layout-iw/activity_main.xml
 @@ -215,6 +215,22 @@
-                         android:fontFamily="@font/outfit_regular"
+                         android:fontFamily="@string/font_regular"
                          android:letterSpacing="0.14"
                          android:textAllCaps="true" />
 +
@@ -5242,21 +5242,8 @@ index 765ad1c..dadabfc 100644
                  </LinearLayout>
  
                  <View
-diff --git a/launcher/app/src/main/res/layout-iw/item_input.xml b/launcher/app/src/main/res/layout-iw/item_input.xml
-index aeb649d..7eafc93 100644
---- a/launcher/app/src/main/res/layout-iw/item_input.xml
-+++ b/launcher/app/src/main/res/layout-iw/item_input.xml
-@@ -20,7 +20,7 @@
-         android:duplicateParentState="true"
-         android:textSize="11sp"
-         android:textDirection="locale"
--        android:fontFamily="@font/outfit"
-+        android:fontFamily="@font/lexend"
-         android:letterSpacing="0.04" />
- 
-     <View
 diff --git a/launcher/app/src/main/res/layout/activity_main.xml b/launcher/app/src/main/res/layout/activity_main.xml
-index 00e3464..208b459 100644
+index c5d56e7..65d80ec 100644
 --- a/launcher/app/src/main/res/layout/activity_main.xml
 +++ b/launcher/app/src/main/res/layout/activity_main.xml
 @@ -254,6 +254,21 @@
@@ -5282,7 +5269,7 @@ index 00e3464..208b459 100644
                              android:id="@+id/date"
                              android:gravity="left"
 @@ -270,6 +285,22 @@
-                             android:fontFamily="@font/outfit_regular"
+                             android:fontFamily="@string/font_regular"
                              android:letterSpacing="0.14"
                              android:textAllCaps="true" />
 +
@@ -5336,147 +5323,34 @@ index 00e3464..208b459 100644
                  <TextView
                      android:id="@+id/btnLibraryTop"
                      style="@style/TopButtonIcon"
-diff --git a/launcher/app/src/main/res/layout/dialog_card_prompt.xml b/launcher/app/src/main/res/layout/dialog_card_prompt.xml
-index 39ef5b1..180bb93 100644
---- a/launcher/app/src/main/res/layout/dialog_card_prompt.xml
-+++ b/launcher/app/src/main/res/layout/dialog_card_prompt.xml
-@@ -31,7 +31,7 @@
-         android:textColor="#D9FFFFFF"
-         android:textSize="15sp"
-         android:lineSpacingExtra="3sp"
--        android:fontFamily="@font/outfit" />
-+        android:fontFamily="@font/lexend" />
- 
-     <TextView
-         android:id="@+id/names"
-@@ -41,7 +41,7 @@
-         android:textColor="#D9FFFFFF"
-         android:textSize="15sp"
-         android:lineSpacingExtra="3sp"
--        android:fontFamily="@font/outfit" />
-+        android:fontFamily="@font/lexend" />
- 
-     <TextView
-         android:id="@+id/hint"
-@@ -51,7 +51,7 @@
-         android:text="@string/card_prompt_hint"
-         android:textColor="#99FFFFFF"
-         android:textSize="13sp"
--        android:fontFamily="@font/outfit" />
-+        android:fontFamily="@font/lexend" />
- 
-     <TextView
-         android:id="@+id/identity"
-@@ -62,7 +62,7 @@
-         android:textColor="#80FFFFFF"
-         android:textSize="12sp"
-         android:letterSpacing="0.03"
--        android:fontFamily="@font/outfit" />
-+        android:fontFamily="@font/lexend" />
- 
-     <LinearLayout
-         android:layout_width="match_parent"
-diff --git a/launcher/app/src/main/res/layout/item_app.xml b/launcher/app/src/main/res/layout/item_app.xml
-index d6f9a1a..5fb9a32 100644
---- a/launcher/app/src/main/res/layout/item_app.xml
-+++ b/launcher/app/src/main/res/layout/item_app.xml
-@@ -45,7 +45,7 @@
-             android:ellipsize="end"
-             android:textColor="#FFFFFFFF"
-             android:textSize="13sp"
--            android:fontFamily="@font/outfit"
-+            android:fontFamily="@font/lexend"
-             android:visibility="gone" />
-     </FrameLayout>
- 
-diff --git a/launcher/app/src/main/res/layout/item_card_row.xml b/launcher/app/src/main/res/layout/item_card_row.xml
-index 2a72deb..2524a13 100644
---- a/launcher/app/src/main/res/layout/item_card_row.xml
-+++ b/launcher/app/src/main/res/layout/item_card_row.xml
-@@ -39,7 +39,7 @@
-             android:textColor="@drawable/pill_text"
-             android:duplicateParentState="true"
-             android:textSize="11sp"
--            android:fontFamily="@font/outfit"
-+            android:fontFamily="@font/lexend"
-             android:letterSpacing="0.04" />
-     </LinearLayout>
- 
-@@ -50,7 +50,7 @@
-         android:textColor="@drawable/pill_text_mid"
-         android:duplicateParentState="true"
-         android:textSize="11sp"
--        android:fontFamily="@font/outfit"
-+        android:fontFamily="@font/lexend"
-         android:singleLine="true"
-         android:ellipsize="end" />
- 
-@@ -61,7 +61,7 @@
-         android:textColor="@drawable/pill_text_mid"
-         android:duplicateParentState="true"
-         android:textSize="11sp"
--        android:fontFamily="@font/outfit"
-+        android:fontFamily="@font/lexend"
-         android:singleLine="true"
-         android:ellipsize="middle" />
- 
-@@ -74,6 +74,6 @@
-         android:duplicateParentState="true"
-         android:textSize="10sp"
-         android:letterSpacing="0.03"
--        android:fontFamily="@font/outfit"
-+        android:fontFamily="@font/lexend"
-         android:maxLines="2" />
- </LinearLayout>
-diff --git a/launcher/app/src/main/res/layout/item_input.xml b/launcher/app/src/main/res/layout/item_input.xml
-index 6dba0ba..e6a944e 100644
---- a/launcher/app/src/main/res/layout/item_input.xml
-+++ b/launcher/app/src/main/res/layout/item_input.xml
-@@ -45,6 +45,6 @@
-         android:textColor="@drawable/pill_text_dim"
-         android:duplicateParentState="true"
-         android:textSize="11sp"
--        android:fontFamily="@font/outfit"
-+        android:fontFamily="@font/lexend"
-         android:letterSpacing="0.04" />
- </LinearLayout>
+diff --git a/launcher/app/src/main/res/values-vi/fonts.xml b/launcher/app/src/main/res/values-vi/fonts.xml
+deleted file mode 100644
+index 9e58a7d..0000000
+--- a/launcher/app/src/main/res/values-vi/fonts.xml
++++ /dev/null
+@@ -1,9 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<!-- Outfit lacks 96 of the 134 Vietnamese accented letters, so words mixed two fonts; use the system's (#833). -->
+-<resources>
+-    <string name="font_body" translatable="false">sans-serif</string>
+-    <string name="font_regular" translatable="false">sans-serif</string>
+-    <string name="font_light" translatable="false">sans-serif-light</string>
+-    <string name="font_extralight" translatable="false">sans-serif-thin</string>
+-    <string name="font_medium" translatable="false">sans-serif-medium</string>
+-</resources>
 diff --git a/launcher/app/src/main/res/values-vi/strings.xml b/launcher/app/src/main/res/values-vi/strings.xml
-index c36910c..60a9ff3 100644
+index 0327731..a909687 100644
 --- a/launcher/app/src/main/res/values-vi/strings.xml
 +++ b/launcher/app/src/main/res/values-vi/strings.xml
-@@ -68,4 +68,44 @@
-     <string name="dock_edit">Chỉnh sửa dock</string>
-     <string name="dock_edit_hint">Chọn vị trí trên dock cần đổi rồi nhấn OK. Nhấn Quay lại để kết thúc.</string>
-     <string name="dock_edit_pick_app">Giờ chọn ứng dụng để đặt vào đó rồi nhấn OK. Nhấn Quay lại để chọn vị trí khác.</string>
+@@ -112,4 +112,20 @@
+     <string name="race_countdown_hours">%1$d giờ %2$d phút</string>
+     <string name="race_countdown_days">%1$d ngày %2$d giờ</string>
+     <string name="last_opened">Mở lần cuối %1$s</string>
 +    <string name="projector">Máy chiếu</string>
 +    <string name="screensaver">Màn hình chờ</string>
-+    <!-- CleanTV/VGS 22/10/2026: chữ mới của upstream (sau 2.5) -->
 +    <string name="stats_cpu">CPU %1$d%%</string>
-+    <string name="stats_memory">Bộ nhớ %1$d / %2$d MB</string>
-+    <string name="stats_storage">Còn trống %1$s</string>
 +    <string name="storage_gb_whole">%1$.0f GB</string>
 +    <string name="storage_gb_decimal">%1$.1f GB</string>
-+    <string name="rows_below_dock_label">Số hàng dưới dock</string>
-+    <string name="wallpaper_label">Hình nền</string>
-+    <string name="wallpaper_state">Hình nền: %1$s</string>
-+    <string name="wallpaper_none">Không</string>
-+    <string name="wallpaper_applied">Đã đổi hình nền</string>
-+    <string name="wallpaper_theme_default">Mặc định của theme</string>
-+    <string name="reorder">Sắp xếp app</string>
-+    <string name="reorder_hint">OK để nhấc app lên, phím mũi tên để di chuyển, Back để đặt xuống. Bấm Back lần nữa để xong.</string>
-+    <string name="reorder_not_saved">Không lưu được thứ tự mới</string>
-+    <string name="app_library">Thư viện app</string>
-+    <string name="library_empty">Không có app nào mở được</string>
-+    <string name="library_on_home">Có trên Home</string>
-+    <string name="library_add_home">Thêm vào Home</string>
-+    <string name="library_remove_shortcut">Bỏ khỏi Home</string>
-+    <string name="library_open">Mở</string>
-+    <string name="library_app_info">Thông tin app</string>
-+    <string name="library_save_failed">Không lưu được lối tắt</string>
-+    <string name="library_recent">Mới · Thêm vào Home</string>
-+    <string name="library_hint_add">Bấm để thêm vào Home · Giữ để xem thêm</string>
-+    <string name="library_hint_open">Bấm để mở · Giữ để xem thêm</string>
-+    <string name="last_opened">Mở lần cuối %1$s</string>
 +    <string name="lunar_date_format">%1$d/%2$s âm lịch · %3$s</string>
 +    <string name="lunar_month_leap">%1$d nhuận</string>
 +    <string name="lunar_year">%1$s %2$s</string>
@@ -5490,10 +5364,10 @@ index c36910c..60a9ff3 100644
 +    </string-array>
  </resources>
 diff --git a/launcher/app/src/main/res/values/config.xml b/launcher/app/src/main/res/values/config.xml
-index b98866f..816b2df 100644
+index 141d9dd..6bc5149 100644
 --- a/launcher/app/src/main/res/values/config.xml
 +++ b/launcher/app/src/main/res/values/config.xml
-@@ -166,6 +166,8 @@
+@@ -177,6 +177,8 @@
      <!-- Show the Solar Hijri (Shamsi) date used in Iran and Afghanistan, e.g. "27 Mehr 1405", above the
           Gregorian date. -->
      <bool name="shamsi_date">false</bool>
@@ -5502,8 +5376,23 @@ index b98866f..816b2df 100644
  
      <!-- A name after the greeting: "Mr. Trịnh" shows GOOD MORNING, MR. TRỊNH. Empty: the greeting alone. -->
      <string name="greeting_name" translatable="false"></string>
+diff --git a/launcher/app/src/main/res/values/fonts.xml b/launcher/app/src/main/res/values/fonts.xml
+index adbb30d..91098f5 100644
+--- a/launcher/app/src/main/res/values/fonts.xml
++++ b/launcher/app/src/main/res/values/fonts.xml
+@@ -1,8 +1,8 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<!-- The UI fonts, looked up through these strings so a locale can swap in a system family: Outfit has no
++<!-- CleanTV/VGS: Lexend thay Outfit (đủ dấu tiếng Việt), nên bỏ values-vi/fonts.xml. The UI fonts, looked up through these strings so a locale can swap in a system family: Outfit has no
+      glyphs for most Vietnamese accented letters, so values-vi points them at the system sans-serif (#833). -->
+ <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ReferenceType">
+-    <string name="font_body" translatable="false">@font/outfit</string>
++    <string name="font_body" translatable="false">@font/lexend</string>
+     <string name="font_regular" translatable="false">@font/outfit_regular</string>
+     <string name="font_light" translatable="false">@font/outfit_light</string>
+     <string name="font_extralight" translatable="false">@font/outfit_extralight</string>
 diff --git a/launcher/app/src/main/res/values/strings.xml b/launcher/app/src/main/res/values/strings.xml
-index 04ee1dc..4bac7ab 100644
+index 1a385d4..c125752 100644
 --- a/launcher/app/src/main/res/values/strings.xml
 +++ b/launcher/app/src/main/res/values/strings.xml
 @@ -23,6 +23,18 @@
@@ -5525,7 +5414,7 @@ index 04ee1dc..4bac7ab 100644
      <string name="shamsi_month_farvardin">Farvardin</string>
      <string name="shamsi_month_ordibehesht">Ordibehesht</string>
      <string name="shamsi_month_khordad">Khordad</string>
-@@ -140,4 +152,6 @@
+@@ -141,4 +153,6 @@
      <!-- Cinematic top shelf (cinematic_home): the line under the focused dock app's name; %1$s is when it was
           last opened, e.g. "5 minutes ago" or "yesterday, 9:40 pm". -->
      <string name="last_opened">Last opened %1$s</string>
