@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Dark tech gradient background -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M0,0h320v180h-320z" />
+    <path
+        android:fillColor="#131A29"
+        android:pathData="M10,10h300v160h-300z" />
+    <!-- TV Icon in center -->
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M174,68l14,-14h-56l14,14h-34c-6.6,0 -12,5.4 -12,12v64c0,6.6 5.4,12 12,12h124c6.6,0 12,-5.4 12,-12v-64c0,-6.6 -5.4,-12 -12,-12h-34zM224,144h-124v-64h124v64z" />
+</vector>

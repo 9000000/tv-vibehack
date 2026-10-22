@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TV VibeHack Manager</string>
+    <string name="tab_connect">Kết nối</string>
+    <string name="tab_match">Mẫu TV</string>
+    <string name="tab_debloat">Dọn dẹp</string>
+    <string name="tab_launcher">Launcher</string>
+</resources>
