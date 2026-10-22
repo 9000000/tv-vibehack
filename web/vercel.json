@@ -13,7 +13,7 @@
     },
     {
       "source": "/tv",
-      "destination": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.6-thu-tv.apk",
+      "destination": "https://cleantv-dem.vgszone.workers.dev/tai?tu=tv",
       "permanent": false
     }
   ],

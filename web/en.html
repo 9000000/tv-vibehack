@@ -136,6 +136,12 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
 .nkDau{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}.nkNgay{margin-left:auto;font-size:13px;opacity:.6}
 .nkNhan{font-size:11.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:999px;padding:2px 9px}
 .nk ul{margin:0;padding-left:20px;line-height:1.55}.nkCu summary{cursor:pointer;text-align:center;font-weight:600;opacity:.75;padding:8px;margin-bottom:10px}
+.tvTim{width:100%;font:inherit;font-size:16px;padding:12px 16px;border-radius:14px;border:1px solid var(--vien);background:rgba(127,127,140,.08);color:inherit;box-sizing:border-box}
+.tvLoai{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tvLoai button{font:inherit;font-size:13.5px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--vien);background:none;color:inherit;cursor:pointer;opacity:.75}
+.tvLoai button.chon{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border-color:transparent;opacity:1}.tvDem{font-size:13px;opacity:.6;margin:14px 2px 8px}
+.tvDs{max-height:560px;overflow-y:auto;border:1px solid var(--vien);border-radius:18px;padding:4px 18px 12px}.tvHang h3{margin:0;padding:12px 0 6px;font-size:15px}.tvHang h3 span{font-size:12px;opacity:.55}
+.tvMau{padding:8px 0;border-top:1px solid var(--vien);font-size:14.5px}.tvMau em{font-style:normal;font-size:11px;font-weight:700;padding:1px 8px;margin-left:8px;border-radius:999px;background:rgba(139,92,246,.18);color:#a78bfa}
+.tvMau i{font-style:normal;float:right;font-size:12.5px;opacity:.6}.tvMau small{display:block;font-size:12px;opacity:.55;margin-top:2px}
 </style>
 </head>
 <body>
@@ -211,6 +217,17 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
   </div>
 </div></section>
 
+<section id="tren-tivi"><div class="wrap">
+  <h2 data-en="No Android phone? Install it on the TV">Không có điện thoại Android? Cài thẳng lên tivi</h2>
+  <p class="sub" data-en="Experimental. iPhone owners, or anyone who'd rather use the remote: install CleanTV on the TV itself. Same app, same steps.">Thử nghiệm. Dùng iPhone, hoặc muốn đi bằng remote: cài CleanTV lên chính chiếc tivi. Cùng một app, các bước y như trên điện thoại.</p>
+  <div class="luoi">
+    <div class="the hd"><img src="/anh/tv-tren-tivi-1.webp" alt="" loading="lazy"><h3><span>1</span><b data-en="Get the app onto the TV">Tải app về tivi</b></h3><p data-en="Turn on USB debugging. On the TV install Downloader from the Play Store, enter cleantv.alexvgs.tech/tv and install.">Bật Gỡ lỗi USB. Trên tivi cài app Downloader, gõ cleantv.alexvgs.tech/tv rồi cài.</p></div>
+    <div class="the hd"><img src="/anh/tv-tren-tivi-2.webp" alt="" loading="lazy"><h3><span>2</span><b data-en="Connect this TV">Kết nối chính tivi này</b></h3><p data-en="Open CleanTV → Clean a TV → Connect this TV. Tick Always allow and press Allow, then clean as usual.">Mở CleanTV → Dọn một tivi → Kết nối tivi này. Tích Luôn cho phép, bấm Cho phép, rồi dọn như bình thường.</p></div>
+    <div class="the hd"><img src="/anh/tv-tren-tivi-3.webp" alt="" loading="lazy"><h3><span>3</span><b data-en="Reopen it from the clean Home">Mở lại từ Home sạch</b></h3><p data-en="CleanTV sits on the clean Home: open it again to change the theme or restore. Turn ADB off when done.">CleanTV nằm trên Home sạch: mở lại để đổi giao diện hay khôi phục. Xong nhớ Tắt ADB.</p></div>
+  </div>
+  <p class="sub" style="margin-top:14px;font-size:14px" data-en="Newer Google TVs that only offer Wireless debugging (pairing code) may not connect yet; use an Android phone there.">Google TV đời mới chỉ có Gỡ lỗi qua Wi-Fi (ghép mã) có thể chưa kết nối được; khi đó dùng điện thoại Android.</p>
+</div></section>
+
 <section id="chuan-bi"><div class="wrap">
   <h2 data-en="Step 0: turn on developer mode">Bước 0: bật chế độ nhà phát triển</h2>
   <p class="sub" data-en="Required — without it the app can't reach the TV. One time, about a minute, with the remote. Names may differ slightly by brand.">Bắt buộc — không có bước này app không kết nối được tivi. Làm một lần, khoảng một phút.</p>
@@ -256,6 +273,15 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
   <details><summary data-en="Why isn't it on Google Play?">Sao không có trên Google Play?</summary><p data-en="It is installed straight from this page for now. The app updates itself: when a new version is out it shows an Update button.">Hiện tải thẳng từ trang này. App tự cập nhật: có bản mới là hiện nút Cập nhật ngay trong app.</p></details>
   <details><summary data-en="Warranty and responsibility">Bảo hành và trách nhiệm</summary><p data-en="CleanTV is free software provided &quot;as is&quot;, with no warranty. It only changes a TV with the owner's permission (they must switch on debugging and press Allow on the TV). Every change is reversible with Restore, but you use it at your own risk. CleanTV is not affiliated with Google, Apple, Sony, TCL or any TV maker; brand names are only used to say which TVs work.">CleanTV là phần mềm miễn phí, cung cấp &quot;nguyên trạng&quot;, không kèm bảo hành. App chỉ thay đổi tivi khi chủ tivi cho phép (phải tự bật gỡ lỗi và bấm Cho phép trên tivi). Mọi thay đổi đều khôi phục được, nhưng người dùng tự chịu trách nhiệm khi sử dụng. CleanTV không liên quan tới Google, Apple, Sony, TCL hay hãng tivi nào; tên hãng chỉ dùng để nói tivi nào chạy được.</p></details>
   <details><summary data-en="Who made it?">Ai làm?</summary><p data-en="CleanTV is made by AlexVGS on top of the open-source CleanYourTV project (MIT) by Gathin and its contributors, who built the 213 TV lists and the clean Home.">CleanTV do AlexVGS làm, dựa trên dự án mã nguồn mở CleanYourTV (MIT) của Gathin và cộng đồng — họ làm 213 danh sách tivi và màn Home sạch.</p></details>
+</div></section>
+
+<section id="tivi"><div class="wrap" style="max-width:860px">
+  <h2 class="giua" data-en="Tested TVs" id="tvTieuDe">Tivi đã thử</h2>
+  <p class="sub giua" style="margin:0 auto 18px" data-en="Each model is a package list real owners disabled and kept working, from the CleanYourTV community. A TV that isn't here still works: the app uses safe general rules.">Mỗi mẫu là danh sách gói người dùng thật đã tắt và chạy ổn, từ cộng đồng CleanYourTV. Tivi không có tên ở đây vẫn dùng được: app áp luật chung an toàn.</p>
+  <input id="tvTim" type="search" class="tvTim" placeholder="Search brand or model (TCL C725, Mi Box, Sony X80J)">
+  <div id="tvLoai" class="tvLoai"></div>
+  <p id="tvDem" class="tvDem"></p>
+  <div id="tvDs" class="tvDs"></div>
 </div></section>
 
 <section id="cap-nhat"><div class="wrap" style="max-width:820px">
@@ -338,6 +364,33 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
   }
   fetch('/nhat-ky.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) { nkDs = j || []; veNhatKy(); }).catch(function () {});
   document.getElementById('doiNgon').addEventListener('click', veNhatKy);
+
+  // Tivi đã thử (tivi.json, scripts/lam-ds-tivi.py).
+  var tvDs = [], tvLoai = '', LOAI_TV = [['', 'All', 'Tất cả'], ['tivi', 'TVs', 'Tivi'], ['box', 'Boxes & sticks', 'Box, que'], ['may-chieu', 'Projectors', 'Máy chiếu']];
+  function veTivi() {
+    var hop = document.getElementById('tvDs'); if (!hop || !tvDs.length) return;
+    var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var bo = function (t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); };
+    var q = bo(document.getElementById('tvTim').value.trim());
+    var loc = tvDs.filter(function (m) { return (!tvLoai || m.loai === tvLoai) && (!q || bo(m.hang + ' ' + m.ten + ' ' + m.chiTiet + ' ' + m.android).indexOf(q) >= 0); });
+    var nhom = {}; loc.forEach(function (m) { (nhom[m.hang] = nhom[m.hang] || []).push(m); });
+    var hang = Object.keys(nhom).sort(function (a, b) { return nhom[b].length - nhom[a].length || a.localeCompare(b); });
+    document.getElementById('tvDem').textContent = cur === 'en' ? loc.length + ' models · ' + hang.length + ' brands' : loc.length + ' mẫu · ' + hang.length + ' hãng';
+    document.getElementById('tvLoai').innerHTML = LOAI_TV.map(function (l) { return '<button type="button" data-l="' + l[0] + '"' + (l[0] === tvLoai ? ' class="chon"' : '') + '>' + (cur === 'en' ? l[1] : l[2]) + '</button>'; }).join('');
+    hop.innerHTML = hang.map(function (h) {
+      return '<div class="tvHang"><h3>' + esc(h) + ' <span>' + nhom[h].length + '</span></h3>' + nhom[h].map(function (m) {
+        return '<div class="tvMau"><b>' + esc(m.ten) + '</b>' + (m.loai !== 'tivi' ? '<em>' + (m.loai === 'box' ? 'Box' : (cur === 'en' ? 'Projector' : 'Máy chiếu')) + '</em>' : '') + (m.android ? '<i>' + esc(m.android) + '</i>' : '') + (m.chiTiet ? '<small>' + esc(m.chiTiet) + '</small>' : '') + '</div>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+  document.getElementById('tvTim').addEventListener('input', veTivi);
+  document.getElementById('tvLoai').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { tvLoai = b.dataset.l; veTivi(); } });
+  document.getElementById('doiNgon').addEventListener('click', veTivi);
+  fetch('/tivi.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) {
+    tvDs = j.ds || []; var t = document.getElementById('tvTieuDe');
+    if (t) { t.dataset.en = j.tong + ' tested TVs, ' + j.hang + ' brands'; t.dataset.vi = j.tong + ' mẫu, ' + j.hang + ' hãng'; t.innerHTML = cur === 'en' ? t.dataset.en : t.dataset.vi; }
+    veTivi();
+  }).catch(function () {});
 
   // Placeholder hai thứ tiếng.
   var ph = document.querySelectorAll('[data-ph-en]');
