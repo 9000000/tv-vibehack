@@ -502,7 +502,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         }
         if (!kq.ok) {
             val goi = kq.conLai.ifBlank { t("không rõ", "unknown") }
-            loi = if (kq.lyDo == "setupwraith")
+            loi = if (kq.lyDo == "cvte")
+                t("Nút Home trên tivi vẫn mở Home gốc ($goi). Tivi bo mạch CVTE: app không tắt Home gốc vì đã có tivi treo ở màn khởi động sau khi tắt. Tắt mở tivi một lần rồi bấm Home thử lại; vẫn về Home cũ thì Home sạch vẫn mở được từ danh sách ứng dụng.",
+                    "The TV's Home button still opens the stock Home ($goi). CVTE board: the app never disables it, since one TV hung on its boot animation after that. Restart the TV once and press Home again; if it still opens the old Home, launch the clean Home from the app list.")
+            else if (kq.lyDo == "setupwraith")
                 t("Nút Home trên tivi vẫn mở Home Google ($goi). Trên Google TV phải tắt cả setupwraith thì mới thay được Home, mà nó đang giữ Wi-Fi nên app không tự tắt. Tivi vẫn dùng bình thường như cũ. Muốn thay hẳn nút Home: cắm dây mạng LAN cho tivi, kết nối lại, ở bước chọn gói tích thêm setupwraith rồi dọn lại.",
                     "The TV's Home button still opens Google's Home ($goi). On Google TV setupwraith must be disabled too before Home can change, and it holds the Wi-Fi, so the app leaves it. The TV works as before. To take over Home fully: plug the TV into Ethernet, reconnect, tick setupwraith in the package list and clean again.")
             else

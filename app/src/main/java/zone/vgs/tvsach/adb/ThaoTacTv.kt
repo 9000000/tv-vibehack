@@ -2,6 +2,7 @@ package zone.vgs.tvsach.adb
 
 import zone.vgs.tvsach.t
 import zone.vgs.tvsach.dulieu.BanSaoLuu
+import zone.vgs.tvsach.dulieu.KeHoach
 import zone.vgs.tvsach.dulieu.KhoSaoLuu
 import zone.vgs.tvsach.dulieu.ThongTinTv
 import zone.vgs.tvsach.dulieu.TrangThaiGoi
@@ -194,6 +195,9 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         // Home của hãng lạ (Fengmi, máy chiếu, tivi nội địa…): thử giữ nó bật, chỉ đặt Home mặc định + bắt nút Home trên
         // remote; không được mới tắt (21/10/2026, Formovie Nemo: com.tvfengmi.launcher).
         val hangLa = homeGoc != "none" && homeGoc !in HOME_GOC_BIET
+        // Bo mạch CVTE: chỉ đặt Home mặc định, không tắt Home gốc, không bật dịch vụ bắt phím cùng lượt (upstream #741).
+        val cvte = laBoMachCvte()
+        val giuHomeGoc = KeHoach.laHomeCvte(homeGoc)
 
         bao(t("Đẩy và cài Home sạch (${apk.size / 1024} KB)…", "Pushing and installing the clean Home (${apk.size / 1024} KB)…"))
         var out = caiApkHome(apk, bao)
@@ -226,11 +230,11 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             if (homeGoc !in sl.daTatTruoc) sl.daTatBoiApp += homeGoc
             kho.ghi(sl)
         }
-        if (homeGoc != "none" && !hangLa) tatHomeGoc()
+        if (homeGoc != "none" && !hangLa && !giuHomeGoc) tatHomeGoc()
         sh("cmd package set-home-activity --user 0 $PKG_HOME/.MainActivity")
-        if (hangLa) {
-            // Bắt nút Home trên remote về Home sạch dù hãng có dịch vụ bắt phím riêng.
-            batDichVu("HomeKeyService")
+        if (hangLa && !giuHomeGoc) {
+            // Bắt nút Home trên remote về Home sạch dù hãng có dịch vụ bắt phím riêng (bo CVTE: không, xem trên).
+            if (!cvte) batDichVu("HomeKeyService")
             if (!homeHienTai().startsWith("$PKG_HOME/")) {
                 bao(t("Home của hãng vẫn giữ quyền, tắt nó…", "The maker's Home still wins, disabling it…"))
                 tatHomeGoc()
@@ -239,6 +243,11 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         }
 
         val bayGio = homeHienTai()
+        if (!bayGio.startsWith("$PKG_HOME/") && giuHomeGoc) {
+            traHomeGoc(sl)
+            return t("Tivi bo mạch CVTE ('${bayGio.ifBlank { "không rõ" }}' vẫn nhận Home). Với loại bo này app không tắt Home gốc vì đã có tivi treo ở màn khởi động sau khi tắt. Tivi vẫn như cũ; Home sạch vẫn mở được từ danh sách ứng dụng.",
+                "CVTE board ('${bayGio.ifBlank { "unknown" }}' still claims Home). On this board the app never disables the stock Home: one TV hung on its boot animation after that. The TV is as before; open the clean Home from the app list.")
+        }
         if (!bayGio.startsWith("$PKG_HOME/")) {
             bao(t("Home không chuyển được, trả lại Home gốc…", "Home did not switch, restoring the stock Home…"))
             traHomeGoc(sl)
@@ -248,8 +257,13 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
 
         bao(t("Ghi cấu hình dock…", "Writing the dock settings…"))
         dayCauHinh(cauHinh, anhNen, boAnh)
-        if (nutInput) batDichVu("InputKeyService")
-        if (nutHome) batDichVu("HomeKeyService")
+        if (cvte && (nutInput || nutHome)) {
+            bao(t("Tivi bo mạch CVTE: chưa bật bắt phím remote lượt này. Tắt mở tivi một lần, thấy Home sạch lên bình thường rồi vào Đổi giao diện bật lại.",
+                "CVTE board: remote-key helpers stay off this pass. Restart the TV once and, once the clean Home comes up, turn them on under Change look."))
+        } else {
+            if (nutInput) batDichVu("InputKeyService")
+            if (nutHome) batDichVu("HomeKeyService")
+        }
         return null
     }
 
@@ -385,6 +399,10 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             // ganChuyenHomeCu (stock_home_redirect) CHƯA bật: thử trên máy ảo Android TV 14 ngày 22/10/2026 chưa thấy chuyển
             // về được — upstream mới thử trên XGIMI thật. Chưa thử chạy được thì không đưa ra cho người dùng.
             if (pkg == PKG_HOME) return KetQuaPhimHome(true, gianh, "", "")
+            if (KeHoach.laHomeCvte(pkg)) {
+                lyDo = "cvte"
+                return tra(pkg)
+            }
             if (lan == 3 || sl == null || pkg == SETUP || !nenTatVuiGianhHome(pkg)) return tra(pkg)
             if (pkg in HOME_GOC_BIET && dangBat(SETUP)) {
                 lyDo = "setupwraith"
@@ -402,7 +420,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     }
 
     private fun nenTatVuiGianhHome(pkg: String): Boolean {
-        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
+        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || KeHoach.laHomeCvte(pkg) || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
             pkg.startsWith("com.android.systemui") || pkg.contains("packageinstaller") || pkg.contains("permissioncontroller")) return false
         if (!sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return laLauncherCaiThem(pkg)
         if (sh("dumpsys package $pkg | grep -c TV_INPUT_HARDWARE").trim().toIntOrNull()?.let { it > 0 } == true) return false
@@ -431,6 +449,11 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         return sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
             .lines().any { it.trim().startsWith("$pkg/") }
     }
+
+    /** Tivi dùng bo mạch CVTE (có gói com.cvte.* / cn.cvte.*). Nhớ theo kết nối. */
+    private var cvteDaDo: Boolean? = null
+    fun laBoMachCvte(): Boolean = cvteDaDo ?: sh("pm list packages | grep -c -E 'package:(com|cn)\\.cvte\\.'").trim()
+        .toIntOrNull().let { (it ?: 0) > 0 }.also { cvteDaDo = it }
 
     private fun batDichVu(ten: String) {
         val svc = "$PKG_HOME/.$ten"

@@ -82,9 +82,16 @@ object KeHoach {
     /** Máy chiếu: gói lo lấy nét, chỉnh hình, motor — không bao giờ tắt (21/10/2026). */
     private val GIU_MAY_CHIEU = Regex("focus|keystone|trapez|tixing|jiaozheng|duijiao|motor|calibr|projector|projection", RegexOption.IGNORE_CASE)
 
+    /**
+     * Home gốc của bo mạch CVTE (JVC, Vision, Super General, Artel…): tắt nó cùng lúc bật dịch vụ bắt phím làm JVC
+     * LT-43N7115 treo ở màn khởi động, mất cả ADB (upstream #741, 22/10/2026). Không bao giờ tắt, kể cả khi danh sách
+     * đúng mẫu ghi tắt — Home sạch chỉ đặt làm mặc định.
+     */
+    fun laHomeCvte(pkg: String) = pkg.startsWith("com.cvte.tv.launcher")
+
     fun laGoiCanGiu(pkg: String, tt: TrangThaiGoi): Boolean =
         pkg in GIU_CHINH_XAC || GIU_DAU.any { pkg.startsWith(it) } || pkg in tt.banPhim || pkg == tt.homeHienTai ||
-            GIU_MAY_CHIEU.containsMatchIn(pkg)
+            GIU_MAY_CHIEU.containsMatchIn(pkg) || laHomeCvte(pkg)
 
     fun lap(du: DuLieu, mau: MauTv?, tt: TrangThaiGoi): List<MucGoi> {
         val ketQua = LinkedHashMap<String, MucGoi>()

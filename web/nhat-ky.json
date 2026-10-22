@@ -1,5 +1,19 @@
 [
  {
+  "ban": "1.9.1",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Tivi bo mạch CVTE (JVC, Vision, Super General, Artel…): app không bao giờ tắt Home gốc của hãng, chỉ đặt Home sạch làm mặc định. Một chiếc JVC đã treo ở màn khởi động sau khi tắt Home gốc (báo trên CleanYourTV #741).",
+   "Trên bo CVTE, bắt phím remote (Home, Input) không bật cùng lượt cài: tắt mở tivi một lần, thấy Home sạch lên bình thường rồi mới bật.",
+   "Thêm mục hỏi đáp: tivi kẹt ở màn khởi động thì làm gì."
+  ],
+  "en": [
+   "CVTE-board TVs (JVC, Vision, Super General, Artel…): the app never disables the stock Home, it only makes the clean Home the default. A JVC hung on its boot animation after its stock Home was disabled (CleanYourTV #741).",
+   "On CVTE boards the remote-key helpers (Home, Input) are not turned on in the same pass: restart the TV once, check the clean Home comes up, then turn them on.",
+   "New FAQ: what to do if the TV is stuck on the boot animation."
+  ]
+ },
+ {
   "ban": "1.9",
   "ngay": "2026-10-22",
   "vi": [
