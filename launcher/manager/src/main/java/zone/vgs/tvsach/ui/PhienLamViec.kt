@@ -113,6 +113,23 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var thuTuHinhNen by mutableStateOf("shuffle")
     var bangCaiDatNhanh by mutableStateOf(false)
     var nutSapXep by mutableStateOf(false)
+    // Toàn bộ các công tắc CleanYourTV bổ sung (https://cleanyour.tv/addons)
+    var hienNutWifi by mutableStateOf(true) // show_network_pill
+    var hienNutInputs by mutableStateOf(true) // show_inputs_pill
+    var tieuDeDock by mutableStateOf(true) // dock_title
+    var hangDockRieng by mutableStateOf(true) // dock_row
+    var dienDayDock by mutableStateOf(true) // fill_dock
+    var hieuUngLoXo by mutableStateOf(true) // focus_overshoot
+    var chuyenDongCoBan by mutableStateOf(true) // animations
+    var hieuUngNangCao by mutableStateOf(false) // advanced_effects
+    var toaSangNenDock by mutableStateOf(true) // ambient_glow
+    var toaSangIconApp by mutableStateOf(false) // app_glow
+    var theModuleCards by mutableStateOf(true) // module_cards
+    var nutHomeCaiDat by mutableStateOf(false) // show_home_settings_shortcut
+    var boLocPhim by mutableStateOf(true) // key_filter
+    var appTruyenHinh by mutableStateOf("") // live_tv_package
+    var appVpn by mutableStateOf("") // vpn_app
+    var cauHinhTuyY by mutableStateOf("") // JSON tuỳ biến mở rộng
     var homeXong by mutableStateOf(false)
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
     var phimHomeOk by mutableStateOf(true)
@@ -413,6 +430,9 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     /** Từ màn thông tin: đổi theme cho tivi đã có Home sạch. */
     fun moDoiTheme() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
 
+    /** Bỏ qua bước sao lưu & dọn gói để sang thẳng cài đặt / tuỳ biến Home sạch. */
+    fun boQuaDonGoi() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
+
     /** "Đổi giao diện": mở ra đúng các lựa chọn đang có trên tivi thay vì mặc định. */
     private suspend fun napCauHinhCu() {
         val j = runCatching { io { tv.docCauHinhTv() } }.getOrNull() ?: return
@@ -436,6 +456,21 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (j.has("wallpaper_order")) thuTuHinhNen = j.optString("wallpaper_order", thuTuHinhNen)
         bangCaiDatNhanh = j.optBoolean("settings_key_panel", bangCaiDatNhanh)
         nutSapXep = j.optBoolean("reorder_button", nutSapXep)
+        if (j.has("show_network_pill")) hienNutWifi = j.optBoolean("show_network_pill", hienNutWifi)
+        if (j.has("show_inputs_pill")) hienNutInputs = j.optBoolean("show_inputs_pill", hienNutInputs)
+        if (j.has("dock_title")) tieuDeDock = j.optBoolean("dock_title", tieuDeDock)
+        if (j.has("dock_row")) hangDockRieng = j.optBoolean("dock_row", hangDockRieng)
+        if (j.has("fill_dock")) dienDayDock = j.optBoolean("fill_dock", dienDayDock)
+        if (j.has("focus_overshoot")) hieuUngLoXo = j.optBoolean("focus_overshoot", hieuUngLoXo)
+        if (j.has("animations")) chuyenDongCoBan = j.optBoolean("animations", chuyenDongCoBan)
+        if (j.has("advanced_effects")) hieuUngNangCao = j.optBoolean("advanced_effects", hieuUngNangCao)
+        if (j.has("ambient_glow")) toaSangNenDock = j.optBoolean("ambient_glow", toaSangNenDock)
+        if (j.has("app_glow")) toaSangIconApp = j.optBoolean("app_glow", toaSangIconApp)
+        if (j.has("module_cards")) theModuleCards = j.optBoolean("module_cards", theModuleCards)
+        if (j.has("show_home_settings_shortcut")) nutHomeCaiDat = j.optBoolean("show_home_settings_shortcut", nutHomeCaiDat)
+        if (j.has("key_filter")) boLocPhim = j.optBoolean("key_filter", boLocPhim)
+        if (j.has("live_tv_package")) appTruyenHinh = j.optString("live_tv_package", appTruyenHinh)
+        if (j.has("vpn_app")) appVpn = j.optString("vpn_app", appVpn)
         nutManCho = j.optBoolean("dream_button", nutManCho)
         gonNut = j.optBoolean("top_compact", gonNut)
         j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
@@ -533,7 +568,34 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (thuTuHinhNen == "sequential") put("wallpaper_order", "sequential")
         if (bangCaiDatNhanh) put("settings_key_panel", true)
         if (nutSapXep) put("reorder_button", true)
+        if (!hienNutWifi) put("show_network_pill", false)
+        if (!hienNutInputs) put("show_inputs_pill", false)
+        if (!tieuDeDock) put("dock_title", false)
+        if (!hangDockRieng) put("dock_row", false)
+        if (!dienDayDock) put("fill_dock", false)
+        if (!hieuUngLoXo) put("focus_overshoot", false)
+        if (!chuyenDongCoBan) put("animations", false)
+        if (hieuUngNangCao) put("advanced_effects", true)
+        if (!toaSangNenDock) put("ambient_glow", false)
+        if (toaSangIconApp) put("app_glow", true)
+        if (!theModuleCards) put("module_cards", false)
+        if (nutHomeCaiDat) put("show_home_settings_shortcut", true)
+        if (!boLocPhim) put("key_filter", false)
+        if (appTruyenHinh.isNotBlank()) put("live_tv_package", appTruyenHinh.trim())
+        if (appVpn.isNotBlank()) put("vpn_app", appVpn.trim())
+
+        // Nhập JSON tuỳ ý (cho phép bất kỳ khoá nào trong 64 switches)
+        if (cauHinhTuyY.isNotBlank()) {
+            runCatching {
+                val them = JSONObject(cauHinhTuyY.trim())
+                them.keys().forEach { k -> put(k, them.get(k)) }
+            }
+        }
     }.toString()
+
+    fun xemTruocCauHinh(): String = runCatching {
+        JSONObject(cauHinhHome()).toString(2)
+    }.getOrDefault(cauHinhHome())
 
     private suspend fun anhNenTheme(): ByteArray? = themeChon.anhNen?.let { a -> io { ctx.assets.open(a).readBytes() } }
 
