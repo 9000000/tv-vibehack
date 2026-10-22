@@ -76,6 +76,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var ungVien by mutableStateOf<List<Pair<MauTv, Int>>>(emptyList())
     var mauChon by mutableStateOf<MauTv?>(null)
     var saoLuu by mutableStateOf<BanSaoLuu?>(null)
+    /** Bản sao lưu vừa lấy từ tivi (điện thoại này không có). */
+    var saoLuuTuTv by mutableStateOf(false)
 
     // Chọn gói
     var muc by mutableStateOf<List<MucGoi>>(emptyList())
@@ -333,7 +335,12 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         val du = io { DuLieu.nap(ctx) }
         ungVien = du.khopMau(info)
         mauChon = ungVien.firstOrNull()?.first
-        saoLuu = kho.doc(info.khoaLuu)?.also { it.ip = host; kho.ghi(it) }
+        // Điện thoại không có bản sao lưu (gỡ app, đổi máy, người khác dọn) thì lấy bản trên tivi.
+        val slMay = kho.doc(info.khoaLuu)
+        saoLuu = (slMay ?: io { tv.docSaoLuuTrenTv(info.khoaLuu) })?.also { b ->
+            b.ip = host; io { tv.luuSaoLuu(b) }
+        }
+        saoLuuTuTv = slMay == null && saoLuu != null
         nutInput = tt.homeHienTai == "com.google.android.apps.tv.launcherx"
         laMayChieu = tv.coVeMayChieu(tt, info)
         man = if (dangKhoiPhuc) Man.KHOI_PHUC else Man.THONG_TIN
@@ -613,6 +620,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         loiKp.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
         if (loiKp.isEmpty() && sl.daTatBoiApp.isEmpty() && !sl.launcherDaCai && !sl.dnsDaDoi) {
             kho.xoa(sl.khoa)
+            io { tv.xoaSaoLuuTrenTv() }
             khoiPhucXong = true
             ghi(t("Đã khôi phục xong, xoá bản sao lưu.", "Restore complete, backup removed."))
         } else ghi(t("Khôi phục xong một phần, bản sao lưu vẫn giữ để chạy lại.", "Partly restored; the backup is kept so you can run it again."))
@@ -620,11 +628,32 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         taiLaiSaoLuu()
     }
 
+    /** Tivi có Home sạch (bản nào cũng được): đã từng dọn bằng CleanTV / CleanYourTV. */
+    val coDauCleanTv: Boolean get() = trangThai?.let { tt -> ThaoTacTv.HOME_SACH.any { it in tt.caiDat } } == true
+
+    /** Gói đang tắt trên tivi khi không có bản sao lưu (null = chưa đọc). */
+    var goiTatKhongSaoLuu by mutableStateOf<List<String>?>(null)
+
+    fun docGoiTatKhongSaoLuu() = chay(t("Đang đọc gói đang tắt…", "Reading disabled packages…")) {
+        goiTatKhongSaoLuu = io { tv.goiTatBoiNguoiDung() }
+    }
+
+    fun chayKhoiPhucKhongSaoLuu(goLauncher: Boolean) = chay(t("Đang khôi phục…", "Restoring…")) {
+        nhatKy.clear()
+        val loiKp = io { tv.khoiPhucKhongSaoLuu(goLauncher) { s -> ghiTuIo(s) } }
+        veApp()
+        zone.vgs.tvsach.Dem.gui(ctx, "khoi-phuc", tenTiviDem(), goiTatKhongSaoLuu?.size ?: 0, "khong-sao-luu")
+        loiKp.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
+        if (loiKp.isEmpty()) khoiPhucXong = true
+        else ghi(t("Khôi phục xong một phần, chạy lại để thử tiếp.", "Partly restored; run it again to retry."))
+        goiTatKhongSaoLuu = null
+    }
+
     fun datLai() {
         thongTin = null; trangThai = null; muc = emptyList(); chon.clear(); ketQua = null
         dock.clear(); tenChao = ""; homeXong = false; dnsChanQc = false; dangKhoiPhuc = false; khoiPhucXong = false; anhTv = null
         laMayChieu = false; mayChieu = null; ghimMayChieu.clear()
-        nhatKy.clear(); saoLuu = null; epSetupwraith = false
+        nhatKy.clear(); saoLuu = null; saoLuuTuTv = false; goiTatKhongSaoLuu = null; epSetupwraith = false
         taiLaiSaoLuu()
     }
 

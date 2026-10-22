@@ -1,11 +1,11 @@
 {
  "app": {
-  "versionCode": 21,
-  "versionName": "1.9.2",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.2.apk",
-  "co": 11305703,
-  "ghiChu": "Sửa lỗi tivi Xiaomi bản Trung Quốc bấm Home ra màn đen: có Home sạch bản riêng cho Xiaomi, và app luôn bật lại Home gốc nếu không thay được. Dock chọn được tới 8 app.",
-  "ghiChuEn": "Fixes a black screen on Home on China-market Xiaomi TVs: a dedicated clean Home build for Xiaomi, and the app always turns the stock Home back on if it can't take over. The dock now holds up to 8 apps.",
+  "versionCode": 22,
+  "versionName": "1.9.3",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.3.apk",
+  "co": 11322087,
+  "ghiChu": "Bản sao lưu được lưu thêm ngay trên tivi: gỡ app hay đổi điện thoại vẫn khôi phục được. Thêm khôi phục khi không có sao lưu. Nút tham gia cộng đồng VGS.",
+  "ghiChuEn": "The backup is now also stored on the TV itself, so restoring works after reinstalling the app or switching phones. Restore without a backup. A link to join the VGS community.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
@@ -13,13 +13,13 @@
    "phienBan": "4ade98d2fafd1587",
    "url": "/ota/du-lieu.json",
    "co": 1185263,
-   "tuBan": 21
+   "tuBan": 22
   },
   "tvhome.apk": {
    "phienBan": "70e863980c54e165",
    "url": "/ota/tvhome.apk",
    "co": 568379,
-   "tuBan": 21
+   "tuBan": 22
   }
  }
 }

@@ -1,5 +1,19 @@
 [
  {
+  "ban": "1.9.3",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Bản sao lưu được lưu thêm một bản ngay trên tivi: gỡ app, xoá dữ liệu hay đổi điện thoại, kết nối lại là app tự lấy về để Khôi phục.",
+   "Khôi phục khi không có sao lưu (người khác dọn, mất cả hai bản): bật lại mọi gói đang tắt, gỡ Home sạch, trả Home gốc, DNS và trợ năng; hỏi xác nhận rõ vì gói bạn tự tắt trước đó cũng bật lại.",
+   "Màn “Tivi đã sạch” có nút tham gia cộng đồng VGS."
+  ],
+  "en": [
+   "The backup is also stored on the TV itself: after reinstalling the app, clearing its data or switching phones, the app reads it back on connect so Restore still works.",
+   "Restore without a backup (cleaned by someone else, both copies gone): re-enables every disabled package, removes the clean Home, brings back the stock Home, DNS and accessibility; asks for clear confirmation since packages you disabled yourself come back too.",
+   "The “TV is clean” screen links to the VGS community."
+  ]
+ },
+ {
   "ban": "1.9.2",
   "ngay": "2026-10-22",
   "vi": [

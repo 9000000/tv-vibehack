@@ -507,7 +507,11 @@ private fun ManThongTin(vm: PhienLamViec) = Cuon {
         Phu(t("Tivi mở ADB không cần xác nhận: ai cùng mạng cũng điều khiển được. Nhớ tắt ADB khi xong.",
             "This TV accepts ADB without a prompt: anyone on the network can control it. Turn ADB off when done."), Color.White)
     }
-    vm.saoLuu?.let { Phu(t("Tivi này đã có bản sao lưu từ ${ngay(it.luc)}. Làm tiếp vẫn giữ mốc khôi phục cũ.", "A backup from ${ngay(it.luc)} exists. Continuing keeps that restore point.")) }
+    vm.saoLuu?.let {
+        Phu(t("Tivi này đã có bản sao lưu từ ${ngay(it.luc)}", "A backup from ${ngay(it.luc)} exists") +
+            (if (vm.saoLuuTuTv) t(" (lấy từ bản lưu trên tivi)", " (read from the copy on the TV)") else "") +
+            t(". Làm tiếp vẫn giữ mốc khôi phục cũ.", ". Continuing keeps that restore point."))
+    }
     The(t("Danh sách mẫu", "Model list"), Icons.Rounded.FactCheck) {
         if (vm.ungVien.isEmpty()) Phu(t("Chưa có mẫu nào khớp đúng tivi này. App dùng luật chung: chỉ tích sẵn gói đã tắt trên nhiều tivi khác và không ai ghi là phải giữ.",
             "No tested list matches this TV. The app uses general rules: it pre-ticks only packages disabled on many other TVs that nobody marked as needed."))
@@ -521,6 +525,7 @@ private fun ManThongTin(vm: PhienLamViec) = Cuon {
     NutPhu(t("Xem màn hình tivi", "View TV screen"), Icons.Rounded.Screenshot) { vm.chupManHinh() }
     if (vm.daCoHomeSach) NutPhu(t("Đổi giao diện Home sạch", "Change the clean Home theme"), Icons.Rounded.Palette) { vm.moDoiTheme() }
     if (vm.saoLuu != null) NutPhu(t("Khôi phục tivi này", "Restore this TV"), Icons.Rounded.Restore) { vm.man = Man.KHOI_PHUC }
+    else if (vm.coDauCleanTv) NutPhu(t("Khôi phục (không có sao lưu)", "Restore (no backup)"), Icons.Rounded.Restore) { vm.man = Man.KHOI_PHUC }
 }
 
 @Composable
@@ -851,6 +856,15 @@ private fun ManXong(vm: PhienLamViec) = Cuon {
         NutPhu(t("Xem màn hình tivi", "View TV screen"), Icons.Rounded.Screenshot) { vm.chupManHinh() }
         NutPhu(t("Khởi động lại tivi", "Reboot the TV"), Icons.Rounded.RestartAlt) { vm.khoiDongLaiTv() }
     }
+    // Mời vào cộng đồng VGS (22/10/2026, anh Alex duyệt): ?tu=cleantv-app để vgs.zone ghi nguồn đăng ký từ app.
+    The(t("Cộng đồng VGS", "The VGS community"), Icons.Rounded.Groups) {
+        Phu(t("CleanTV miễn phí, do cộng đồng VGS làm. Tham gia VGSZone để hỏi đáp, nhận bản mới sớm và săn quà công nghệ.",
+            "CleanTV is free, made by the VGS community. Join VGSZone for help, early builds and tech giveaways."))
+        val uri = androidx.compose.ui.platform.LocalUriHandler.current
+        NutPhu(t("Tham gia cộng đồng VGS", "Join the VGS community"), Icons.Rounded.Groups) {
+            runCatching { uri.openUri("https://vgs.zone/dang-ky?tu=cleantv-app&next=/cleantv") }
+        }
+    }
     NutGopY(vm)
     NutChinh(t("Tắt ADB & kết thúc", "Turn off ADB & finish"), enabled = !vm.dangBan, icon = Icons.Rounded.Lock) { vm.tatAdbVaKetThuc() }
     Phu(t("Sau đó trên tivi: Tuỳ chọn nhà phát triển → tắt Gỡ lỗi USB, chọn \"Thu hồi uỷ quyền gỡ lỗi USB\". Bản sao lưu vẫn trong điện thoại để khôi phục.",
@@ -869,10 +883,34 @@ private fun ManKhoiPhuc(vm: PhienLamViec) = Cuon {
         return@Cuon
     }
     if (sl == null) {
-        The {
-            Text(t("Điện thoại này không có bản sao lưu của ${vm.thongTin?.tenHienThi}. Có thể đã dọn bằng máy khác.",
-                "This phone has no backup for ${vm.thongTin?.tenHienThi}. It may have been cleaned from another phone."))
+        // Không có bản sao lưu cả trên điện thoại lẫn trên tivi: bật lại mọi gói đang tắt, hỏi xác nhận rõ (22/10/2026).
+        DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục không cần sao lưu", "Restore without a backup"),
+            t("Không thấy bản sao lưu của ${vm.thongTin?.tenHienThi} trên điện thoại này lẫn trên tivi.",
+                "No backup of ${vm.thongTin?.tenHienThi} on this phone or on the TV."))
+        val ds = vm.goiTatKhongSaoLuu
+        if (ds == null) {
+            The {
+                Text(t("App có thể bật lại MỌI gói đang bị tắt trên tivi, gỡ Home sạch và trả Home gốc của hãng. Gói chính bạn tự tắt từ trước cũng sẽ bật lại.",
+                    "The app can re-enable EVERY disabled package on the TV, remove the clean Home and bring back the maker's Home. Packages you disabled yourself earlier come back too."))
+            }
+            NutChinh(if (vm.dangBan) t("Đang đọc…", "Reading…") else t("Xem gói đang tắt", "See disabled packages"), enabled = !vm.dangBan, icon = Icons.Rounded.Search) { vm.docGoiTatKhongSaoLuu() }
+            return@Cuon
         }
+        var dongY by remember { mutableStateOf(false) }
+        var goHomeKsl by remember { mutableStateOf(true) }
+        The(t("${ds.size} gói đang tắt", "${ds.size} disabled packages"), Icons.Rounded.Restore) {
+            if (ds.isEmpty()) Phu(t("Không có gói nào đang tắt.", "No packages are disabled."))
+            ds.take(12).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+            if (ds.size > 12) Phu(t("…và ${ds.size - 12} gói nữa.", "…and ${ds.size - 12} more."))
+        }
+        The {
+            Hang(t("Gỡ luôn Home sạch", "Also uninstall the clean Home"), t("Bỏ chọn để giữ Home sạch trên tivi", "Untick to keep it on the TV"), goHomeKsl) { goHomeKsl = it }
+            Hang(t("Tôi hiểu: bật lại tất cả", "I understand: re-enable all"), t("Kể cả gói tôi tự tắt trước khi dùng CleanTV", "Including ones I disabled before using CleanTV"), dongY) { dongY = it }
+        }
+        NutChinh(if (vm.dangBan) t("Đang khôi phục…", "Restoring…") else t("Khôi phục", "Restore"), enabled = dongY && !vm.dangBan, icon = Icons.Rounded.Restore) {
+            vm.chayKhoiPhucKhongSaoLuu(goHomeKsl)
+        }
+        vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
         return@Cuon
     }
     DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ${sl.ten}", "Restore ${sl.ten}"),
