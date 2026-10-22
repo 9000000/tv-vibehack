@@ -57,6 +57,9 @@ object CapNhat {
         j.optJSONObject("duLieu")?.let { dl ->
             for (ten in dl.keys()) {
                 val o = dl.getJSONObject(ten)
+                // Dữ liệu do bản app CŨ HƠN phát hành thì bỏ: đồ đóng sẵn trong app mới hơn (22/10/2026: bản thử 1.7
+                // tải lại launcher của 1.5 từ máy chủ rồi dùng nó thay launcher có âm lịch).
+                if (o.optInt("tuBan", 0) < BuildConfig.VERSION_CODE) { fileDuLieu(ctx, ten).delete(); continue }
                 val phienBan = o.getString("phienBan")
                 if (prefs.getString(ten, "") == phienBan && fileDuLieu(ctx, ten).isFile) continue
                 runCatching {

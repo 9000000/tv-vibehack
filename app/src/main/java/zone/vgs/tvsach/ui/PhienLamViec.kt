@@ -30,6 +30,7 @@ import zone.vgs.tvsach.dulieu.BanSaoLuu
 import zone.vgs.tvsach.dulieu.DuLieu
 import zone.vgs.tvsach.dulieu.KeHoach
 import zone.vgs.tvsach.dulieu.KhoSaoLuu
+import zone.vgs.tvsach.dulieu.THANH_PHO
 import zone.vgs.tvsach.dulieu.MauTv
 import zone.vgs.tvsach.dulieu.MucGoi
 import zone.vgs.tvsach.dulieu.ThongTinTv
@@ -91,6 +92,15 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var dnsChanQc by mutableStateOf(false)
     var nutManCho by mutableStateOf(true)
     var gonNut by mutableStateOf(true)
+    // Tuỳ chỉnh thêm (1.7, các "switch" của launcher — upstream themes/README.md).
+    var amLich by mutableStateOf(true)
+    var tenDuoiApp by mutableStateOf(false)
+    var thuVienApp by mutableStateOf(false)
+    var dongHoKhiYen by mutableStateOf(0)
+    var tiviYeu by mutableStateOf(false)
+    var hieuUngKinh by mutableStateOf(false)
+    var lamToiNen by mutableStateOf(0)
+    var hienThongSo by mutableStateOf(false)
     var homeXong by mutableStateOf(false)
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
     var phimHomeOk by mutableStateOf(true)
@@ -389,7 +399,25 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     /** Từ màn thông tin: đổi theme cho tivi đã có Home sạch. */
-    fun moDoiTheme() { chuanBiDock(); man = Man.HOME_SACH }
+    fun moDoiTheme() { chuanBiDock(); man = Man.HOME_SACH; viewModelScope.launch { napCauHinhCu() } }
+
+    /** "Đổi giao diện": mở ra đúng các lựa chọn đang có trên tivi thay vì mặc định. */
+    private suspend fun napCauHinhCu() {
+        val j = runCatching { io { tv.docCauHinhTv() } }.getOrNull() ?: return
+        amLich = j.optBoolean("lunar_date", amLich)
+        tenDuoiApp = j.optBoolean("always_show_names", false)
+        thuVienApp = j.optBoolean("app_library", false)
+        dongHoKhiYen = j.optInt("home_idle_clock_minutes", 0)
+        tiviYeu = j.optBoolean("reduced_motion", false)
+        hieuUngKinh = j.optBoolean("dock_glass", false)
+        lamToiNen = j.optInt("wallpaper_dim", 0)
+        hienThongSo = j.optBoolean("show_stats", false)
+        nutManCho = j.optBoolean("dream_button", nutManCho)
+        gonNut = j.optBoolean("top_compact", gonNut)
+        j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
+        j.optString("greeting_name").takeIf { it.isNotBlank() }?.let { tenChao = it }
+        j.optString("weather_place").takeIf { it.isNotBlank() }?.let { ten -> THANH_PHO.firstOrNull { it.ten == ten }?.let { thanhPho = it } }
+    }
 
     private fun chuanBiDock() {
         if (dock.isNotEmpty()) return
@@ -406,7 +434,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         val apk = io { zone.vgs.tvsach.CapNhat.moAsset(ctx, "tvhome.apk").readBytes() }
         val cauHinh = cauHinhHome()
         val anh = anhNenTheme()
-        val loiCai = io { tv.caiLauncher(apk, sl, cauHinh, anh, nutInput, nutHome) { s -> ghiTuIo(s) } }
+        val bo = boAnhTheme()
+        val loiCai = io { tv.caiLauncher(apk, sl, cauHinh, anh, bo, nutInput, nutHome) { s -> ghiTuIo(s) } }
         if (loiCai != null) error(loiCai)
         if (dnsChanQc) io { tv.batDnsChanQc(sl) }
         if (nutManCho) io { tv.chuanBiManCho(sl) }
@@ -457,9 +486,22 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         put("top_compact", gonNut)
         thanhPho?.let { put("weather_lat", it.lat); put("weather_lon", it.lon); put("weather_place", it.ten) }
         if (ghimMayChieu.isNotEmpty()) put("projector_actions", JSONArray(ghimMayChieu.map { (comp, nhan) -> "$nhan=$comp" }))
+        put("lunar_date", amLich)
+        if (tenDuoiApp) put("always_show_names", true)
+        if (thuVienApp) { put("app_library", true); put("library_button", true) }
+        if (dongHoKhiYen > 0) put("home_idle_clock_minutes", dongHoKhiYen)
+        if (tiviYeu) put("reduced_motion", true)
+        if (hieuUngKinh) { put("dock_glass", true); put("app_glow", true) }
+        if (lamToiNen > 0) put("wallpaper_dim", lamToiNen)
+        if (hienThongSo) put("show_stats", true)
     }.toString()
 
     private suspend fun anhNenTheme(): ByteArray? = themeChon.anhNen?.let { a -> io { ctx.assets.open(a).readBytes() } }
+
+    /** Bộ ảnh xoay vòng của theme: mọi file ảnh trong thư mục assets boAnh. */
+    private suspend fun boAnhTheme(): List<Pair<String, ByteArray>>? = themeChon.boAnh?.let { thu ->
+        io { (ctx.assets.list(thu) ?: emptyArray()).sorted().map { it to ctx.assets.open("$thu/$it").readBytes() } }
+    }
 
     /** Đổi theme / dock cho tivi đã có Home sạch. */
     fun apDungTheme() = chay(t("Đang đổi giao diện…", "Applying the theme…")) {
@@ -472,7 +514,9 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
             return@chay
         }
         if (anh != null) thongBao = t("Đang gửi ảnh nền (${anh.size / 1024} KB)…", "Sending the wallpaper (${anh.size / 1024} KB)…")
-        io { tv.dayCauHinh(json, anh) }
+        val bo = boAnhTheme()
+        if (bo != null) thongBao = t("Đang gửi ${bo.size} ảnh phong cảnh…", "Sending ${bo.size} landscape pictures…")
+        io { tv.dayCauHinh(json, anh, bo) }
         if (nutManCho) io { tv.chuanBiManCho(saoLuu) }
         thongBao = t("Đang thử nút Home trên tivi…", "Testing the TV's Home button…")
         val sl = saoLuu ?: thongTin?.let { tt -> runCatching { io { tv.damBaoSaoLuu(tt, getprop, ip) } }.getOrNull() }?.also { saoLuu = it }

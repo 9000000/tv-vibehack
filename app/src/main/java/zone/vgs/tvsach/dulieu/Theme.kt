@@ -15,10 +15,13 @@ data class Theme(
     val cauHinh: Map<String, Any>,
     val anhNen: String? = null,
     val mau: List<Long>,
+    /** Thư mục assets chứa BỘ ảnh nền xoay vòng (đẩy vào wallpapers/ của launcher); ảnh xem trước trong app. */
+    val boAnh: String? = null,
+    val anhXem: String? = null,
 ) {
     fun ghiVao(o: JSONObject) {
         cauHinh.forEach { (k, v) -> o.put(k, v) }
-        o.put("wallpaper", anhNen != null)
+        o.put("wallpaper", anhNen != null || boAnh != null)
     }
 }
 
@@ -31,6 +34,10 @@ val THEMES = listOf(
         mapOf("sky_intensity" to 70, "dock_band" to false), null, listOf(0xFF1B2B5A, 0xFF5A3A4A)),
     Theme("dien-anh", "Điện ảnh", "Cinematic", "Ảnh app đang chọn phủ kín nửa trên", "The focused app's artwork fills the top",
         mapOf("cinematic_home" to true, "sky_intensity" to 35), null, listOf(0xFF4A0A0A, 0xFF101010)),
+    // Scenes của CleanYourTV (manas-04): 14 tranh phong cảnh tối vẽ bằng code, tự đổi mỗi giờ (22/10/2026).
+    Theme("phong-canh", "Phong cảnh", "Scenes", "14 tranh phong cảnh, tự đổi mỗi giờ", "14 landscapes, a new one every hour",
+        mapOf("wallpaper_rotation_minutes" to 60, "dock_band" to false, "background_color" to "#05060A"), null,
+        listOf(0xFF1A2236, 0xFF4A3A5A), boAnh = "theme/phong-canh", anhXem = "theme/phong-canh/02-golden-coast.jpg"),
     Theme("toi-gian", "Tối giản", "Minimal", "Nền đen tuyền, kiểu Apple TV", "Pure black, Apple TV style",
         mapOf("background_color" to "#000000"), null, listOf(0xFF000000, 0xFF111111)),
     Theme("sau-cot", "Nhiều app", "More apps", "6 cột, thấy thêm một hàng app", "6 columns, one more row visible",

@@ -170,6 +170,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         sl: BanSaoLuu,
         cauHinh: String,
         anhNen: ByteArray?,
+        boAnh: List<Pair<String, ByteArray>>?,
         nutInput: Boolean,
         nutHome: Boolean,
         bao: (String) -> Unit,
@@ -243,7 +244,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         }
 
         bao(t("Ghi cấu hình dock…", "Writing the dock settings…"))
-        dayCauHinh(cauHinh, anhNen)
+        dayCauHinh(cauHinh, anhNen, boAnh)
         if (nutInput) batDichVu("InputKeyService")
         if (nutHome) batDichVu("HomeKeyService")
         return null
@@ -306,18 +307,22 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      */
     private fun ghiFileTheme(ten: String, du: ByteArray) {
         val dir = "/sdcard/Android/data/$PKG_HOME/files"
-        val tam = "/data/local/tmp/cyt-$ten"
+        val tam = "/data/local/tmp/cyt-${ten.replace('/', '-')}"
         adb.ghiFile(tam, du)
+        if (ten.contains('/')) sh("mkdir -p $dir/${ten.substringBeforeLast('/')} 2>/dev/null; true")
         sh("rm -f $dir/$ten 2>/dev/null; content write --uri content://$PKG_HOME.theme/$ten < $tam 2>/dev/null || cp $tam $dir/$ten 2>/dev/null; rm -f $tam")
     }
 
-    fun dayCauHinh(json: String, anhNen: ByteArray? = null) {
+    fun dayCauHinh(json: String, anhNen: ByteArray? = null, boAnh: List<Pair<String, ByteArray>>? = null) {
         val dir = "/sdcard/Android/data/$PKG_HOME/files"
         val uri = "content://$PKG_HOME.theme"
         sh("mkdir -p $dir 2>/dev/null; true")
         ghiFileTheme("config.json", json.toByteArray())
         if (anhNen != null) ghiFileTheme("wallpaper.jpg", anhNen)
         else sh("rm -f $dir/wallpaper.jpg 2>/dev/null; content delete --uri $uri/wallpaper.jpg 2>/dev/null; true")
+        // Bộ ảnh xoay vòng (wallpapers/): xoá bộ cũ trước, theme không có bộ ảnh thì chỉ xoá.
+        sh("rm -rf $dir/wallpapers 2>/dev/null; content delete --uri $uri/wallpapers 2>/dev/null; true")
+        boAnh?.forEach { (ten, du) -> ghiFileTheme("wallpapers/$ten", du) }
         ghiFileTheme("theme_revision", java.util.UUID.randomUUID().toString().replace("-", "").toByteArray())
         sh(KHOI_DONG_LAI_HOME)
     }
@@ -328,6 +333,12 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
      */
     /** Kết quả thử nút Home thật: [gianh] = các gói đã tắt vì giành nút Home, [conLai] = gói vẫn giành (không dám tắt). */
     data class KetQuaPhimHome(val ok: Boolean, val gianh: List<String>, val conLai: String, val lyDo: String = "")
+
+    /** config.json đang có trên tivi (để "Đổi giao diện" mở ra đúng lựa chọn cũ); null nếu chưa có / đọc không được. */
+    fun docCauHinhTv(): org.json.JSONObject? {
+        val s = sh("content read --uri content://$PKG_HOME.theme/config.json 2>/dev/null || cat /sdcard/Android/data/$PKG_HOME/files/config.json 2>/dev/null").trim()
+        return runCatching { org.json.JSONObject(s) }.getOrNull()
+    }
 
     /** Gói của màn đang hiện trên tivi (đọc cửa sổ đang giữ tiêu điểm — chạy được từ Android 8 tới 14). */
     fun goiDangHien(): String {

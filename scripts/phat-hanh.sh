@@ -37,8 +37,8 @@ code, name, ghi, ghi_en, co_apk, url_apk, s1, c1, s2, c2 = sys.argv[1:]
 print(json.dumps({
   "app": {"versionCode": int(code), "versionName": name, "apk": url_apk, "co": int(co_apk), "ghiChu": ghi, "ghiChuEn": ghi_en, "ngay": ngay},
   "duLieu": {
-    "du-lieu.json": {"phienBan": s1, "url": "/ota/du-lieu.json", "co": int(c1)},
-    "tvhome.apk": {"phienBan": s2, "url": "/ota/tvhome.apk", "co": int(c2)},
+    "du-lieu.json": {"phienBan": s1, "url": "/ota/du-lieu.json", "co": int(c1), "tuBan": int(code)},
+    "tvhome.apk": {"phienBan": s2, "url": "/ota/tvhome.apk", "co": int(c2), "tuBan": int(code)},
   },
 }, ensure_ascii=False, indent=1))
 PY

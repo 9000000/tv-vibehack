@@ -1,5 +1,21 @@
 [
  {
+  "ban": "1.7",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Âm lịch ngay dưới ngày dương trên Home sạch, ví dụ \"13/9 âm lịch · Bính Ngọ\" (bật / tắt trong Đổi giao diện).",
+   "Theme Phong cảnh: 14 tranh phong cảnh tự đổi mỗi giờ (từ CleanYourTV).",
+   "Mục Tuỳ chỉnh thêm: hiện tên dưới mọi app, thư viện app, chế độ tivi yếu, kính mờ, hiện bộ nhớ, đồng hồ khi để yên, làm tối hình nền.",
+   "Đổi giao diện mở ra đúng các lựa chọn đang có trên tivi."
+  ],
+  "en": [
+   "Lunar date under the date on the clean Home, e.g. \"Lunar 13/9 · Year of the Horse\".",
+   "Scenes theme: 14 landscapes rotating hourly (from CleanYourTV).",
+   "More options: names under every app, app library, slow-TV mode, frosted glass, memory line, idle clock, dimmed wallpaper.",
+   "Changing the theme now opens with the TV's current choices."
+  ]
+ },
+ {
   "ban": "1.5",
   "ngay": "2026-10-22",
   "vi": [
