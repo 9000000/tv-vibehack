@@ -921,6 +921,40 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (loi.isEmpty()) khoiPhucXong = true
     }
 
+    /** Bật lại một gói cụ thể trực tiếp trên tivi. */
+    fun batMotGoi(pkg: String) = chay(t("Đang bật lại $pkg…", "Re-enabling $pkg…")) {
+        val ok = io { tv.batMotGoi(pkg) }
+        if (ok) {
+            saoLuu?.let { sl ->
+                if (pkg in sl.daTatBoiApp) {
+                    sl.daTatBoiApp -= pkg
+                    kho.ghi(sl)
+                    taiLaiSaoLuu()
+                }
+            }
+            trangThai = io { tv.docTrangThai() }
+            ghi(t("Đã bật lại $pkg thành công.", "Re-enabled $pkg successfully."))
+        } else {
+            ghi(t("Không bật được $pkg.", "Failed to re-enable $pkg."))
+        }
+    }
+
+    /** Bật lại danh sách các gói đã chọn. */
+    fun batCacGoiDaChon(ds: List<String>) = chay(t("Đang bật lại ${ds.size} ứng dụng…", "Re-enabling ${ds.size} apps…")) {
+        if (ds.isEmpty()) return@chay
+        nhatKy.clear()
+        val loi = io { tv.batLaiGoiDaTat(ds) { s -> ghiTuIo(s) } }
+        loi.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
+        saoLuu?.let { sl ->
+            val thanhCong = ds - loi.map { it.substringBefore(':') }.toSet()
+            sl.daTatBoiApp.removeAll(thanhCong.toSet())
+            kho.ghi(sl)
+            taiLaiSaoLuu()
+        }
+        trangThai = io { tv.docTrangThai() }
+        ghi(t("Đã bật lại ${ds.size - loi.size}/${ds.size} ứng dụng.", "Re-enabled ${ds.size - loi.size}/${ds.size} apps."))
+    }
+
     fun datLai() {
         thongTin = null; trangThai = null; muc = emptyList(); chon.clear(); ketQua = null
         dock.clear(); tenChao = ""; homeXong = false; dnsChanQc = false; dangKhoiPhuc = false; khoiPhucXong = false; anhTv = null

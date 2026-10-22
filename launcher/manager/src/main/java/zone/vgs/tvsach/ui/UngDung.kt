@@ -1137,43 +1137,121 @@ private fun ManKhoiPhuc(vm: PhienLamViec) = Cuon {
         NutChinh(t("Tiếp: tắt ADB", "Next: turn off ADB"), icon = Icons.Rounded.Lock) { vm.man = Man.XONG }
         return@Cuon
     }
-    if (sl == null) {
-        val daTat = vm.trangThai?.daTat.orEmpty()
-        if (daTat.isNotEmpty()) {
-            DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ứng dụng đã tắt", "Restore disabled apps"),
-                t("Điện thoại không còn file sao lưu cũ, nhưng phát hiện tivi có ${daTat.size} ứng dụng đang bị tắt.",
-                  "This phone has no backup file, but detected ${daTat.size} disabled apps on the TV."))
-            The(t("Ứng dụng đang tắt trên tivi (${daTat.size})", "Disabled apps on TV (${daTat.size})"), Icons.Rounded.Apps) {
-                Phu(t("Bấm nút dưới để bật lại toàn bộ các ứng dụng này trực tiếp trên tivi.",
-                      "Tap below to re-enable all these apps directly on the TV."))
-                daTat.take(8).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
-                if (daTat.size > 8) Phu("… " + t("và ${daTat.size - 8} ứng dụng khác", "and ${daTat.size - 8} more"))
-            }
-            NutChinh(if (vm.dangBan) t("Đang bật lại…", "Re-enabling…") else t("Bật lại tất cả ${daTat.size} ứng dụng", "Re-enable all ${daTat.size} apps"),
-                enabled = !vm.dangBan, icon = Icons.Rounded.Restore) {
-                vm.chayBatLaiTatCaGoiTv()
-            }
-            vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
-        } else {
-            The {
-                Text(t("Điện thoại này không có bản sao lưu của ${vm.thongTin?.tenHienThi}. Trên tivi hiện cũng không có ứng dụng nào đang bị tắt.",
-                    "This phone has no backup for ${vm.thongTin?.tenHienThi}. There are also no disabled packages on the TV."))
-            }
+
+    // Danh sách các gói có thể khôi phục: nếu có sao lưu thì lấy sl.daTatBoiApp, nếu không thì lấy vm.trangThai?.daTat
+    val dsGoi = (sl?.daTatBoiApp?.toList() ?: vm.trangThai?.daTat?.toList().orEmpty()).sorted()
+    val chon = remember { mutableStateMapOf<String, Boolean>() }
+    val soChon = dsGoi.count { chon[it] == true }
+
+    if (dsGoi.isEmpty()) {
+        The {
+            Text(t("Không có ứng dụng nào đang bị tắt cần khôi phục.", "No disabled apps to restore."))
         }
         return@Cuon
     }
-    DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ${sl.ten}", "Restore ${sl.ten}"),
-        t("Bật lại ${sl.daTatBoiApp.size} gói", "Re-enable ${sl.daTatBoiApp.size} packages") +
-            (if (sl.launcherDaCai) t(", trả Home gốc", ", restore the stock Home") else "") +
-            (if (sl.dnsDaDoi) t(", trả DNS", ", restore DNS") else "") + ".")
+
+    if (sl == null) {
+        DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ứng dụng đã tắt", "Restore disabled apps"),
+            t("Điện thoại không còn file sao lưu cũ, nhưng phát hiện tivi có ${dsGoi.size} ứng dụng đang bị tắt.",
+              "This phone has no backup file, but detected ${dsGoi.size} disabled apps on the TV."))
+    } else {
+        DauTrang({ OIcon(Icons.Rounded.Restore, 72.dp) }, t("Khôi phục ${sl.ten}", "Restore ${sl.ten}"),
+            t("Có ${dsGoi.size} gói app đã tắt", "${dsGoi.size} disabled packages") +
+                (if (sl.launcherDaCai) t(", có thể trả Home gốc", ", can restore stock Home") else "") +
+                (if (sl.dnsDaDoi) t(", trả DNS", ", restore DNS") else "") + ".")
+    }
+
     var goHome by remember { mutableStateOf(true) }
-    if (sl.launcherDaCai) The {
-        Hang(t("Gỡ luôn Home sạch", "Also uninstall the clean Home"), t("Bỏ chọn để giữ Home sạch trên tivi", "Untick to keep it on the TV"), goHome) { goHome = it }
+    if (sl != null && sl.launcherDaCai) The {
+        Hang(t("Gỡ luôn Home sạch khi khôi phục toàn bộ", "Also uninstall clean Home on full restore"),
+            t("Bỏ chọn để giữ Home sạch trên tivi", "Untick to keep clean Home on the TV"), goHome) { goHome = it }
     }
-    NutChinh(if (vm.dangBan) t("Đang khôi phục…", "Restoring…") else t("Khôi phục", "Restore"), enabled = !vm.dangBan, icon = Icons.Rounded.Restore) {
-        vm.chayKhoiPhuc(sl.launcherDaCai && goHome)
+
+    The(t("Bật lại từng ứng dụng (${dsGoi.size})", "Re-enable individual apps (${dsGoi.size})"), Icons.Rounded.Apps) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Phu(t("Bấm nút 'Bật' cạnh app để bật ngay, hoặc tích chọn nhiều app:", "Tap 'Enable' next to an app, or tick to select multiple:"))
+            val tatCa = dsGoi.isNotEmpty() && dsGoi.all { chon[it] == true }
+            TextButton(onClick = { dsGoi.forEach { chon[it] = !tatCa } }) {
+                Text(if (tatCa) t("Bỏ hết", "None") else t("Chọn hết", "All"))
+            }
+        }
+        dsGoi.forEach { pkg ->
+            DongGoiKhoiPhuc(
+                pkg = pkg,
+                chon = chon[pkg] == true,
+                onChonDoi = { chon[pkg] = it },
+                onBatNgay = { vm.batMotGoi(pkg) },
+                dangBan = vm.dangBan
+            )
+        }
     }
+
+    if (soChon > 0) {
+        NutChinh(
+            if (vm.dangBan) t("Đang bật lại…", "Re-enabling…")
+            else t("Bật $soChon ứng dụng đã chọn", "Re-enable $soChon selected apps"),
+            enabled = !vm.dangBan,
+            icon = Icons.Rounded.Check
+        ) {
+            vm.batCacGoiDaChon(dsGoi.filter { chon[it] == true })
+        }
+    }
+
+    if (sl != null) {
+        NutPhu(
+            if (vm.dangBan) t("Đang khôi phục toàn bộ…", "Restoring all…")
+            else t("Khôi phục toàn bộ (${dsGoi.size} gói)", "Restore all (${dsGoi.size} packages)"),
+            enabled = !vm.dangBan,
+            icon = Icons.Rounded.Restore
+        ) {
+            vm.chayKhoiPhuc(sl.launcherDaCai && goHome)
+        }
+    } else {
+        NutPhu(
+            if (vm.dangBan) t("Đang bật lại…", "Re-enabling…")
+            else t("Bật lại tất cả ${dsGoi.size} ứng dụng", "Re-enable all ${dsGoi.size} apps"),
+            enabled = !vm.dangBan,
+            icon = Icons.Rounded.Restore
+        ) {
+            vm.chayBatLaiTatCaGoiTv()
+        }
+    }
+
     vm.nhatKy.takeLast(4).forEach { Text(it, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = ChuPhu) }
+}
+
+@Composable
+private fun DongGoiKhoiPhuc(
+    pkg: String,
+    chon: Boolean,
+    onChonDoi: (Boolean) -> Unit,
+    onBatNgay: () -> Unit,
+    dangBan: Boolean,
+) {
+    val ten = tenDep(pkg)
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(The2)
+            .border(1.dp, if (chon) Tim.copy(alpha = 0.6f) else Vien, RoundedCornerShape(14.dp))
+            .clickable { onChonDoi(!chon) }.padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(chon, onChonDoi)
+        Spacer(Modifier.width(8.dp))
+        Column(Modifier.weight(1f)) {
+            Text(ten, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1)
+            Text(pkg, fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = ChuPhu, maxLines = 1)
+        }
+        Spacer(Modifier.width(8.dp))
+        FilledTonalButton(
+            onClick = onBatNgay,
+            enabled = !dangBan,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = Tim.copy(alpha = 0.25f), contentColor = Color.White)
+        ) {
+            Text(t("Bật", "Enable"), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
 }
 
 // ---------------- Nhắc + hướng dẫn chế độ nhà phát triển ----------------

@@ -581,6 +581,12 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         return loi
     }
 
+    /** Bật lại một gói cụ thể trực tiếp trên tivi. */
+    fun batMotGoi(pkg: String): Boolean {
+        val out = runCatching { sh("pm enable --user 0 $pkg") }.getOrNull() ?: return false
+        return out.contains("enabled")
+    }
+
     // ---------- Đóng ADB ----------
 
     /** Tắt ADB qua mạng trên tivi. Lệnh cuối làm rớt kết nối này, nên lỗi ở đây là bình thường. */
