@@ -40,4 +40,26 @@
 - **Prevention**: Luôn kiểm tra cấu trúc cú pháp `data class (...) { ... }` trong Kotlin khi bổ sung custom property getter.
 - **Status**: Fixed
 
+## [2026-10-22 17:53] - Unit Test Failures in KeHoachTest & NangCaoTest
+
+- **Type**: Process
+- **Severity**: Medium
+- **File**: `launcher/manager/src/test/java/zone/vgs/tvsach/dulieu/KeHoachTest.kt:84`, `NangCaoTest.kt:25`
+- **Agent**: mon
+- **Root Cause**:
+  1. Trong `KeHoach.kt`, regex `APP_XUAT_XUONG` chỉ kiểm tra `factorytest|factory_test|factorymode`, bỏ sót tiền tố `factorymenu` (như gói `mediatek.factorymenu.ui`), khiến gói này lọt vào kế hoạch và làm fail test `factoryTest_khongBaoGioVaoDanhSachTat`.
+  2. Trong `NangCaoTest.kt`, assertion cũ kiểm tra tất cả các khóa trong `KHOA_DA_CO_SAN` không được có trong `nang-cao.json`, nhưng bản v2.0.1 đã mở rộng hỗ trợ 52 tùy chọn nâng cao và chỉ loại trừ 4 khóa do app tự quản lý (`dock_apps`, `lunar_date`, `always_show_names`, `wallpaper`).
+- **Error Message**:
+  ```
+  KeHoachTest > factoryTest_khongBaoGioVaoDanhSachTat FAILED
+      java.lang.AssertionError at KeHoachTest.kt:84
+  NangCaoTest > danhMucHopLe FAILED
+      java.lang.AssertionError at NangCaoTest.kt:25
+  ```
+- **Fix Applied**: 
+  1. Mở rộng regex `APP_XUAT_XUONG = Regex("""factory|hkcfac|fac\.menu""", RegexOption.IGNORE_CASE)`.
+  2. Đồng bộ assertion trong `NangCaoTest.kt` khớp với upstream v2.0.1: `listOf("dock_apps", "lunar_date", "always_show_names", "wallpaper")`.
+- **Prevention**: Luôn chạy unit test bộ dữ liệu và kiểm tra regex bao phủ đầy đủ các biến thể package hệ thống.
+- **Status**: Fixed
+
 ---
