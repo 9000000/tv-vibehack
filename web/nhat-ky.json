@@ -1,5 +1,19 @@
 [
  {
+  "ban": "1.8",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Home sạch theo CleanYourTV 2.6: bấm Home từ app về nhanh hơn, đỡ giật trên tivi yếu; ô đầu và cuối dock không còn bị mép bo che.",
+   "Bật \"Nút Input trên remote\" thì bấm Input mở bảng chọn HDMI của Home sạch (cho tivi bấm Input không ra gì sau khi dọn).",
+   "Không bao giờ coi app kiểm tra xuất xưởng (vd trên Xiaomi Mi TV 4A) là Home của hãng."
+  ],
+  "en": [
+   "Clean Home follows CleanYourTV 2.6: back to Home from an app is faster on slow TVs; the first and last dock tiles are no longer clipped.",
+   "With \"Remote Input button\" on, Input opens the clean Home's source picker (for TVs where it did nothing after cleaning).",
+   "A factory-test app (e.g. on Xiaomi Mi TV 4A) is never taken for the maker's Home."
+  ]
+ },
+ {
   "ban": "1.7",
   "ngay": "2026-10-22",
   "vi": [

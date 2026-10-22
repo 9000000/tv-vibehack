@@ -1,25 +1,25 @@
 {
  "app": {
-  "versionCode": 17,
-  "versionName": "1.7",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.7.apk",
-  "co": 10732667,
-  "ghiChu": "Home sạch có âm lịch (13/9 âm lịch · Bính Ngọ), theme Phong cảnh 14 tranh tự đổi mỗi giờ, thêm tuỳ chỉnh: tên dưới mọi app, thư viện app, chế độ tivi yếu, kính mờ. Cập nhật xong vào Đổi giao diện để bật.",
-  "ghiChuEn": "Lunar date on the clean Home, a Scenes theme with 14 landscapes rotating hourly, and more options: names under apps, app library, slow-TV mode, frosted glass. After updating, open Change theme to turn them on.",
+  "versionCode": 18,
+  "versionName": "1.8",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.8.apk",
+  "co": 10733595,
+  "ghiChu": "Home sạch cập nhật theo CleanYourTV 2.6: bấm Home từ app về nhanh hơn trên tivi yếu, ô đầu và cuối dock không bị che. Nút Input trên remote mở bảng chọn nguồn. An toàn hơn trên tivi Xiaomi.",
+  "ghiChuEn": "Clean Home updated to CleanYourTV 2.6: faster back to Home on slow TVs, first and last dock tiles no longer clipped. The remote's Input button opens the source picker. Safer on Xiaomi TVs.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
   "du-lieu.json": {
-   "phienBan": "ef4494dceb3c4e04",
+   "phienBan": "4ade98d2fafd1587",
    "url": "/ota/du-lieu.json",
    "co": 1185263,
-   "tuBan": 17
+   "tuBan": 18
   },
   "tvhome.apk": {
-   "phienBan": "e149b8570e7b9127",
+   "phienBan": "70e863980c54e165",
    "url": "/ota/tvhome.apk",
-   "co": 567427,
-   "tuBan": 17
+   "co": 568379,
+   "tuBan": 18
   }
  }
 }

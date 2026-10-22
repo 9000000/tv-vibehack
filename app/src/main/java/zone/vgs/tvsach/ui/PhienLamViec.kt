@@ -412,6 +412,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         hieuUngKinh = j.optBoolean("dock_glass", false)
         lamToiNen = j.optInt("wallpaper_dim", 0)
         hienThongSo = j.optBoolean("show_stats", false)
+        if (j.has("handle_view_inputs")) nutInput = j.optBoolean("handle_view_inputs", nutInput)
         nutManCho = j.optBoolean("dream_button", nutManCho)
         gonNut = j.optBoolean("top_compact", gonNut)
         j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
@@ -487,6 +488,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         thanhPho?.let { put("weather_lat", it.lat); put("weather_lon", it.lon); put("weather_place", it.ten) }
         if (ghimMayChieu.isNotEmpty()) put("projector_actions", JSONArray(ghimMayChieu.map { (comp, nhan) -> "$nhan=$comp" }))
         put("lunar_date", amLich)
+        // Launcher 2.6: nút Input trên remote (VIEW_INPUTS) mở bảng chọn nguồn của Home sạch — đi cùng công tắc nút Input.
+        if (nutInput) put("handle_view_inputs", true)
         if (tenDuoiApp) put("always_show_names", true)
         if (thuVienApp) { put("app_library", true); put("library_button", true) }
         if (dongHoKhiYen > 0) put("home_idle_clock_minutes", dongHoKhiYen)
