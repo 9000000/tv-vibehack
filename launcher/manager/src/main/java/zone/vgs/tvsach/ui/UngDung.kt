@@ -838,6 +838,11 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             Hang(t("Nút sắp xếp app trên thanh bar (reorder_button)", "Reorder button in top bar"),
                 t("Thêm nút bấm sắp xếp trực tiếp cạnh Settings", "Dedicated reorder button in top bar"),
                 vm.nutSapXep) { vm.nutSapXep = it }
+
+            Hang(t("Menu thao tác khi giữ OK trên app (tile_menu)", "Tile long-press action menu"),
+                t("Giữ phím OK để mở menu Di chuyển, Thêm vào Dock, Thay thế app, Gỡ khỏi Home...",
+                  "Hold OK on a tile opens Move, Add to dock, Replace app, Remove from Home..."),
+                vm.menuGiuOApp) { vm.menuGiuOApp = it }
         }
 
         // 2. Hiệu ứng chuyển động & Đồ hoạ (Motion & Graphics)
@@ -934,6 +939,16 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             Hang(t("Nút cài đặt Home mặc định (show_home_settings_shortcut)", "Default home shortcut"),
                 t("Giữ ô chọn Home mặc định của hệ thống trong lưới", "Keep Default-home tile visible when available"),
                 vm.nutHomeCaiDat) { vm.nutHomeCaiDat = it }
+
+            Hang(t("Gộp 3 nút trên cùng thành 1 bánh răng (top_menu)", "Top menu single gear"),
+                t("Gộp Inputs, Wi-Fi và Cài đặt thành 1 nút bánh răng tròn ở giữa top bar",
+                  "Inputs, Wi-Fi and Settings folded into one round gear, centred on header"),
+                vm.menuTopHopNhat) { vm.menuTopHopNhat = it }
+
+            Hang(t("Nút mở Cài đặt Launcher trên TV (launcher_settings_button)", "Launcher settings button"),
+                t("Thêm nút bấm trên top bar mở trực tiếp màn hình cài đặt giao diện Launcher trên TV",
+                  "Dedicated button in top bar to open Launcher settings directly on the TV"),
+                vm.nutCaiDatLauncher) { vm.nutCaiDatLauncher = it }
         }
 
         // 4. Hình nền, Bầu trời & Màn hình chờ
@@ -999,6 +1014,11 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             Hang(t("Bộ lọc phím điều khiển (key_filter)", "Remote key filter"),
                 t("Bật bộ lọc bắt phím (tắt nếu TCL Android 12 bị kẹt lặp phím âm lượng)", "Enable key filtering (disable if TCL has volume repeat issue)"),
                 vm.boLocPhim) { vm.boLocPhim = it }
+
+            Hang(t("Tự phục hồi dịch vụ trợ năng remote (restore_key_services)", "Restore key accessibility helpers"),
+                t("Tự động khôi phục HomeKeyService / InputKeyService nếu bị ngắt khi buộc dừng app",
+                  "Puts remote's accessibility helpers back on enabled list after force stop"),
+                vm.khoiPhucTroNangKey) { vm.khoiPhucTroNangKey = it }
 
             OutlinedTextField(vm.appVpn, { vm.appVpn = it },
                 label = { Text(t("Gói app VPN (vpn_app - mở khi bấm vào nút mạng)", "VPN app package name")) },

@@ -135,6 +135,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var boLocPhim by mutableStateOf(true) // key_filter
     var appTruyenHinh by mutableStateOf("") // live_tv_package
     var appVpn by mutableStateOf("") // vpn_app
+    var menuTopHopNhat by mutableStateOf(false) // top_menu
+    var menuGiuOApp by mutableStateOf(true) // tile_menu
+    var khoiPhucTroNangKey by mutableStateOf(false) // restore_key_services
+    var nutCaiDatLauncher by mutableStateOf(false) // launcher_settings_button
     var cauHinhTuyY by mutableStateOf("") // JSON tuỳ biến mở rộng
     var homeXong by mutableStateOf(false)
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
@@ -190,6 +194,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
             "reorder_button" to ((th.cauHinh["reorder_button"] as? Boolean) ?: false),
             "live_tv_package" to ((th.cauHinh["live_tv_package"] as? String) ?: ""),
             "vpn_app" to ((th.cauHinh["vpn_app"] as? String) ?: ""),
+            "top_menu" to ((th.cauHinh["top_menu"] as? Boolean) ?: false),
+            "tile_menu" to ((th.cauHinh["tile_menu"] as? Boolean) ?: true),
+            "restore_key_services" to ((th.cauHinh["restore_key_services"] as? Boolean) ?: false),
+            "launcher_settings_button" to ((th.cauHinh["launcher_settings_button"] as? Boolean) ?: false),
             "cau_hinh_tuy_y" to "",
             "nang_cao" to ""
         )
@@ -235,6 +243,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
             "reorder_button" to nutSapXep,
             "live_tv_package" to appTruyenHinh,
             "vpn_app" to appVpn,
+            "top_menu" to menuTopHopNhat,
+            "tile_menu" to menuGiuOApp,
+            "restore_key_services" to khoiPhucTroNangKey,
+            "launcher_settings_button" to nutCaiDatLauncher,
             "cau_hinh_tuy_y" to cauHinhTuyY,
             "nang_cao" to JSONObject(nangCao as Map<*, *>).toString()
         )
@@ -295,6 +307,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         nutSapXep = (m["reorder_button"] as? Boolean) ?: (m["reorder_button"] as? String)?.toBooleanStrictOrNull() ?: false
         appTruyenHinh = (m["live_tv_package"] as? String) ?: ""
         appVpn = (m["vpn_app"] as? String) ?: ""
+        menuTopHopNhat = (m["top_menu"] as? Boolean) ?: (m["top_menu"] as? String)?.toBooleanStrictOrNull() ?: false
+        menuGiuOApp = (m["tile_menu"] as? Boolean) ?: (m["tile_menu"] as? String)?.toBooleanStrictOrNull() ?: true
+        khoiPhucTroNangKey = (m["restore_key_services"] as? Boolean) ?: (m["restore_key_services"] as? String)?.toBooleanStrictOrNull() ?: false
+        nutCaiDatLauncher = (m["launcher_settings_button"] as? Boolean) ?: (m["launcher_settings_button"] as? String)?.toBooleanStrictOrNull() ?: false
         cauHinhTuyY = (m["cau_hinh_tuy_y"] as? String) ?: ""
         val ncStr = (m["nang_cao"] as? String) ?: ""
         nangCao.clear()
@@ -828,6 +844,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
             put("key_filter", boLocPhim)
             if (appTruyenHinh.isNotBlank()) put("live_tv_package", appTruyenHinh.trim())
             if (appVpn.isNotBlank()) put("vpn_app", appVpn.trim())
+            put("top_menu", menuTopHopNhat)
+            put("tile_menu", menuGiuOApp)
+            put("restore_key_services", khoiPhucTroNangKey)
+            put("launcher_settings_button", nutCaiDatLauncher)
 
             // Nâng cao ghi sau cùng: người dùng đã chủ động đặt thì đè lên giá trị theme và switch.
             val daDat = dsNangCao.mapNotNull { tc ->

@@ -34,6 +34,9 @@ val THEMES = listOf(
         mapOf("sky_intensity" to 70, "dock_band" to false), null, listOf(0xFF1B2B5A, 0xFF5A3A4A)),
     Theme("dien-anh", "Điện ảnh", "Cinematic", "Ảnh app đang chọn phủ kín nửa trên", "The focused app's artwork fills the top",
         mapOf("cinematic_home" to true, "sky_intensity" to 35), null, listOf(0xFF4A0A0A, 0xFF101010)),
+    Theme("glass", "Kính mờ (Glass)", "Glass", "Nền xanh navy, kệ điện ảnh, thanh dock kính mờ", "Dark navy with teal and violet light, cinematic shelf, glass dock",
+        mapOf("background_color" to "#090C14", "cinematic_home" to true, "dock_glass" to true, "icon_only_buttons" to true, "app_glow" to true, "glow_style" to "horizon", "focus_overshoot" to false, "advanced_effects" to true),
+        "theme/glass.jpg", listOf(0xFF090C14, 0xFF182A45, 0xFF351F52)),
     // Scenes của CleanYourTV (manas-04): 14 tranh phong cảnh tối vẽ bằng code, tự đổi mỗi giờ (22/10/2026).
     Theme("phong-canh", "Phong cảnh", "Scenes", "14 tranh phong cảnh, tự đổi mỗi giờ", "14 landscapes, a new one every hour",
         mapOf("wallpaper_rotation_minutes" to 60, "dock_band" to false, "background_color" to "#05060A"), null,
