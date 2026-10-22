@@ -1,11 +1,11 @@
 {
  "app": {
-  "versionCode": 20,
-  "versionName": "1.9.1",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.1.apk",
-  "co": 10737193,
-  "ghiChu": "Bản an toàn cho tivi bo mạch CVTE (JVC, Vision, Super General, Artel…): không bao giờ tắt Home gốc của hãng, không bật bắt phím remote cùng lượt.",
-  "ghiChuEn": "Safety update for CVTE-board TVs (JVC, Vision, Super General, Artel…): the stock Home is never disabled and remote-key helpers are not turned on in the same pass.",
+  "versionCode": 21,
+  "versionName": "1.9.2",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-1.9.2.apk",
+  "co": 11305703,
+  "ghiChu": "Sửa lỗi tivi Xiaomi bản Trung Quốc bấm Home ra màn đen: có Home sạch bản riêng cho Xiaomi, và app luôn bật lại Home gốc nếu không thay được. Dock chọn được tới 8 app.",
+  "ghiChuEn": "Fixes a black screen on Home on China-market Xiaomi TVs: a dedicated clean Home build for Xiaomi, and the app always turns the stock Home back on if it can't take over. The dock now holds up to 8 apps.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
@@ -13,13 +13,13 @@
    "phienBan": "4ade98d2fafd1587",
    "url": "/ota/du-lieu.json",
    "co": 1185263,
-   "tuBan": 20
+   "tuBan": 21
   },
   "tvhome.apk": {
    "phienBan": "70e863980c54e165",
    "url": "/ota/tvhome.apk",
    "co": 568379,
-   "tuBan": 20
+   "tuBan": 21
   }
  }
 }

@@ -9,8 +9,12 @@ export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetool
 # Bản sửa của CleanTV (dòng thời tiết…): áp patch nếu chưa áp.
 if git -C upstream apply --check --binary ../patches/launcher-vgs.patch 2>/dev/null; then git -C upstream apply --binary ../patches/launcher-vgs.patch; fi
 echo "sdk.dir=$ANDROID_HOME" > upstream/launcher/local.properties
-(cd upstream/launcher && ./gradlew assembleRelease -q --console=plain)
 mkdir -p app/src/main/assets
+# Bản tên gói com.ts.launcher cho tivi Xiaomi bản Trung Quốc: hãng chỉ nhận Home có tên trong danh sách (upstream
+# docs/devices/xiaomi-mitv-aetp0-dofus.md). Mã Java vẫn là com.gathin.tvhome, chỉ đổi applicationId.
+(cd upstream/launcher && ./gradlew assembleRelease -q --console=plain -PlauncherApplicationId=com.ts.launcher)
+cp upstream/launcher/app/build/outputs/apk/release/app-release.apk app/src/main/assets/tvhome-xiaomi.apk
+(cd upstream/launcher && ./gradlew assembleRelease -q --console=plain)
 cp upstream/launcher/app/build/outputs/apk/release/app-release.apk app/src/main/assets/tvhome.apk
 python3 -I scripts/lam-du-lieu.py upstream app/src/main/assets/du-lieu.json
 python3 -I scripts/lam-ds-tivi.py app/src/main/assets/du-lieu.json web/tivi.json

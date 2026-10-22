@@ -41,6 +41,9 @@ import java.net.Socket
 
 enum class Man { CHINH, KET_NOI, THONG_TIN, CHON_GOI, DANG_TAT, HOME_SACH, XONG, KHOI_PHUC, HUONG_DAN, GIAY_PHEP }
 
+/** Số app tối đa trong dock: bằng số cột lớn nhất của Home sạch (columns 1–8); dock dài hơn số cột thì tràn xuống hàng sau (22/10/2026, góp ý muốn hàng đầu nhiều app hơn). */
+const val DOCK_TOI_DA = 8
+
 class PhienLamViec(app: Application) : AndroidViewModel(app) {
     private val ctx: Context get() = getApplication()
     private val adb by lazy { KetNoiAdb.lay(ctx) }
@@ -156,7 +159,9 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var thanhPho by mutableStateOf<zone.vgs.tvsach.dulieu.ThanhPho?>(null)
 
     /** Tivi đã có Home sạch: chỉ cần đẩy theme, không cài lại. */
-    val daCoHomeSach: Boolean get() = trangThai?.let { ThaoTacTv.PKG_HOME in it.caiDat && ThaoTacTv.PKG_HOME !in it.daTat } == true
+    /** Tên gói Home sạch trên tivi đang nối (Xiaomi bản Trung Quốc: com.ts.launcher), dò lúc kết nối. */
+    private var goiHome = ThaoTacTv.PKG_HOME
+    val daCoHomeSach: Boolean get() = trangThai?.let { tt -> goiHome in tt.caiDat && goiHome !in tt.daTat } == true
 
     var dsSaoLuu by mutableStateOf<List<BanSaoLuu>>(emptyList())
 
@@ -318,8 +323,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
 
     private suspend fun sauKhiKetNoi(host: String) {
         daNapCu = false
+        tv.quenTivi()
         thongBao = t("Đang đọc thông tin tivi…", "Reading the TV…")
         val (info, gp) = io { tv.docThongTin() }
+        goiHome = io { tv.pkgHome }
         thongTin = info; getprop = gp
         val tt = io { tv.docTrangThai() }
         trangThai = tt
@@ -412,7 +419,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     /** App có biểu tượng còn bật, để chọn vào dock. */
     fun appChoDock(): List<String> {
         val tt = trangThai ?: return emptyList()
-        val khongDua = setOf(ThaoTacTv.PKG_HOME, "com.android.tv.settings", "com.android.settings") + ThaoTacTv.HOME_GOC_BIET
+        val khongDua = ThaoTacTv.HOME_SACH + setOf("com.android.tv.settings", "com.android.settings") + ThaoTacTv.HOME_GOC_BIET
         return tt.coBieuTuong.filter { it in tt.caiDat && it !in tt.daTat && it !in khongDua }
             .sortedWith(compareBy({ p -> UU_TIEN_DOCK.indexOf(p).let { if (it < 0) 99 else it } }, { it }))
     }
@@ -447,7 +454,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         dsNangCao.filter { it.khoa in daDat }.forEach { tc -> zone.vgs.tvsach.dulieu.NangCao.docChu(tc, j)?.let { nangCao[tc.khoa] = it } }
         nutManCho = j.optBoolean("dream_button", nutManCho)
         gonNut = j.optBoolean("top_compact", gonNut)
-        j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
+        j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(DOCK_TOI_DA)) } }
         j.optString("greeting_name").takeIf { it.isNotBlank() }?.let { tenChao = it }
         j.optString("weather_place").takeIf { it.isNotBlank() }?.let { ten -> THANH_PHO.firstOrNull { it.ten == ten }?.let { thanhPho = it } }
     }
@@ -458,13 +465,13 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     fun doiDock(p: String) {
-        if (p in dock) dock.remove(p) else if (dock.size < 6) dock.add(p)
+        if (p in dock) dock.remove(p) else if (dock.size < DOCK_TOI_DA) dock.add(p)
     }
 
     fun caiHomeSach() = chay(t("Đang cài Home sạch…", "Installing the clean Home…")) {
         val sl = saoLuu ?: io { tv.damBaoSaoLuu(thongTin!!, getprop, ip) }.also { saoLuu = it }
         nhatKy.clear()
-        val apk = io { zone.vgs.tvsach.CapNhat.moAsset(ctx, "tvhome.apk").readBytes() }
+        val apk = io { zone.vgs.tvsach.CapNhat.moAsset(ctx, tv.apkHome).readBytes() }
         val cauHinh = cauHinhHome()
         val anh = anhNenTheme()
         val bo = boAnhTheme()
@@ -550,7 +557,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         val anh = anhNenTheme()
         // Cài đè launcher đi kèm app (bản mới có dòng thời tiết…), giữ dữ liệu và dịch vụ trợ năng.
         thongBao = t("Đang cập nhật Home sạch…", "Updating the clean Home…")
-        if (!io { tv.capNhatLauncher(zone.vgs.tvsach.CapNhat.moAsset(ctx, "tvhome.apk").readBytes()) }) {
+        if (!io { tv.capNhatLauncher(zone.vgs.tvsach.CapNhat.moAsset(ctx, tv.apkHome).readBytes()) }) {
             loi = t("Không cập nhật được Home sạch trên tivi, giao diện mới sẽ không hiện đủ. Thử lại hoặc gửi góp ý kèm hãng, model.", "Couldn't update the clean Home on the TV, so the new look won't fully show. Try again or send feedback with the brand and model.")
             return@chay
         }

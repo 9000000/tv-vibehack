@@ -1,5 +1,19 @@
 [
  {
+  "ban": "1.9.2",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Tivi Xiaomi bản Trung Quốc (MiTV-ASTP0…): hãng chỉ nhận Home có tên trong danh sách, nên app cài Home sạch bản riêng mang tên được nhận; bản Home sạch cũ bị chặn sẽ được gỡ.",
+   "Nút Home không chuyển được sang Home sạch thì app bật lại Home gốc của hãng và đặt làm mặc định, không để màn đen (trước đó Home gốc có thể vẫn bị tắt).",
+   "Dock chọn được tới 8 app (bằng số cột tối đa); dài hơn số cột thì tràn xuống hàng sau."
+  ],
+  "en": [
+   "China-market Xiaomi TVs (MiTV-ASTP0…): the firmware only accepts allow-listed Home apps, so the app installs a clean Home build under an accepted name and removes the blocked older one.",
+   "If the Home button still doesn't reach the clean Home, the app turns the maker's Home back on and makes it the default, instead of leaving a black screen (before, the stock Home could stay disabled).",
+   "The dock holds up to 8 apps (the most columns); more than the columns spill onto the next row."
+  ]
+ },
+ {
   "ban": "1.9.1",
   "ngay": "2026-10-22",
   "vi": [

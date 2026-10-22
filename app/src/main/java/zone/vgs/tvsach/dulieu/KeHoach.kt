@@ -50,7 +50,7 @@ object KeHoach {
         "com.android.webview", "com.android.externalstorage", "com.android.keychain", "com.android.location.fused",
         "com.google.android.tv.remote.service", "com.google.android.tvlauncher",
         "com.google.android.apps.tv.launcherx", "com.google.android.leanbacklauncher", "com.mitv.tvhome",
-        "com.gathin.tvhome",
+        "com.gathin.tvhome", "com.ts.launcher",
     )
     private val GIU_DAU = listOf("com.android.providers.", "com.android.networkstack", "com.google.android.networkstack")
 

@@ -684,7 +684,7 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
         }
         Phu(t(vm.themeChon.moTaVi, vm.themeChon.moTaEn))
     }
-    The(t("Dock (tối đa 6, theo thứ tự chạm)", "Dock (up to 6, in tap order)"), Icons.Rounded.Apps) {
+    The(t("Dock (tối đa $DOCK_TOI_DA, theo thứ tự chạm)", "Dock (up to $DOCK_TOI_DA, in tap order)"), Icons.Rounded.Apps) {
         vm.appChoDock().forEach { p ->
             val viTri = vm.dock.indexOf(p)
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (viTri >= 0) Tim.copy(alpha = 0.2f) else The2)
