@@ -661,19 +661,32 @@ def main():
 
     # 3. Upload
     gh_available = shutil.which("gh") is not None
+    uploaded = False
     if gh_available:
         if upload_via_gh(tag, title, notes, apks, is_prerelease=is_prerelease, is_draft=args.draft):
-            return
+            uploaded = True
 
-    token = read_token()
-    if token:
-        if upload_via_api(token, tag, title, notes, apks, is_prerelease=is_prerelease, is_draft=args.draft):
-            return
-    else:
-        print("\n[WARN] Chua cau hinh xac thuc GitHub!")
-        print("Cai dat GitHub CLI (gh auth login) hoac them Token vao file launcher/local.properties:")
-        print("   GITHUB_TOKEN=ghp_your_personal_access_token")
-        sys.exit(1)
+    if not uploaded:
+        token = read_token()
+        if token:
+            if upload_via_api(token, tag, title, notes, apks, is_prerelease=is_prerelease, is_draft=args.draft):
+                uploaded = True
+        else:
+            print("\n[WARN] Chua cau hinh xac thuc GitHub!")
+            print("Cai dat GitHub CLI (gh auth login) hoac them Token vao file launcher/local.properties:")
+            print("   GITHUB_TOKEN=ghp_your_personal_access_token")
+            sys.exit(1)
+
+    if uploaded and not args.draft:
+        try:
+            subprocess.run(["git", "add", "cap-nhat.json"], cwd=ROOT, check=True)
+            status = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=ROOT, capture_output=True, text=True)
+            if "cap-nhat.json" in status.stdout:
+                subprocess.run(["git", "commit", "-m", f"chore: cap nhat cap-nhat.json cho phien ban {tag}"], cwd=ROOT, check=True)
+            subprocess.run(["git", "push", "origin", TARGET_BRANCH], cwd=ROOT, check=True)
+            print(f"[OK] Da tu dong day cap-nhat.json len nhanh {TARGET_BRANCH} de phuc vu cap nhat OTA.")
+        except Exception as e:
+            print(f"[WARN] Khong the tu dong push cap-nhat.json: {e}")
 
 if __name__ == "__main__":
     main()

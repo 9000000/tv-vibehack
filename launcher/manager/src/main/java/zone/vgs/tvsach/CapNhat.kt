@@ -85,20 +85,25 @@ object CapNhat {
     }
 
     private fun layJsonCapNhat(): JSONObject? {
-        // 1. Thử lấy cap-nhat.json từ nhánh app
+        val t = System.currentTimeMillis()
+        var jsonTuRepo: JSONObject? = null
+        // 1. Thử lấy cap-nhat.json từ nhánh app (kèm timestamp chống CDN cache)
         runCatching {
-            return JSONObject(String(tai("$GOC/cap-nhat.json", 15), Charsets.UTF_8))
+            jsonTuRepo = JSONObject(String(tai("$GOC/cap-nhat.json?t=$t", 15), Charsets.UTF_8))
         }
-        // 2. Thử lấy cap-nhat.json từ nhánh main
-        runCatching {
-            return JSONObject(String(tai("$GOC_PHU/cap-nhat.json", 15), Charsets.UTF_8))
+        // 2. Thử lấy cap-nhat.json từ nhánh main nếu nhánh app lỗi
+        if (jsonTuRepo == null) {
+            runCatching {
+                jsonTuRepo = JSONObject(String(tai("$GOC_PHU/cap-nhat.json?t=$t", 15), Charsets.UTF_8))
+            }
         }
-        // 3. Dự phòng: Truy vấn trực tiếp GitHub Releases API mới nhất của repo
+        // 3. Dự phòng & Đối chiếu: Truy vấn trực tiếp GitHub Releases API mới nhất của repo
+        var jsonTuRelease: JSONObject? = null
         runCatching {
             val releaseObj = JSONObject(String(tai(GITHUB_API_LATEST, 15), Charsets.UTF_8))
             val tag = releaseObj.optString("tag_name", "").removePrefix("v").removePrefix("V")
             val body = releaseObj.optString("body", "")
-            val assets = releaseObj.optJSONArray("assets") ?: return null
+            val assets = releaseObj.optJSONArray("assets") ?: return@runCatching
 
             var managerApkUrl = ""
             var managerSize = 0L
@@ -143,10 +148,28 @@ object CapNhat {
                         .put("tuBan", targetCode))
                     syntheticJson.put("duLieu", duLieu)
                 }
-                return syntheticJson
+                jsonTuRelease = syntheticJson
             }
         }
-        return null
+
+        // Chọn nguồn có phiên bản app mới hơn hoặc gộp duLieu
+        val repoApp = jsonTuRepo?.optJSONObject("app")
+        val relApp = jsonTuRelease?.optJSONObject("app")
+        if (jsonTuRepo != null && jsonTuRelease != null) {
+            val repoVer = repoApp?.optString("versionName", "") ?: ""
+            val relVer = relApp?.optString("versionName", "") ?: ""
+            val repoCode = repoApp?.optInt("versionCode", 0) ?: 0
+            val relCode = relApp?.optInt("versionCode", 0) ?: 0
+            if (relCode > repoCode || soSanhPhienBan(relVer, repoVer) > 0) {
+                // Release mới hơn cap-nhat.json (do cache CDN), dùng app từ Release nhưng giữ duLieu từ repo
+                if (!jsonTuRelease.has("duLieu") && jsonTuRepo.has("duLieu")) {
+                    jsonTuRelease.put("duLieu", jsonTuRepo.optJSONObject("duLieu"))
+                }
+                return jsonTuRelease
+            }
+            return jsonTuRepo
+        }
+        return jsonTuRepo ?: jsonTuRelease
     }
 
     /**
