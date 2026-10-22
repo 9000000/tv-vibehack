@@ -479,6 +479,11 @@ private fun ColumnScope.KetNoiTiviNay(vm: PhienLamViec) {
     }
     NutChinh(t("Kết nối tivi này", "Connect this TV"), enabled = !vm.dangBan, icon = Icons.Rounded.Link) { vm.ketNoiTiviNay() }
     NutPhu(t("Hướng dẫn bật Gỡ lỗi USB có hình", "Picture guide to USB debugging"), Icons.Rounded.Warning) { vm.moHuongDan() }
+    val ctxTv = androidx.compose.ui.platform.LocalContext.current
+    NutPhu(t("Mở Tuỳ chọn nhà phát triển", "Open Developer options"), Icons.Rounded.Tune) {
+        runCatching { ctxTv.startActivity(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            .onFailure { runCatching { ctxTv.startActivity(android.content.Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } }
+    }
 }
 
 // ---------------- Thông tin + chọn mẫu ----------------

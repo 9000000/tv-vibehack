@@ -1,11 +1,11 @@
 {
  "app": {
-  "versionCode": 23,
-  "versionName": "2.0",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.apk",
-  "co": 11367899,
-  "ghiChu": "CleanTV 2.0: Home sạch mới (đủ tiếng Việt, sửa thư viện app, giữ phím remote sau khi bị dừng), 225 mẫu tivi, 52 tuỳ chọn Nâng cao. Cùng các bản 1.9.x: an toàn cho tivi CVTE, Home sạch riêng cho Xiaomi, sao lưu trên tivi, khôi phục không cần sao lưu.",
-  "ghiChuEn": "CleanTV 2.0: a new clean Home (full Vietnamese, app library fix, remote helpers kept after a force stop), 225 TV models, 52 Advanced options. Plus the 1.9.x work: CVTE safety, a Xiaomi clean Home build, backup on the TV, restore without a backup.",
+  "versionCode": 24,
+  "versionName": "2.0.1",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.1.apk",
+  "co": 11367907,
+  "ghiChu": "Chạy CleanTV ngay trên tivi mà báo lỗi kết nối: giờ app nói rõ cách bật ADB qua mạng, có nút mở Tuỳ chọn nhà phát triển.",
+  "ghiChuEn": "Running CleanTV on the TV and it can't connect: the app now explains how to turn on ADB over the network, with a button to Developer options.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
@@ -13,13 +13,13 @@
    "phienBan": "c752f0ec8c447e7c",
    "url": "/ota/du-lieu.json",
    "co": 1259284,
-   "tuBan": 23
+   "tuBan": 24
   },
   "tvhome.apk": {
    "phienBan": "348650d509be7734",
    "url": "/ota/tvhome.apk",
    "co": 583151,
-   "tuBan": 23
+   "tuBan": 24
   }
  }
 }

@@ -1,5 +1,15 @@
 [
  {
+  "ban": "2.0.1",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Chạy CleanTV ngay trên tivi mà tivi chưa mở ADB qua mạng: thay dòng lỗi tiếng Anh bằng hướng dẫn (bật \"Gỡ lỗi qua mạng\", hoặc dùng điện thoại ghép bằng mã, hoặc adb tcpip 5555), thêm nút mở Tuỳ chọn nhà phát triển."
+  ],
+  "en": [
+   "Running CleanTV on a TV that has not opened ADB over the network: the raw error is replaced by steps (turn on \"Network debugging\", or pair from a phone, or adb tcpip 5555), plus a button to Developer options."
+  ]
+ },
+ {
   "ban": "2.0",
   "ngay": "2026-10-22",
   "vi": [
