@@ -84,7 +84,7 @@ object KeHoach {
     fun laGoiCapNhat(pkg: String) = CAP_NHAT.containsMatchIn(pkg)
 
     /** Menu thử nghiệm xuất xưởng: không bao giờ tắt hay kích hoạt kẻo lật cờ Factory Mode. */
-    private val APP_XUAT_XUONG = Regex("""factorytest|factory_test|factorymode|hkcfac|fac\.menu""", RegexOption.IGNORE_CASE)
+    private val APP_XUAT_XUONG = Regex("""factory|hkcfac|fac\.menu""", RegexOption.IGNORE_CASE)
 
     /**
      * Nhóm trong danh sách đúng mẫu mà người làm danh sách ghi là tắt THEO Ý RIÊNG ("off by choice", "personal choice",
