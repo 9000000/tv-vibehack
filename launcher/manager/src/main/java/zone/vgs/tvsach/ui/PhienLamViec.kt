@@ -76,6 +76,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var ungVien by mutableStateOf<List<Pair<MauTv, Int>>>(emptyList())
     var mauChon by mutableStateOf<MauTv?>(null)
     var saoLuu by mutableStateOf<BanSaoLuu?>(null)
+    var saoLuuTuTv by mutableStateOf(false)
+    var goiTatKhongSaoLuu by mutableStateOf<List<String>?>(null)
 
     // Chọn gói
     var muc by mutableStateOf<List<MucGoi>>(emptyList())
@@ -442,7 +444,11 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
 
     private fun moTaLoi(e: Throwable): String = when {
         e is AdbPairingRequiredException -> t("Tivi đòi ghép đôi (Gỡ lỗi không dây). Dùng phần \"Ghép đôi bằng mã\" bên dưới.", "The TV needs pairing (Wireless debugging). Use \"Pair with code\" below.")
-        e.message?.contains("ECONNREFUSED") == true || e.message?.contains("refused") == true ->
+        // Chế độ chạy trên tivi: nhiều tivi (TCL…) bật Gỡ lỗi USB chỉ mở ADB qua dây, cổng 5555 chưa nghe (22/10/2026).
+        laLoiTuChoi(e) && ip.trim() == "127.0.0.1" ->
+            t("Tivi chưa mở ADB qua mạng (cổng 5555), nên app trên tivi chưa tự nối vào được. Cách sửa: trong Tuỳ chọn nhà phát triển bật thêm \"Gỡ lỗi qua mạng\" / \"ADB qua mạng\" (nếu có) rồi Kết nối lại. Tivi chỉ có \"Gỡ lỗi không dây\" thì dùng CleanTV trên điện thoại, chọn Ghép bằng mã. Hoặc cắm tivi vào máy tính, chạy adb tcpip 5555 một lần.",
+                "The TV hasn't opened ADB over the network (port 5555), so the app on the TV can't connect to itself. Fix: in Developer options also turn on \"Network debugging\" / \"ADB over network\" (if there) and Connect again. If the TV only has \"Wireless debugging\", use CleanTV on a phone with Pair with code. Or plug the TV into a computer and run adb tcpip 5555 once.")
+        laLoiTuChoi(e) ->
             t("Tivi từ chối kết nối ở cổng này. Kiểm tra đã bật Gỡ lỗi USB / Gỡ lỗi qua mạng chưa.", "The TV refused the connection on this port. Check USB debugging / Network debugging is on.")
         e.message?.contains("EHOSTUNREACH") == true || e.message?.contains("No route") == true ->
             t("Không tới được tivi. Điện thoại và tivi phải chung một mạng Wi-Fi.", "Cannot reach the TV. The phone and TV must be on the same Wi-Fi.")
@@ -451,6 +457,10 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         else -> listOfNotNull(e.message, e.cause?.message).firstOrNull()
             ?: t("Lỗi kết nối (${e.javaClass.simpleName}). Kiểm tra IP, cổng và tivi còn bật.", "Connection error (${e.javaClass.simpleName}). Check the IP, port and that the TV is on.")
     }
+
+    private fun laLoiTuChoi(e: Throwable): Boolean =
+        e.message?.contains("ECONNREFUSED") == true || e.message?.contains("refused") == true ||
+        e.cause?.message?.contains("ECONNREFUSED") == true || e.cause?.message?.contains("refused") == true
 
     private suspend fun <T> io(khoi: () -> T): T = withContext(Dispatchers.IO) { khoi() }
 
@@ -547,7 +557,12 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         val du = io { DuLieu.nap(ctx) }
         ungVien = du.khopMau(info)
         mauChon = ungVien.firstOrNull()?.first
-        saoLuu = kho.doc(info.khoaLuu)?.also { it.ip = host; kho.ghi(it) }
+        // Điện thoại không có bản sao lưu (gỡ app, đổi máy, người khác dọn) thì lấy bản trên tivi.
+        val slMay = kho.doc(info.khoaLuu)
+        saoLuu = (slMay ?: io { tv.docSaoLuuTrenTv(info.khoaLuu) })?.also { b ->
+            b.ip = host; io { tv.luuSaoLuu(b) }
+        }
+        saoLuuTuTv = slMay == null && saoLuu != null
         nutInput = tt.homeHienTai == "com.google.android.apps.tv.launcherx"
         laMayChieu = tv.coVeMayChieu(tt, info)
         man = if (dangKhoiPhuc) Man.KHOI_PHUC else Man.THONG_TIN
@@ -751,8 +766,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
                 t("Nút Home trên tivi vẫn mở Home gốc ($goi). Tivi bo mạch CVTE: app không tắt Home gốc vì đã có tivi treo ở màn khởi động sau khi tắt. Tắt mở tivi một lần rồi bấm Home thử lại; vẫn về Home cũ thì Home sạch vẫn mở được từ danh sách ứng dụng.",
                     "The TV's Home button still opens the stock Home ($goi). CVTE board: the app never disables it, since one TV hung on its boot animation after that. Restart the TV once and press Home again; if it still opens the old Home, launch the clean Home from the app list.")
             else if (kq.lyDo == "setupwraith")
-                t("Nút Home trên tivi vẫn mở Home Google ($goi). Trên Google TV phải tắt cả setupwraith thì mới thay được Home, mà nó đang giữ Wi-Fi nên app không tự tắt. Tivi vẫn dùng bình thường như cũ. Muốn thay hẳn nút Home: cắm dây mạng LAN cho tivi, kết nối lại, ở bước chọn gói tích thêm setupwraith rồi dọn lại.",
-                    "The TV's Home button still opens Google's Home ($goi). On Google TV setupwraith must be disabled too before Home can change, and it holds the Wi-Fi, so the app leaves it. The TV works as before. To take over Home fully: plug the TV into Ethernet, reconnect, tick setupwraith in the package list and clean again.")
+                t("Nút Home trên tivi vẫn mở Home Google ($goi). Trên Google TV phải tắt cả setupwraith thì mới thay được Home, mà mạng Wi-Fi lưu lúc cài tivi thuộc về nó nên app không tự tắt (tắt là rớt Wi-Fi). Tivi vẫn dùng bình thường như cũ. Muốn thay hẳn: trên tivi vào Cài đặt > Mạng, quên mạng Wi-Fi rồi kết nối lại (hoặc cắm dây LAN), sau đó kết nối lại app, ở bước chọn gói tích thêm setupwraith (nhóm Google Home) rồi dọn lại.",
+                    "The TV's Home button still opens Google's Home ($goi). On Google TV setupwraith must be disabled too before Home can change, and the Wi-Fi saved during setup belongs to it, so the app leaves it (disabling it would drop the Wi-Fi). The TV works as before. To take over Home fully: on the TV, Settings > Network, forget the Wi-Fi and join it again (or plug in Ethernet), reconnect the app, tick setupwraith (Google Home group) in the package list and clean again.")
             else
                 t("Nút Home trên tivi vẫn mở '$goi' thay vì Home sạch. App đã để tivi như cũ, không tắt thêm gì. Gửi góp ý kèm hãng, model để VGS thêm hỗ trợ.",
                     "The TV's Home button still opens '$goi' instead of the clean Home. The app left the TV as it was. Send feedback with the brand and model so VGS can add support.")
@@ -908,11 +923,30 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         loiKp.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
         if (loiKp.isEmpty() && sl.daTatBoiApp.isEmpty() && !sl.launcherDaCai && !sl.dnsDaDoi) {
             kho.xoa(sl.khoa)
+            io { tv.xoaSaoLuuTrenTv() }
             khoiPhucXong = true
             ghi(t("Đã khôi phục xong, xoá bản sao lưu.", "Restore complete, backup removed."))
         } else ghi(t("Khôi phục xong một phần, bản sao lưu vẫn giữ để chạy lại.", "Partly restored; the backup is kept so you can run it again."))
         saoLuu = kho.doc(info.khoaLuu)
         taiLaiSaoLuu()
+    }
+
+    /** Tivi có Home sạch (bản nào cũng được): đã từng dọn bằng CleanTV / CleanYourTV. */
+    val coDauCleanTv: Boolean get() = trangThai?.let { tt -> ThaoTacTv.HOME_SACH.any { it in tt.caiDat } } == true
+
+    fun docGoiTatKhongSaoLuu() = chay(t("Đang đọc gói đang tắt…", "Reading disabled packages…")) {
+        goiTatKhongSaoLuu = io { tv.goiTatBoiNguoiDung() }
+    }
+
+    fun chayKhoiPhucKhongSaoLuu(goLauncher: Boolean) = chay(t("Đang khôi phục…", "Restoring…")) {
+        nhatKy.clear()
+        val loiKp = io { tv.khoiPhucKhongSaoLuu(goLauncher) { s -> ghiTuIo(s) } }
+        veApp()
+        zone.vgs.tvsach.Dem.gui(ctx, "khoi-phuc", tenTiviDem(), goiTatKhongSaoLuu?.size ?: 0, "khong-sao-luu")
+        loiKp.forEach { ghi(t("Lỗi: $it", "Error: $it")) }
+        if (loiKp.isEmpty()) khoiPhucXong = true
+        else ghi(t("Khôi phục xong một phần, chạy lại để thử tiếp.", "Partly restored; run it again to retry."))
+        goiTatKhongSaoLuu = null
     }
 
     /** Cứu hộ: Bật lại tất cả ứng dụng đang tắt trên tivi mà không cần file sao lưu trong điện thoại. */
@@ -938,7 +972,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
             saoLuu?.let { sl ->
                 if (pkg in sl.daTatBoiApp) {
                     sl.daTatBoiApp -= pkg
-                    kho.ghi(sl)
+                    io { tv.luuSaoLuu(sl) }
                     taiLaiSaoLuu()
                 }
             }
@@ -958,7 +992,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         saoLuu?.let { sl ->
             val thanhCong = ds - loi.map { it.substringBefore(':') }.toSet()
             sl.daTatBoiApp.removeAll(thanhCong.toSet())
-            kho.ghi(sl)
+            io { tv.luuSaoLuu(sl) }
             taiLaiSaoLuu()
         }
         trangThai = io { tv.docTrangThai() }
@@ -969,7 +1003,7 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         thongTin = null; trangThai = null; muc = emptyList(); chon.clear(); ketQua = null
         dock.clear(); tenChao = ""; homeXong = false; dnsChanQc = false; dangKhoiPhuc = false; khoiPhucXong = false; anhTv = null
         laMayChieu = false; mayChieu = null; ghimMayChieu.clear()
-        nhatKy.clear(); saoLuu = null; epSetupwraith = false
+        nhatKy.clear(); saoLuu = null; saoLuuTuTv = false; goiTatKhongSaoLuu = null; epSetupwraith = false
         taiLaiSaoLuu()
     }
 

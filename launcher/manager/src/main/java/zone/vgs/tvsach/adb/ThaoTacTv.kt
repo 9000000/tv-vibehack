@@ -98,8 +98,27 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     // ---------- Sao lưu ----------
 
     /** Lấy bản sao lưu đã có của tivi này, chưa có thì chụp trạng thái hiện tại và ghi xuống máy. */
+    /**
+     * Ghi bản sao lưu vào điện thoại VÀ một bản lên chính tivi ([TEP_SAO_LUU_TV]), để gỡ app / đổi điện thoại vẫn khôi
+     * phục được (22/10/2026). Bản trên tivi bỏ getprop + danh sách gói (chỉ để tham khảo) cho nhẹ: ghi lại sau mỗi gói.
+     * Ghi file tạm rồi mv, mất kết nối giữa chừng không hỏng bản cũ. Lỗi ghi lên tivi không chặn việc đang làm.
+     */
+    fun luuSaoLuu(b: BanSaoLuu) {
+        kho.ghi(b)
+        runCatching {
+            val gon = b.copy(getprop = "", goiTruoc = emptyList()).toJson().toString().toByteArray()
+            adb.ghiFile("$TEP_SAO_LUU_TV.tam", gon)
+            sh("mv -f $TEP_SAO_LUU_TV.tam $TEP_SAO_LUU_TV")
+        }
+    }
+
+    /** Bản sao lưu nằm trên tivi (do điện thoại nào cũng được ghi), đúng tivi này; null nếu không có / hỏng. */
+    fun docSaoLuuTrenTv(khoa: String): BanSaoLuu? = runCatching {
+        BanSaoLuu.tuJson(org.json.JSONObject(sh("cat $TEP_SAO_LUU_TV 2>/dev/null").trim()))
+    }.getOrNull()?.takeIf { it.khoa == khoa }
+
     fun damBaoSaoLuu(tv: ThongTinTv, getprop: String, ip: String): BanSaoLuu {
-        kho.doc(tv.khoaLuu)?.let { cu -> cu.ip = ip; kho.ghi(cu); return cu }
+        (kho.doc(tv.khoaLuu) ?: docSaoLuuTrenTv(tv.khoaLuu))?.let { cu -> cu.ip = ip; luuSaoLuu(cu); return cu }
         val tt = docTrangThai()
         val b = BanSaoLuu(
             khoa = tv.khoaLuu, ten = tv.tenHienThi, ip = ip, luc = System.currentTimeMillis(),
@@ -109,7 +128,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             truyCapTruoc = sh("settings get secure enabled_accessibility_services").trim(),
             getprop = getprop, goiTruoc = tt.caiDat.sorted(),
         )
-        kho.ghi(b)
+        luuSaoLuu(b)
         return b
     }
 
@@ -178,7 +197,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             if (out.contains("disabled-user") || out.contains("new state: disabled")) {
                 daTat += p
                 if (p !in sl.daTatTruoc) sl.daTatBoiApp += p
-                kho.ghi(sl) // ghi sau MỖI gói: rớt mạng giữa chừng vẫn khôi phục đúng.
+                luuSaoLuu(sl) // ghi sau MỖI gói: rớt mạng giữa chừng vẫn khôi phục đúng.
             } else {
                 loi += p to out.trim().lines().lastOrNull().orEmpty()
             }
@@ -238,7 +257,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
                 t("Tivi đã có Home sạch ký bằng khoá khác (cài từ máy khác). Gỡ bản cũ trước: pm uninstall $pkgHome.", "The TV has a clean Home signed with another key (installed from another computer). Uninstall it first: pm uninstall $pkgHome.")
             else t("Cài không được: ${out.trim().lines().lastOrNull()}. Home gốc vẫn nguyên.", "Install failed: ${out.trim().lines().lastOrNull()}. The stock Home is untouched.")
         }
-        sl.launcherDaCai = true; kho.ghi(sl)
+        sl.launcherDaCai = true; luuSaoLuu(sl)
 
         bao(t("Mở thử Home sạch…", "Starting the clean Home…"))
         val start = sh("am start -W -n $cmpHome")
@@ -254,7 +273,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             sh("pm disable-user --user 0 $homeGoc")
             sl.homeGocDaTat = homeGoc
             if (homeGoc !in sl.daTatTruoc) sl.daTatBoiApp += homeGoc
-            kho.ghi(sl)
+            luuSaoLuu(sl)
         }
         if (homeGoc != "none" && !hangLa && !giuHomeGoc) tatHomeGoc()
         sh("cmd package set-home-activity --user 0 $cmpHome")
@@ -338,7 +357,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         val daTat = sh("pm list packages -d").lines().map { it.substringAfter("package:").trim() }
         for (p in ung) if (p in daTat) {
             sh("pm enable --user 0 $p")
-            if (sl != null && p in sl.daTatBoiApp) { sl.daTatBoiApp -= p; kho.ghi(sl) }
+            if (sl != null && p in sl.daTatBoiApp) { sl.daTatBoiApp -= p; luuSaoLuu(sl) }
         }
         val dv = sh("cmd package query-services --brief -a android.service.dreams.DreamService").lines().map { it.trim() }
         val chon = ung.firstNotNullOfOrNull { p -> dv.firstOrNull { it.startsWith("$p/") } }
@@ -417,7 +436,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             if (gianh.isNotEmpty()) {
                 bao(t("Không chuyển được nút Home, bật lại ${gianh.joinToString()}…", "Couldn't take over the Home button, re-enabling ${gianh.joinToString()}…"))
                 gianh.forEach { p -> sh("pm enable --user 0 $p"); sl?.daTatBoiApp?.remove(p); if (sl?.homeGocDaTat == p) sl.homeGocDaTat = "" }
-                sl?.let { kho.ghi(it) }
+                sl?.let { luuSaoLuu(it) }
             }
             // Home gốc đã tắt từ bước cài (caiLauncher) mà nút Home vẫn không ra Home sạch: bật lại + đặt làm mặc định.
             // 22/10/2026, Xiaomi MiTV-ASTP0 bản Trung Quốc: hãng chỉ nhận Home theo danh sách tên gói, nút Home ra
@@ -451,7 +470,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             if (pkg !in sl.daTatTruoc && pkg !in sl.daTatBoiApp) sl.daTatBoiApp += pkg
             // Nhớ là Home gốc: lần "Đổi giao diện" sau ghi đè config.json vẫn gắn lại stock_home_redirect cho nó.
             if (sl.homeGocDaTat.isBlank() && pkg in HOME_GOC_BIET + listOf(sl.homeTruoc.substringBefore('/'))) sl.homeGocDaTat = pkg
-            kho.ghi(sl)
+            luuSaoLuu(sl)
             gianh += pkg
         }
         return tra(goiDangHien())
@@ -519,7 +538,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         if (goc.isBlank()) return
         sh("pm enable --user 0 $goc")
         sh("cmd package set-home-activity --user 0 \$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $goc | tail -n 1)")
-        sl.daTatBoiApp -= goc; sl.homeGocDaTat = ""; kho.ghi(sl)
+        sl.daTatBoiApp -= goc; sl.homeGocDaTat = ""; luuSaoLuu(sl)
     }
 
     // ---------- DNS chặn quảng cáo ----------
@@ -527,10 +546,56 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     fun batDnsChanQc(sl: BanSaoLuu) {
         sh("settings put global private_dns_specifier dns.adguard-dns.com")
         sh("settings put global private_dns_mode hostname")
-        sl.dnsDaDoi = true; kho.ghi(sl)
+        sl.dnsDaDoi = true; luuSaoLuu(sl)
     }
 
     // ---------- Khôi phục ----------
+
+    fun xoaSaoLuuTrenTv() { runCatching { sh("rm -f $TEP_SAO_LUU_TV") } }
+
+    /** Gói đang bị tắt bằng tay / bằng shell (enabled=3: disable-user), không gồm gói hãng tắt sẵn từ xưởng. */
+    fun goiTatBoiNguoiDung(): List<String> =
+        sh("for p in \$(pm list packages -d | cut -d: -f2); do dumpsys package \$p | grep -q 'User 0:.*enabled=3' && echo \$p; done")
+            .lines().map { it.trim() }.filter { TEN_GOI.matches(it) }.sorted()
+
+    /**
+     * Khôi phục khi KHÔNG có bản sao lưu (gỡ app, đổi máy, người khác dọn — 22/10/2026): bật lại mọi gói đang tắt kiểu
+     * disable-user (kể cả gói chủ tivi tự tắt trước đó, màn hình đã hỏi xác nhận), bỏ dịch vụ trợ năng của Home sạch,
+     * trả DNS AdGuard của app về tự động, đặt lại Home hệ thống của hãng; tuỳ chọn gỡ Home sạch.
+     */
+    fun khoiPhucKhongSaoLuu(goLauncher: Boolean, bao: (String) -> Unit): List<String> {
+        val loi = mutableListOf<String>()
+        val ds = goiTatBoiNguoiDung()
+        ds.forEachIndexed { i, p ->
+            bao(t("Bật lại ${i + 1}/${ds.size}: $p", "Re-enabling ${i + 1}/${ds.size}: $p"))
+            val out = runCatching { sh("pm enable --user 0 $p") }.getOrElse { "${it.message}" }
+            if (!out.contains("enabled")) loi += "$p: ${out.trim()}"
+        }
+        val tc = sh("settings get secure enabled_accessibility_services").trim()
+        if (HOME_SACH.any { tc.contains("$it/") }) {
+            val con = tc.split(':').filter { d -> d.isNotBlank() && HOME_SACH.none { d.startsWith("$it/") } }.joinToString(":")
+            if (con.isBlank()) sh("settings delete secure enabled_accessibility_services") else sh("settings put secure enabled_accessibility_services '$con'")
+        }
+        if (sh("settings get global private_dns_specifier").trim() == "dns.adguard-dns.com") {
+            bao(t("Trả DNS về tự động…", "Setting DNS back to automatic…"))
+            sh("settings put global private_dns_mode opportunistic; settings delete global private_dns_specifier")
+        }
+        if (goLauncher) HOME_SACH.forEach { p ->
+            if (sh("pm path $p").isNotBlank()) { bao(t("Gỡ Home sạch ($p)…", "Removing the clean Home ($p)…")); sh("pm uninstall $p") }
+        }
+        // Home hệ thống của hãng: ưu tiên Home gốc app biết, rồi app hệ thống đầu tiên có màn HOME dùng được.
+        val heThong = sh("pm list packages -s").lines().map { it.trim().removePrefix("package:") }.toSet()
+        val ung = sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
+            .lines().map { it.trim() }.filter { it.contains('/') && !it.endsWith("FallbackHome") }
+            .filter { c -> val p = c.substringBefore('/'); p in heThong && p !in HOME_SACH && p !in KHONG_PHAI_HOME && !APP_XUAT_XUONG.containsMatchIn(p) }
+        val home = HOME_GOC_BIET.firstNotNullOfOrNull { g -> ung.firstOrNull { it.startsWith("$g/") } } ?: ung.firstOrNull()
+        if (home != null) {
+            bao(t("Đặt Home gốc: $home", "Setting the stock Home: $home"))
+            sh("cmd package set-home-activity --user 0 $home")
+        }
+        sh("input keyevent KEYCODE_HOME")
+        return loi
+    }
 
     /** Đưa tivi về như trước: bật lại gói app đã tắt, trả Home gốc, gỡ Home sạch nếu muốn, trả DNS. */
     fun khoiPhuc(sl: BanSaoLuu, goLauncher: Boolean, bao: (String) -> Unit): List<String> {
@@ -539,7 +604,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         ds.forEachIndexed { i, p ->
             bao(t("Bật lại ${i + 1}/${ds.size}: $p", "Re-enabling ${i + 1}/${ds.size}: $p"))
             val out = runCatching { sh("pm enable --user 0 $p") }.getOrElse { t("lỗi ${it.message}", "error ${it.message}") }
-            if (out.contains("enabled")) { sl.daTatBoiApp -= p; kho.ghi(sl) } else loi += "$p: ${out.trim()}"
+            if (out.contains("enabled")) { sl.daTatBoiApp -= p; luuSaoLuu(sl) } else loi += "$p: ${out.trim()}"
         }
         if (sl.launcherDaCai) {
             bao(t("Trả Home gốc…", "Restoring the stock Home…"))
@@ -557,7 +622,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             }
             sl.launcherDaCai = !goLauncher && sl.launcherDaCai
             sl.homeGocDaTat = ""
-            kho.ghi(sl)
+            luuSaoLuu(sl)
         }
         if (sl.dnsDaDoi) {
             bao(t("Trả DNS như cũ…", "Restoring DNS…"))
@@ -565,7 +630,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             sh("settings put global private_dns_mode $mode")
             if (sl.dnsHostTruoc.isBlank() || sl.dnsHostTruoc == "null") sh("settings delete global private_dns_specifier")
             else sh("settings put global private_dns_specifier ${sl.dnsHostTruoc}")
-            sl.dnsDaDoi = false; kho.ghi(sl)
+            sl.dnsDaDoi = false; luuSaoLuu(sl)
         }
         return loi
     }
@@ -601,6 +666,8 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         val TU_MAY_CHIEU = Regex("projector|formovie|fengmi|xgimi|jmgo|dangbei|nebula|wanbo|byintek|keystone|autofocus|tixing|duijiao", RegexOption.IGNORE_CASE)
         const val PKG_HOME = "com.gathin.tvhome"
         const val PKG_HOME_XIAOMI = "com.ts.launcher"
+        /** Bản sao lưu trên tivi: thư mục của shell, còn sau khi gỡ app / Home sạch, chỉ mất khi khôi phục cài đặt gốc. */
+        const val TEP_SAO_LUU_TV = "/data/local/tmp/cleantv-sao-luu.json"
         /** Namespace Java của launcher: không đổi theo tên gói. */
         const val NS_HOME = "com.gathin.tvhome"
         val HOME_SACH = setOf(PKG_HOME, PKG_HOME_XIAOMI)
