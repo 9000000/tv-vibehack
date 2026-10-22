@@ -1,25 +1,25 @@
 {
  "app": {
-  "versionCode": 25,
-  "versionName": "2.0.2",
-  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.0.2.apk",
-  "co": 11367907,
-  "ghiChu": "Rớt kết nối giữa lúc dọn (Wi-Fi chập chờn, tivi tự khởi động lại): app tự chờ và nối lại; tivi vừa khởi động lại thì dừng hẳn và chỉ ra gói nghi phạm. Không còn lỗi tiếng Anh khó hiểu.",
-  "ghiChuEn": "Connection lost while cleaning (flaky Wi-Fi, the TV restarting): the app waits and reconnects; if the TV restarted it stops and names the suspect package. No more cryptic English errors.",
+  "versionCode": 26,
+  "versionName": "2.1",
+  "apk": "https://pub-925dff61607e4e3da7398d3413ccd1da.r2.dev/CleanTV-2.1.apk",
+  "co": 11387011,
+  "ghiChu": "CleanTV 2.1: giữ OK trên một app ở Home sạch để Di chuyển, Thêm vào dock / Thay bằng app khác, Bỏ khỏi Home, Thông tin app — đổi dock ngay trên tivi. 227 mẫu tivi.",
+  "ghiChuEn": "CleanTV 2.1: hold OK on an app on the clean Home to Move it, add it to the dock / replace it, remove it or open App info, right on the TV. 227 TV models.",
   "ngay": "2026-10-22"
  },
  "duLieu": {
   "du-lieu.json": {
-   "phienBan": "c752f0ec8c447e7c",
+   "phienBan": "61353b367dfc39ef",
    "url": "/ota/du-lieu.json",
-   "co": 1259284,
-   "tuBan": 25
+   "co": 1267388,
+   "tuBan": 26
   },
   "tvhome.apk": {
-   "phienBan": "348650d509be7734",
+   "phienBan": "70f0f2ca9475aa76",
    "url": "/ota/tvhome.apk",
-   "co": 583151,
-   "tuBan": 25
+   "co": 591967,
+   "tuBan": 26
   }
  }
 }

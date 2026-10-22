@@ -123,7 +123,7 @@ index 4cee7a6..335d9e1 100644
          <intent>
              <action android:name="android.settings.SETTINGS" />
 diff --git a/launcher/app/src/main/java/com/gathin/tvhome/Config.java b/launcher/app/src/main/java/com/gathin/tvhome/Config.java
-index f56a54d..a781f97 100644
+index 70c48b0..0e532db 100644
 --- a/launcher/app/src/main/java/com/gathin/tvhome/Config.java
 +++ b/launcher/app/src/main/java/com/gathin/tvhome/Config.java
 @@ -70,6 +70,9 @@ final class Config {
@@ -136,16 +136,16 @@ index f56a54d..a781f97 100644
      /** Name after the greeting ("Good morning, Mr. Trịnh"); empty for the greeting alone. */
      final String greetingName;
      final boolean moduleCards;
-@@ -178,7 +181,7 @@ final class Config {
+@@ -182,7 +185,7 @@ final class Config {
                     Festival festival, int[] inputKeycodes, List<String> appKeys, String stockHomeRedirect,
                     List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, int homeIdleClockMinutes,
                     boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
--                   boolean handleViewInputs) {
-+                   boolean handleViewInputs, boolean lunarDate, int lunarUtcOffset) {
+-                   boolean handleViewInputs, boolean tileMenu) {
++                   boolean handleViewInputs, boolean tileMenu, boolean lunarDate, int lunarUtcOffset) {
          this.handleViewInputs = handleViewInputs;
+         this.tileMenu = tileMenu;
          this.inputKeycodes = inputKeycodes;
-         this.appKeys = Collections.unmodifiableList(appKeys);
-@@ -204,6 +207,8 @@ final class Config {
+@@ -209,6 +212,8 @@ final class Config {
          this.animations = animations;
          this.advancedEffects = advancedEffects;
          this.shamsiDate = shamsiDate;
@@ -154,7 +154,7 @@ index f56a54d..a781f97 100644
          this.greetingName = greetingName;
          this.moduleCards = moduleCards;
          this.reducedMotion = reducedMotion;
-@@ -280,6 +285,8 @@ final class Config {
+@@ -286,6 +291,8 @@ final class Config {
          boolean animations = res.getBoolean(R.bool.animations);
          boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
          boolean shamsi = res.getBoolean(R.bool.shamsi_date);
@@ -163,7 +163,7 @@ index f56a54d..a781f97 100644
          String greetingName = res.getString(R.string.greeting_name).trim();
          boolean moduleCards = res.getBoolean(R.bool.module_cards);
          boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
-@@ -345,6 +352,8 @@ final class Config {
+@@ -353,6 +360,8 @@ final class Config {
              animations = bool(json, "animations", animations);
              advancedEffects = bool(json, "advanced_effects", advancedEffects);
              shamsi = bool(json, "shamsi_date", shamsi);
@@ -172,12 +172,12 @@ index f56a54d..a781f97 100644
              greetingName = string(json, "greeting_name", greetingName).trim();
              moduleCards = bool(json, "module_cards", moduleCards);
              reducedMotion = bool(json, "reduced_motion", reducedMotion);
-@@ -443,7 +452,7 @@ final class Config {
+@@ -453,7 +462,7 @@ final class Config {
                  Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                  wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                  festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow,
--                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs);
-+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, lunar, lunarOffset);
+-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu);
++                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, lunar, lunarOffset);
      }
  
      /**
@@ -320,10 +320,10 @@ index 0000000..4181780
 +    }
 +}
 diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
-index 183e582..9803b1b 100644
+index e6d030c..d43b91a 100644
 --- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
 +++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
-@@ -166,13 +166,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -168,13 +168,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      private int wifiIcon;
      /** The pills have been filled in once; later resumes refresh them after the first frame. */
      private boolean pillsShown;
@@ -349,7 +349,7 @@ index 183e582..9803b1b 100644
      private boolean shamsi;
      /** greeting_name: said after the greeting, which is shown in capitals. */
      private String greetingName = "";
-@@ -326,6 +338,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -331,6 +343,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
              // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
              if (festive) updateWifiLabel();
@@ -357,7 +357,7 @@ index 183e582..9803b1b 100644
              sky.update();
              wallpaperPlayer.update();
              handler.postDelayed(this, MINUTE_MS);
-@@ -421,12 +434,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -427,12 +440,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
          raceSessions = findViewById(R.id.raceSessions);
          showStats = cfg.showStats;
          shamsi = cfg.shamsiDate;
@@ -384,7 +384,7 @@ index 183e582..9803b1b 100644
          }
          vpnApp = cfg.vpnApp;
          moduleCards = cfg.moduleCards;
-@@ -488,7 +515,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -494,7 +521,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              public void onChildViewDetachedFromWindow(@NonNull View v) {
              }
          });
@@ -394,7 +394,7 @@ index 183e582..9803b1b 100644
          // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
          if (animations && !reducedMotion) {
              grid.setLayoutAnimation(new LayoutAnimationController(
-@@ -632,7 +660,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -649,7 +677,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
          };
          btnInputs.setOnKeyListener(pillKeys);
@@ -422,7 +422,7 @@ index 183e582..9803b1b 100644
          btnSettings.setOnKeyListener(pillKeys);
          btnReorder.setOnKeyListener(pillKeys);
          btnLibraryTop.setOnKeyListener(pillKeys);
-@@ -804,6 +852,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -821,6 +869,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              pillsShown = true;
          }
          if (showStats) startStats();
@@ -430,7 +430,7 @@ index 183e582..9803b1b 100644
          sky.update();
          wallpaperPlayer.start();
          handler.postDelayed(minuteTick, MINUTE_MS);
-@@ -1760,6 +1809,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -1828,6 +1877,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
          else glass.setAlpha(0f);
      }
  
@@ -461,7 +461,7 @@ index 183e582..9803b1b 100644
      // ---- optional system stats (config.xml show_stats) --------------------------------------------
  
      /** Background reader. Started only while Home is resumed and show_stats is on. */
-@@ -2138,6 +2211,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -2206,6 +2279,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              greeting.setTextColor(greetingColor);
          }
          if (shamsi) shamsiDate.setText(Shamsi.today(getResources()));
@@ -469,7 +469,7 @@ index 183e582..9803b1b 100644
      }
  
      // ---- race-weekend panel (a theme's race_calendar) -----------------------------------------------
-@@ -2276,7 +2350,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+@@ -2344,7 +2418,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
              text = name.length() < text.length() && name.length() < 5 ? "" : name;
              SpannableString label = new SpannableString(text + " " + badge);
              label.setSpan(span, text.length() + 1, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -482,10 +482,12 @@ index 183e582..9803b1b 100644
          } else if (!TextUtils.equals(btnWifi.getText(), text)) {
              btnWifi.setText(text);
          }
-@@ -2788,7 +2866,75 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
-         rows.getChildAt(0).requestFocus();
-     }
- 
+@@ -2913,10 +2991,77 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+             panel.animate().alpha(1f).scaleY(1f).translationY(0f).setDuration(220)
+                     .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+         }
++    }
++
 +    /** CleanTV/VGS: one rounded cluster of round icon buttons; the labels move to contentDescription. */
 +    private void gomNut() {
 +        LinearLayout top = findViewById(R.id.topButtons);
@@ -547,9 +549,9 @@ index 183e582..9803b1b 100644
 +        panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 +        popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
 +        dropIn(popup, panel, anchor, Gravity.START);
-+        rows.getChildAt(0).requestFocus();
-+    }
-+
+         rows.getChildAt(0).requestFocus();
+     }
+ 
      private void addSettingsMenuRow(LinearLayout rows, PopupWindow popup, int title, Runnable action) {
 +        addSettingsMenuRow(rows, popup, getString(title), action);
 +    }
@@ -5339,13 +5341,13 @@ index 9e58a7d..0000000
 -    <string name="font_medium" translatable="false">sans-serif-medium</string>
 -</resources>
 diff --git a/launcher/app/src/main/res/values-vi/strings.xml b/launcher/app/src/main/res/values-vi/strings.xml
-index 0327731..a909687 100644
+index b6b7970..3eae781 100644
 --- a/launcher/app/src/main/res/values-vi/strings.xml
 +++ b/launcher/app/src/main/res/values-vi/strings.xml
-@@ -112,4 +112,20 @@
-     <string name="race_countdown_hours">%1$d giờ %2$d phút</string>
+@@ -116,4 +116,20 @@
      <string name="race_countdown_days">%1$d ngày %2$d giờ</string>
      <string name="last_opened">Mở lần cuối %1$s</string>
+     <string name="tile_move">Di chuyển</string>
 +    <string name="projector">Máy chiếu</string>
 +    <string name="screensaver">Màn hình chờ</string>
 +    <string name="stats_cpu">CPU %1$d%%</string>
@@ -5364,7 +5366,7 @@ index 0327731..a909687 100644
 +    </string-array>
  </resources>
 diff --git a/launcher/app/src/main/res/values/config.xml b/launcher/app/src/main/res/values/config.xml
-index 141d9dd..6bc5149 100644
+index 518f0fd..a8d24e5 100644
 --- a/launcher/app/src/main/res/values/config.xml
 +++ b/launcher/app/src/main/res/values/config.xml
 @@ -177,6 +177,8 @@
@@ -5392,7 +5394,7 @@ index adbb30d..91098f5 100644
      <string name="font_light" translatable="false">@font/outfit_light</string>
      <string name="font_extralight" translatable="false">@font/outfit_extralight</string>
 diff --git a/launcher/app/src/main/res/values/strings.xml b/launcher/app/src/main/res/values/strings.xml
-index 1a385d4..c125752 100644
+index aa9d3e9..0a74b8c 100644
 --- a/launcher/app/src/main/res/values/strings.xml
 +++ b/launcher/app/src/main/res/values/strings.xml
 @@ -23,6 +23,18 @@
@@ -5414,7 +5416,7 @@ index 1a385d4..c125752 100644
      <string name="shamsi_month_farvardin">Farvardin</string>
      <string name="shamsi_month_ordibehesht">Ordibehesht</string>
      <string name="shamsi_month_khordad">Khordad</string>
-@@ -141,4 +153,6 @@
+@@ -145,4 +157,6 @@
      <!-- Cinematic top shelf (cinematic_home): the line under the focused dock app's name; %1$s is when it was
           last opened, e.g. "5 minutes ago" or "yesterday, 9:40 pm". -->
      <string name="last_opened">Last opened %1$s</string>

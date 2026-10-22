@@ -1,5 +1,17 @@
 [
  {
+  "ban": "2.1",
+  "ngay": "2026-10-22",
+  "vi": [
+   "Giữ OK trên một app ở Home sạch: menu Di chuyển, Thêm vào dock / Thay bằng app khác, Bỏ khỏi Home (khi bật thư viện app), Thông tin ứng dụng. Đổi chỗ và đổi app trên dock ngay trên tivi, không cần điện thoại (CleanTV bật sẵn; tắt được ở Nâng cao: tile_menu).",
+   "Home sạch theo CleanYourTV mới nhất, có nút mở cài đặt launcher ngay trên thanh trên cùng; danh sách lên 227 mẫu tivi, Nâng cao 54 tuỳ chọn."
+  ],
+  "en": [
+   "Hold OK on an app on the clean Home: Move, Add to dock / Replace with another app, Remove from Home (with the app library) and App info. Rearrange the dock right on the TV, no phone needed (on by default in CleanTV; Advanced: tile_menu).",
+   "The clean Home follows the latest CleanYourTV, with launcher settings straight from the top bar; 227 tested TV models, 54 Advanced options."
+  ]
+ },
+ {
   "ban": "2.0.2",
   "ngay": "2026-10-22",
   "vi": [
