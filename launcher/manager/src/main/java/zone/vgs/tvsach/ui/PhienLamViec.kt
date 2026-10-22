@@ -101,6 +101,18 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     var hieuUngKinh by mutableStateOf(false)
     var lamToiNen by mutableStateOf(0)
     var hienThongSo by mutableStateOf(false)
+    // Tiện ích mở rộng & Switches bổ sung (https://cleanyour.tv/addons)
+    var soCot by mutableStateOf(0)
+    var hangDuoiDock by mutableStateOf(-1)
+    var doMoDock by mutableStateOf(100)
+    var cheDoDienAnh by mutableStateOf(false)
+    var kieuQuangSang by mutableStateOf("")
+    var tuVaoTruyenHinh by mutableStateOf(false)
+    var hinhNenTrueColor by mutableStateOf(false)
+    var chuThichHinhNen by mutableStateOf(false)
+    var thuTuHinhNen by mutableStateOf("shuffle")
+    var bangCaiDatNhanh by mutableStateOf(false)
+    var nutSapXep by mutableStateOf(false)
     var homeXong by mutableStateOf(false)
     /** Lần thử nút Home thật gần nhất ra Home sạch (thuPhimHome). */
     var phimHomeOk by mutableStateOf(true)
@@ -412,6 +424,18 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         hieuUngKinh = j.optBoolean("dock_glass", false)
         lamToiNen = j.optInt("wallpaper_dim", 0)
         hienThongSo = j.optBoolean("show_stats", false)
+        if (j.has("handle_view_inputs")) nutInput = j.optBoolean("handle_view_inputs", nutInput)
+        if (j.has("columns")) soCot = j.optInt("columns", soCot)
+        if (j.has("rows_below_dock")) hangDuoiDock = j.optInt("rows_below_dock", hangDuoiDock)
+        if (j.has("dock_opacity")) doMoDock = j.optInt("dock_opacity", doMoDock)
+        cheDoDienAnh = j.optBoolean("cinematic_home", cheDoDienAnh)
+        if (j.has("glow_style")) kieuQuangSang = j.optString("glow_style", kieuQuangSang)
+        tuVaoTruyenHinh = j.optBoolean("boot_to_live_tv", tuVaoTruyenHinh)
+        hinhNenTrueColor = j.optBoolean("wallpaper_true_color", hinhNenTrueColor)
+        chuThichHinhNen = j.optBoolean("wallpaper_captions", chuThichHinhNen)
+        if (j.has("wallpaper_order")) thuTuHinhNen = j.optString("wallpaper_order", thuTuHinhNen)
+        bangCaiDatNhanh = j.optBoolean("settings_key_panel", bangCaiDatNhanh)
+        nutSapXep = j.optBoolean("reorder_button", nutSapXep)
         nutManCho = j.optBoolean("dream_button", nutManCho)
         gonNut = j.optBoolean("top_compact", gonNut)
         j.optJSONArray("dock_apps")?.let { a -> val ds = (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }; if (ds.isNotEmpty()) { dock.clear(); dock.addAll(ds.take(6)) } }
@@ -487,6 +511,8 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         thanhPho?.let { put("weather_lat", it.lat); put("weather_lon", it.lon); put("weather_place", it.ten) }
         if (ghimMayChieu.isNotEmpty()) put("projector_actions", JSONArray(ghimMayChieu.map { (comp, nhan) -> "$nhan=$comp" }))
         put("lunar_date", amLich)
+        // Launcher 2.6: nút Input trên remote (VIEW_INPUTS) mở bảng chọn nguồn của Home sạch — đi cùng công tắc nút Input.
+        if (nutInput) put("handle_view_inputs", true)
         if (tenDuoiApp) put("always_show_names", true)
         if (thuVienApp) { put("app_library", true); put("library_button", true) }
         if (dongHoKhiYen > 0) put("home_idle_clock_minutes", dongHoKhiYen)
@@ -494,6 +520,19 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         if (hieuUngKinh) { put("dock_glass", true); put("app_glow", true) }
         if (lamToiNen > 0) put("wallpaper_dim", lamToiNen)
         if (hienThongSo) put("show_stats", true)
+
+        // Các Addons & Switches từ https://cleanyour.tv/addons
+        if (soCot in 1..8) put("columns", soCot)
+        if (hangDuoiDock in 0..3) put("rows_below_dock", hangDuoiDock)
+        if (doMoDock in 30..99) put("dock_opacity", doMoDock)
+        if (cheDoDienAnh) put("cinematic_home", true)
+        if (kieuQuangSang.isNotBlank()) put("glow_style", kieuQuangSang)
+        if (tuVaoTruyenHinh) put("boot_to_live_tv", true)
+        if (hinhNenTrueColor) put("wallpaper_true_color", true)
+        if (chuThichHinhNen) put("wallpaper_captions", true)
+        if (thuTuHinhNen == "sequential") put("wallpaper_order", "sequential")
+        if (bangCaiDatNhanh) put("settings_key_panel", true)
+        if (nutSapXep) put("reorder_button", true)
     }.toString()
 
     private suspend fun anhNenTheme(): ByteArray? = themeChon.anhNen?.let { a -> io { ctx.assets.open(a).readBytes() } }

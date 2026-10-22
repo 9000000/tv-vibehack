@@ -42,6 +42,8 @@ val THEMES = listOf(
         mapOf("background_color" to "#000000"), null, listOf(0xFF000000, 0xFF111111)),
     Theme("sau-cot", "Nhiều app", "More apps", "6 cột, thấy thêm một hàng app", "6 columns, one more row visible",
         mapOf("columns" to 6, "rows_below_dock" to 1, "background_color" to "#000000"), null, listOf(0xFF111111, 0xFF222233)),
+    Theme("mac-dinh", "CleanTV Gốc", "CleanTV Default", "Giao diện gốc tối giản của tác giả CleanYourTV", "The built-in CleanYourTV look",
+        mapOf("background_color" to "#050505"), null, listOf(0xFF050505, 0xFF1C1C1E)),
 )
 
 /** Thành phố cho dòng thời tiết trên Home sạch (weather_lat/lon/place của launcher). */

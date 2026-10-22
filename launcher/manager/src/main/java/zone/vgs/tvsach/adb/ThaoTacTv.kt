@@ -399,7 +399,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     }
 
     private fun nenTatVuiGianhHome(pkg: String): Boolean {
-        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || pkg == "android" ||
+        if (!TEN_GOI.matches(pkg) || pkg == PKG_HOME || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg) ||
             pkg.startsWith("com.android.systemui") || pkg.contains("packageinstaller") || pkg.contains("permissioncontroller")) return false
         if (!sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }) return false
         if (sh("dumpsys package $pkg | grep -c TV_INPUT_HARDWARE").trim().toIntOrNull()?.let { it > 0 } == true) return false
@@ -410,7 +410,7 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
     }
 
     private fun laHomeHangLa(pkg: String): Boolean {
-        if (!TEN_GOI.matches(pkg) || pkg in KHONG_PHAI_HOME || pkg == "android") return false
+        if (!TEN_GOI.matches(pkg) || pkg in KHONG_PHAI_HOME || pkg == "android" || APP_XUAT_XUONG.containsMatchIn(pkg)) return false
         val heThong = sh("pm list packages -s $pkg").lines().any { it.trim() == "package:$pkg" }
         val coHome = sh("cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
             .lines().any { it.trim().startsWith("$pkg/") && !it.trim().endsWith("FallbackHome") }
@@ -519,6 +519,11 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         )
         /** Nhận Home nhưng không phải màn Home dùng được. */
         private val KHONG_PHAI_HOME = setOf(SETUP, "com.android.tv.settings", "com.android.settings", "com.android.provision")
+        /**
+         * App kiểm tra xuất xưởng cũng khai báo HOME (Xiaomi Mi TV 4A: com.duokan.factorytest/.FactoryLauncher) — không bao
+         * giờ là Home của hãng, không tắt (theo upstream 0357546, 22/10/2026).
+         */
+        private val APP_XUAT_XUONG = Regex("factorytest|factory_test|factorymode", RegexOption.IGNORE_CASE)
 
         /** Khởi động lại Home để đọc cấu hình; bật lại dịch vụ trợ năng nếu force-stop làm rơi (theme.sh). */
         private const val KHOI_DONG_LAI_HOME =

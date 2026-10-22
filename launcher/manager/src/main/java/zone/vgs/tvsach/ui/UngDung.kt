@@ -732,6 +732,68 @@ private fun ManHomeSach(vm: PhienLamViec) = Cuon {
             listOf(0, 20, 40).forEach { p -> ChonChip(if (p == 0) t("Không", "None") else "$p%", vm.lamToiNen == p) { vm.lamToiNen = p } }
         }
     }
+    The(t("Tiện ích & Công tắc (CleanYourTV Addons)", "Add-ons & Switches (CleanYourTV)"), Icons.Rounded.Extension) {
+        Text(t("Số cột ứng dụng (Columns)", "Grid columns"), fontSize = 14.sp)
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(0 to t("Mặc định", "Default"), 4 to "4", 5 to "5", 6 to "6", 7 to "7", 8 to "8").forEach { (col, nhan) ->
+                ChonChip(nhan, vm.soCot == col) { vm.soCot = col }
+            }
+        }
+        Phu(t("Chọn số lượng ô app trên mỗi hàng ngang (từ 4 đến 8 cột).", "Choose how many app tiles appear in each row (4 to 8 columns)."))
+
+        Text(t("Số hàng hiện sẵn dưới Dock", "Rows visible below dock"), fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(-1 to t("Mặc định", "Default"), 0 to "0 hàng", 1 to "1 hàng", 2 to "2 hàng", 3 to "3 hàng").forEach { (hang, nhan) ->
+                ChonChip(nhan, vm.hangDuoiDock == hang) { vm.hangDuoiDock = hang }
+            }
+        }
+
+        Text(t("Độ trong suốt thanh Dock", "Dock opacity"), fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(100 to t("Đặc (100%)", "Solid"), 80 to "80%", 60 to "60%", 40 to "40%").forEach { (op, nhan) ->
+                ChonChip(nhan, vm.doMoDock == op) { vm.doMoDock = op }
+            }
+        }
+        Phu(t("Độ mờ thấp hơn giúp hình nền hoặc tranh phong cảnh lộ rõ xuyên qua dock.", "Lower opacity lets wallpapers and artwork show through the dock."))
+
+        Text(t("Kiểu quầng sáng Focus (Glow style)", "Focus glow style"), fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("" to t("Mặc định", "Default"), "radial" to t("Toả tròn", "Radial"), "horizon" to t("Chân trời", "Horizon")).forEach { (kieu, nhan) ->
+                ChonChip(nhan, vm.kieuQuangSang == kieu) { vm.kieuQuangSang = kieu }
+            }
+        }
+
+        Text(t("Thứ tự đổi ảnh phong cảnh", "Wallpaper rotation order"), fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("shuffle" to t("Ngẫu nhiên", "Shuffle"), "sequential" to t("Tuần tự", "Sequential")).forEach { (tt, nhan) ->
+                ChonChip(nhan, vm.thuTuHinhNen == tt) { vm.thuTuHinhNen = tt }
+            }
+        }
+
+        Hang(t("Chế độ Điện ảnh (Cinematic Home)", "Cinematic top shelf"),
+            t("Ảnh app đang chọn tràn mờ mềm mại toàn bộ nửa trên màn hình", "Focused app artwork softens and fills the top of the screen"),
+            vm.cheDoDienAnh) { vm.cheDoDienAnh = it }
+
+        Hang(t("Tự vào Truyền hình khi bật tivi", "Boot to Live TV"),
+            t("Mở ngay ứng dụng truyền hình sau khi tivi khởi động xong", "Open the Live TV app on boot"),
+            vm.tuVaoTruyenHinh) { vm.tuVaoTruyenHinh = it }
+
+        Hang(t("Bảng Cài đặt nhanh trên remote", "Quick settings panel"),
+            t("Bấm phím Settings trên remote mở bảng chỉnh nhanh (hình ảnh, âm thanh, mạng)", "Settings button opens a quick settings panel instead of system settings"),
+            vm.bangCaiDatNhanh) { vm.bangCaiDatNhanh = it }
+
+        Hang(t("Hiện chú thích ảnh phong cảnh", "Wallpaper captions"),
+            t("Hiện tên địa danh tranh phong cảnh dưới cụm nút góc trên", "Show landscape location caption under top buttons"),
+            vm.chuThichHinhNen) { vm.chuThichHinhNen = it }
+
+        Hang(t("Hình nền 32-bit (True Color)", "32-bit True Color wallpapers"),
+            t("Khử vệt màu gradient cho tivi có từ 2 GB RAM trở lên", "Decode 32-bit color instead of RGB_565"),
+            vm.hinhNenTrueColor) { vm.hinhNenTrueColor = it }
+
+        Hang(t("Hiện nút sắp xếp app trên thanh trên cùng", "Reorder button in top bar"),
+            t("Nút bấm sắp xếp app trực quan ngay bên cạnh nút Cài đặt", "Add a dedicated reorder button beside Settings"),
+            vm.nutSapXep) { vm.nutSapXep = it }
+    }
     if (vm.daCoHomeSach) NutChinh(if (vm.dangBan) t("Đang áp dụng…", "Applying…") else t("Áp dụng giao diện", "Apply theme"),
         enabled = !vm.dangBan, icon = Icons.Rounded.Palette) { vm.apDungTheme() }
     else NutChinh(if (vm.dangBan) t("Đang cài…", "Installing…") else t("Cài Home sạch", "Install clean Home"), enabled = !vm.dangBan, icon = Icons.Rounded.Home) { vm.caiHomeSach() }
