@@ -191,9 +191,30 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
 
         val daTat = mutableListOf<String>()
         val loi = mutableListOf<Pair<String, String>>()
+        val heThong0 = pidHeThong()
         ds.forEachIndexed { i, p ->
             bao(t("Tắt ${i + 1}/${ds.size}: $p", "Disabling ${i + 1}/${ds.size}: $p"))
-            val out = runCatching { sh("pm disable-user --user 0 $p") }.getOrElse { t("lỗi: ${it.message}", "error: ${it.message}") }
+            var matKetNoi = false
+            var out = try {
+                sh("pm disable-user --user 0 $p")
+            } catch (e: Exception) {
+                if (!laMatKetNoi(e)) t("lỗi: ${e.message}", "error: ${e.message}") else { matKetNoi = true; "" }
+            }
+            // Tivi đang tắt máy: ADB còn trả lời nhưng dịch vụ gói đã chết ("Failure calling service package: Broken pipe").
+            if (DICH_VU_CHET.containsMatchIn(out)) matKetNoi = true
+            if (matKetNoi) {
+                // 22/10/2026, Sony KD-55X8500D: rớt ADB giữa lúc dọn, app báo "connect() must be called first" rồi
+                // dừng. Chờ tivi trả lời lại; tivi vừa khởi động lại thì dừng hẳn, gói vừa tắt là nghi phạm.
+                bao(t("Mất kết nối với tivi, đang chờ tivi trả lời lại…", "Lost the connection to the TV, waiting for it to answer…"))
+                if (!choTiviTraLoi(bao)) throw MatKetNoiTvException(daTat.size, p)
+                val daTatRoi = sh("pm list packages -d").lines().any { it.trim() == "package:$p" }
+                if (daTatRoi) { daTat += p; if (p !in sl.daTatTruoc) sl.daTatBoiApp += p; luuSaoLuu(sl) }
+                val heThong = pidHeThong()
+                if (heThong0 != null && heThong != null && heThong != heThong0)
+                    throw TiviKhoiDongLaiException(if (daTatRoi) p else daTat.lastOrNull() ?: p, daTat.size)
+                out = if (daTatRoi) "new state: disabled-user" else runCatching { sh("pm disable-user --user 0 $p") }.getOrElse { "lỗi: ${it.message}" }
+                if (daTatRoi) return@forEachIndexed
+            }
             if (out.contains("disabled-user") || out.contains("new state: disabled")) {
                 daTat += p
                 if (p !in sl.daTatTruoc) sl.daTatBoiApp += p
@@ -203,6 +224,26 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
             }
         }
         return KetQuaTat(daTat, boQua, loi)
+    }
+
+    /**
+     * PID của system_server: đổi = tivi vừa khởi động lại, kể cả kiểu chỉ khởi động lại phần mềm (tắt nhầm gói làm
+     * system_server chết) mà /proc/uptime không về 0.
+     */
+    private fun pidHeThong(): String? = runCatching { sh("pidof system_server").trim().ifBlank { null } }.getOrNull()
+
+    /**
+     * Chờ tivi trả lời lại tới mức dịch vụ gói chạy được: tối đa 12 lần × 8 giây (~1,5 phút, đủ cho tivi khởi động
+     * lại xong). Lệnh lỗi kiểu mất kết nối thì nối lại ADB.
+     */
+    private fun choTiviTraLoi(bao: (String) -> Unit): Boolean {
+        repeat(12) { lan ->
+            Thread.sleep(8000)
+            bao(t("Chờ tivi, lần ${lan + 1}/12…", "Waiting for the TV, try ${lan + 1}/12…"))
+            val ok = try { sh("pm path android").contains("package:") } catch (e: Exception) { runCatching { adb.ketNoiLai() }; false }
+            if (ok) return true
+        }
+        return false
     }
 
     // ---------- Home sạch (launcher) ----------
@@ -660,7 +701,22 @@ class ThaoTacTv(private val adb: KetNoiAdb, private val kho: KhoSaoLuu) {
         runCatching { sh("settings put global adb_enabled 0") }
     }
 
+    /** Rớt kết nối lúc dọn mà nối lại không được: [daTat] gói đã tắt (đều có trong sao lưu), đang làm dở [goi]. */
+    class MatKetNoiTvException(val daTat: Int, val goi: String) : Exception("mat-ket-noi")
+    /** Tivi tự khởi động lại ngay sau khi tắt [goi] (gói tắt xong gần nhất): dừng dọn, [goi] là nghi phạm. */
+    class TiviKhoiDongLaiException(val goi: String, val daTat: Int) : Exception("khoi-dong-lai")
+
     companion object {
+        /** Lỗi kiểu kết nối ADB đã đứt (libadb: "connect() must be called first", luồng đóng, mạng reset). */
+        fun laMatKetNoi(e: Throwable): Boolean {
+            val m = listOfNotNull(e.message, e.cause?.message).joinToString(" ")
+            return Regex("must be called first|not connected|Stream closed|closed|Broken pipe|EPIPE|reset|ECONNRESET|Socket", RegexOption.IGNORE_CASE).containsMatchIn(m) ||
+                e is java.io.EOFException || e is java.net.SocketException
+        }
+
+        /** Dịch vụ hệ thống không trả lời: tivi đang tắt máy / khởi động lại. */
+        private val DICH_VU_CHET = Regex("Failure calling service|Can't find service|DeadObjectException|DeadSystemException")
+
         val TEN_GOI = Regex("""^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$""")
         /** Tên máy / tên gói gợi ý máy chiếu (21/10/2026, Formovie Nemo). */
         val TU_MAY_CHIEU = Regex("projector|formovie|fengmi|xgimi|jmgo|dangbei|nebula|wanbo|byintek|keystone|autofocus|tixing|duijiao", RegexOption.IGNORE_CASE)

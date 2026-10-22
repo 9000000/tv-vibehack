@@ -142,6 +142,12 @@
 "canThan": false
 },
 {
+"khoa": "launcher_settings_button",
+"kieu": "bool",
+"moTa": "Make the header Settings action open Launcher settings directly with a matching 22dp home icon; also changes the Settings row when top_menu is on. Hold OK keeps module-card and ordering tools. The settings page includes Reorder apps and TV settings (false by default)",
+"canThan": false
+},
+{
 "khoa": "wifi_label_width",
 "kieu": "so",
 "min": 0,
@@ -239,6 +245,12 @@
 "khoa": "wallpaper_captions",
 "kieu": "bool",
 "moTa": "With a rotating collection, the shown picture's name under the top-right buttons, from wallpapers/captions.txt (001.jpg<TAB>Dusk over the peaks, one per line); a picture without a line shows no name (false by default)",
+"canThan": false
+},
+{
+"khoa": "tile_menu",
+"kieu": "bool",
+"moTa": "Hold OK on a tile opens a small menu: Move, Remove from Home (with app_library) and App info. false (the default) keeps holding OK as a shortcut to the app's App info page",
 "canThan": false
 },
 {

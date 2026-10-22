@@ -459,6 +459,15 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
     }
 
     private fun moTaLoi(e: Throwable): String = when {
+        e is ThaoTacTv.TiviKhoiDongLaiException ->
+            t("Tivi vừa tự khởi động lại ngay sau khi tắt ${e.goi}. App đã dừng dọn để an toàn (${e.daTat} gói đã tắt, đều có trong sao lưu). Chờ tivi lên lại, kết nối lại: tivi chạy bình thường thì dọn tiếp và bỏ tích ${e.goi}; có gì lạ thì bấm Khôi phục tivi này. Gửi góp ý kèm model tivi để VGS ghi gói này vào danh sách giữ.",
+                "The TV restarted right after ${e.goi} was disabled. The app stopped cleaning to be safe (${e.daTat} packages disabled, all in the backup). Wait for the TV, reconnect: if it works, clean again without ${e.goi}; if anything is wrong, press Restore this TV. Send feedback with the TV model so VGS can keep this package.")
+        e is ThaoTacTv.MatKetNoiTvException ->
+            t("Mất kết nối với tivi giữa lúc dọn và không nối lại được (${e.daTat} gói đã tắt, đều có trong sao lưu). Kiểm tra tivi còn bật và cùng Wi-Fi, rồi kết nối lại để dọn tiếp hoặc bấm Khôi phục tivi này. Không nối được: tắt tivi ở công tắc nguồn 10 giây rồi bật lại.",
+                "Lost the connection to the TV while cleaning and couldn't reconnect (${e.daTat} packages disabled, all in the backup). Check the TV is on and on the same Wi-Fi, then reconnect to continue or press Restore this TV. Still nothing: switch the TV off at the wall for 10 seconds.")
+        ThaoTacTv.laMatKetNoi(e) && !laLoiTuChoi(e) ->
+            t("Mất kết nối với tivi. Những gì đã làm đều có trong sao lưu: kết nối lại để làm tiếp hoặc bấm Khôi phục tivi này.",
+                "Lost the connection to the TV. Everything done so far is in the backup: reconnect to continue or press Restore this TV.")
         e is AdbPairingRequiredException -> t("Tivi đòi ghép đôi (Gỡ lỗi không dây). Dùng phần \"Ghép đôi bằng mã\" bên dưới.", "The TV needs pairing (Wireless debugging). Use \"Pair with code\" below.")
         // Chế độ chạy trên tivi: nhiều tivi (TCL…) bật Gỡ lỗi USB chỉ mở ADB qua dây, cổng 5555 chưa nghe (22/10/2026).
         laLoiTuChoi(e) && ip.trim() == "127.0.0.1" ->
@@ -611,7 +620,15 @@ class PhienLamViec(app: Application) : AndroidViewModel(app) {
         saoLuu = sl
         ghi(t("Đã lưu bản sao lưu (${sl.goiTruoc.size} gói, ${sl.daTatTruoc.size} gói vốn đã tắt).", "Backup saved (${sl.goiTruoc.size} packages, ${sl.daTatTruoc.size} already disabled)."))
         val ds = muc.filter { chon[it.pkg] == true }.map { it.pkg }
-        val kq = io { tv.tatGoi(ds, sl, epSetupwraith) { s -> ghiTuIo(s) } }
+        val kq = try {
+            io { tv.tatGoi(ds, sl, epSetupwraith) { s -> ghiTuIo(s) } }
+        } catch (e: ThaoTacTv.TiviKhoiDongLaiException) {
+            zone.vgs.tvsach.Dem.gui(ctx, "don-loi", tenTiviDem(), e.daTat, "khoi-dong-lai:${e.goi}")
+            saoLuu = kho.doc(info.khoaLuu); taiLaiSaoLuu(); throw e
+        } catch (e: ThaoTacTv.MatKetNoiTvException) {
+            zone.vgs.tvsach.Dem.gui(ctx, "don-loi", tenTiviDem(), e.daTat, "mat-ket-noi:${e.goi}")
+            saoLuu = kho.doc(info.khoaLuu); taiLaiSaoLuu(); throw e
+        }
         ketQua = kq
         zone.vgs.tvsach.Dem.gui(ctx, "don", tenTiviDem(), kq.daTat.size, if (mauChon != null) "mau:${mauChon!!.id}" else "luat-chung")
         ghi(t("Xong: tắt ${kq.daTat.size}, giữ lại ${kq.boQua.size}, lỗi ${kq.loi.size}.", "Done: disabled ${kq.daTat.size}, kept ${kq.boQua.size}, failed ${kq.loi.size}."))

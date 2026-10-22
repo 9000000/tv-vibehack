@@ -1,10 +1,10 @@
 {
   "app": {
-    "versionCode": 24,
-    "versionName": "2.0.1",
-    "apk": "https://github.com/9000000/tv-vibehack/releases/download/v2.0.1/CleanYourTV-v2.0.1.apk",
-    "co": 12981269,
-    "ghiChu": "## CleanYourTV v2.0.1\n\n### What's Changed:\n- Cập nhật upstream 2.0.1: 225 mẫu TV, 52 tuỳ chọn nâng cao, sao lưu kép trên cả điện thoại và TV (/data/local/tmp/cleantv-sao-luu.json)\n- Cứu hộ khôi phục khi mất sao lưu (quét gói disable-user do người dùng tắt, khôi phục Home gốc, DNS và trợ năng)\n- Nút mở Tuỳ chọn nhà phát triển khi kết nối trực tiếp trên TV, giải thích lỗi từ chối kết nối\n- Giữ nguyên font Plus Jakarta Sans đầy đủ dấu tiếng Việt không bị lỗi hiển thị\n- Khôi phục theme về mặc định, bật lẻ từng app hoặc bật hàng loạt app đã chọn\n\n**Full Changelog**: https://github.com/9000000/tv-vibehack/compare/v1.9.4...v2.0.1",
+    "versionCode": 26,
+    "versionName": "2.1",
+    "apk": "https://github.com/9000000/tv-vibehack/releases/download/v2.1/CleanYourTV-v2.1.apk",
+    "co": 13249481,
+    "ghiChu": "## CleanYourTV v2.1\n\n### What's Changed:\n- CleanTV 2.1: Giữ OK trên một app ở Home sạch để Di chuyển, Thêm vào dock / Thay bằng app khác, Bỏ khỏi Home, Thông tin app — đổi dock ngay trên tivi.\n- Cập nhật cơ sở dữ liệu hỗ trợ 227 mẫu tivi.\n- Tự động kết nối lại khi rớt ADB trong quá trình dọn dẹp.\n- Tự động dừng và cảnh báo gói nghi phạm nếu tivi bị tự khởi động lại.\n- Bổ sung tùy chọn nâng cao launcher_settings_button và tile_menu.\n- Tối ưu hóa giao diện và cập nhật icons AutoMirrored.",
     "ngay": "2026-10-22"
   }
 }

@@ -35,6 +35,23 @@ class KetNoiAdb private constructor(
     override fun getCertificate(): Certificate = chungChi
     override fun getDeviceName(): String = "CleanTV"
 
+    /** Địa chỉ của lần kết nối thành công gần nhất (cả Gỡ lỗi không dây, connectTls cũng đi qua đây). */
+    @Volatile var diemCuoi: Pair<String, Int>? = null
+        private set
+
+    override fun connect(host: String, port: Int): Boolean {
+        val ok = super.connect(host, port)
+        if (ok) diemCuoi = host to port
+        return ok
+    }
+
+    /** Nối lại đúng địa chỉ vừa dùng khi kết nối rớt giữa chừng (Wi-Fi chập chờn, tivi khởi động lại). */
+    fun ketNoiLai(): Boolean {
+        val d = diemCuoi ?: return false
+        runCatching { disconnect() }
+        return runCatching { super.connect(d.first, d.second) }.getOrDefault(false)
+    }
+
     /**
      * Chạy một lệnh shell, trả về chữ in ra (stdout + stderr gộp).
      *
