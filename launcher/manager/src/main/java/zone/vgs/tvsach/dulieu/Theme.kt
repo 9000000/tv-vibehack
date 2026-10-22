@@ -18,6 +18,7 @@ data class Theme(
     /** Thư mục assets chứa BỘ ảnh nền xoay vòng (đẩy vào wallpapers/ của launcher); ảnh xem trước trong app. */
     val boAnh: String? = null,
     val anhXem: String? = null,
+) {
     val ten: String get() = if (zone.vgs.tvsach.NgonNgu.tiengViet) tenVi else tenEn
     val moTa: String get() = if (zone.vgs.tvsach.NgonNgu.tiengViet) moTaVi else moTaEn
 
